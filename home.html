@@ -1,0 +1,1209 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Home — Growth Squad</title>
+<style>
+  :root {
+    --bg: oklch(98% 0.005 250);
+    --surface: oklch(100% 0 0);
+    --fg: oklch(22% 0.02 240);
+    --fg-2: oklch(35% 0.018 240);
+    --muted: oklch(50% 0.018 240);
+    --border: oklch(90% 0.008 240);
+    --accent: oklch(58% 0.16 145);
+    --accent-soft: oklch(94% 0.04 145);
+    --danger: oklch(60% 0.18 25);
+    --danger-soft: oklch(94% 0.04 25);
+    --warn: oklch(75% 0.14 80);
+    --warn-soft: oklch(95% 0.04 80);
+    --info: oklch(62% 0.14 250);
+    --info-soft: oklch(94% 0.04 250);
+    --font-body: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', system-ui, sans-serif;
+    --font-mono: 'JetBrains Mono', 'IBM Plex Mono', ui-monospace, Menlo, monospace;
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 16px;
+    --space-5: 20px;
+    --space-6: 24px;
+    --space-8: 32px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: var(--font-body); background: var(--bg); color: var(--fg); font-size: 13px; line-height: 1.5; min-height: 100vh; display: flex; flex-direction: column; }
+
+  .topbar { background: var(--surface); border-bottom: 1px solid var(--border); padding: 10px 20px; display: flex; align-items: center; gap: 16px; flex-shrink: 0; z-index: 10; }
+  .topbar-breadcrumb { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--muted); }
+  .topbar-breadcrumb span { color: var(--fg); font-weight: 600; }
+  .sprint-chip { display: inline-flex; align-items: center; gap: 5px; background: var(--accent-soft); color: oklch(38% 0.12 145); font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 999px; letter-spacing: 0.02em; }
+  .sprint-chip::before { content: ''; width: 6px; height: 6px; background: var(--accent); border-radius: 50%; }
+
+  .layout { display: flex; flex: 1; overflow: hidden; }
+
+  .nav-sidebar { width: 220px; background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; flex-shrink: 0; padding: var(--space-4) 0; overflow-y: auto; }
+  .nav-brand { display: flex; align-items: center; gap: var(--space-3); padding: 0 var(--space-4) var(--space-5); border-bottom: 1px solid var(--border); margin-bottom: var(--space-3); }
+  .nav-brand-icon { width: 32px; height: 32px; background: linear-gradient(135deg, var(--accent), oklch(65% 0.16 160)); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 14px; flex-shrink: 0; }
+  .nav-brand-text { font-size: 14px; font-weight: 700; color: var(--fg); line-height: 1.2; }
+  .nav-brand-sub { font-size: 11px; color: var(--muted); font-weight: 400; }
+  .nav-section { padding: 0 var(--space-3); margin-bottom: var(--space-2); }
+  .nav-section-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); padding: var(--space-2) var(--space-2) var(--space-1); }
+  .nav-item { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-2) var(--space-3); border-radius: 8px; font-size: 13px; font-weight: 500; color: var(--fg-2); cursor: pointer; transition: all 0.15s; text-decoration: none; position: relative; }
+  .nav-item:hover { background: var(--bg); color: var(--fg); }
+  .nav-item.active { background: var(--accent-soft); color: oklch(38% 0.12 145); font-weight: 600; }
+  .nav-item.active::before { content: ''; position: absolute; left: 0; top: 6px; bottom: 6px; width: 3px; background: var(--accent); border-radius: 0 2px 2px 0; }
+  .nav-item svg { width: 18px; height: 18px; flex-shrink: 0; opacity: 0.7; }
+  .nav-item.active svg { opacity: 1; }
+  .nav-item:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+  .nav-badge { margin-left: auto; background: var(--danger); color: white; font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 999px; font-family: var(--font-mono); }
+  .nav-spacer { flex: 1; }
+  .nav-user { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3) var(--space-4); border-top: 1px solid var(--border); margin-top: var(--space-2); }
+  .nav-user-info { flex: 1; min-width: 0; }
+  .nav-user-name { font-size: 13px; font-weight: 600; color: var(--fg); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .nav-user-role { font-size: 11px; color: var(--muted); }
+
+  .avatar { width: 22px; height: 22px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: white; background: var(--muted); flex-shrink: 0; }
+  .avatar-a { background: oklch(55% 0.14 250); }
+
+  .content { flex: 1; padding: 24px; overflow-y: auto; }
+  .content-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
+  .content-title { font-size: 20px; font-weight: 700; color: var(--fg); }
+  .content-subtitle { font-size: 13px; color: var(--muted); margin-top: 2px; }
+
+  /* KPI cards */
+  .metrics-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 14px; margin-bottom: 26px; }
+  .metric-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px; display: flex; align-items: center; gap: 12px; transition: box-shadow 0.2s ease, transform 0.2s ease; }
+  .metric-card:hover { box-shadow: 0 6px 20px oklch(0% 0 0 / 0.08), 0 2px 6px oklch(0% 0 0 / 0.04); transform: translateY(-2px); }
+  .metric-icon { width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .metric-icon svg { width: 18px; height: 18px; }
+  .metric-icon-accent { background: var(--accent-soft); color: var(--accent); }
+  .metric-icon-green { background: oklch(94% 0.04 145); color: oklch(52% 0.16 145); }
+  .metric-icon-blue { background: var(--info-soft); color: var(--info); }
+  .metric-icon-warn { background: var(--warn-soft); color: oklch(60% 0.16 80); }
+  .metric-icon-purple { background: oklch(94% 0.04 300); color: oklch(52% 0.14 300); }
+  .metric-icon-danger { background: var(--danger-soft); color: var(--danger); }
+  .metric-value { font-size: 22px; font-weight: 700; color: var(--fg); font-family: var(--font-mono); line-height: 1; }
+  .metric-label { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  /* Section heads */
+  .section-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; }
+  .section-title { font-size: 14px; font-weight: 700; color: var(--fg); display: flex; align-items: center; gap: 8px; }
+  .section-title svg { width: 16px; height: 16px; color: var(--muted); }
+  .section-count { font-family: var(--font-mono); font-size: 12px; font-weight: 700; color: var(--muted); background: var(--bg); border: 1px solid var(--border); border-radius: 999px; padding: 1px 8px; }
+  .status-legend { display: flex; gap: 12px; flex-wrap: wrap; }
+  .status-legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--fg-2); }
+  .status-legend-dot { width: 8px; height: 8px; border-radius: 3px; flex-shrink: 0; }
+
+  /* Project cards */
+  .proj-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; margin-bottom: 26px; }
+  .proj-card { position: relative; display: flex; flex-direction: column; gap: 11px; text-align: left; font: inherit; color: inherit; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px; cursor: pointer; transition: box-shadow 0.2s ease, transform 0.2s ease, border-color 0.2s ease; }
+  .proj-card:hover { box-shadow: 0 6px 20px oklch(0% 0 0 / 0.08), 0 2px 6px oklch(0% 0 0 / 0.04); transform: translateY(-2px); }
+  .proj-card:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .proj-card.is-active { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+  .proj-top { display: flex; align-items: center; gap: 8px; min-width: 0; }
+  .proj-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .proj-name { font-size: 14px; font-weight: 700; color: var(--fg); flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .proj-active-chip { flex-shrink: 0; font-size: 10px; font-weight: 700; color: oklch(38% 0.12 145); background: var(--accent-soft); border-radius: 999px; padding: 2px 8px; }
+  .proj-sprint { flex-shrink: 0; font-size: 11px; color: var(--muted); font-family: var(--font-mono); }
+  .proj-progress-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; font-size: 11px; color: var(--muted); margin-bottom: 6px; }
+  .proj-progress-head b { color: var(--fg); font-family: var(--font-mono); font-size: 13px; }
+  .proj-bar { height: 6px; background: var(--bg); border: 1px solid var(--border); border-radius: 999px; overflow: hidden; }
+  .proj-bar-fill { height: 100%; border-radius: 999px; transition: width 0.5s ease; min-width: 2px; }
+  .proj-status { display: flex; height: 8px; gap: 2px; overflow: hidden; border-radius: 4px; }
+  .proj-status span { display: block; height: 100%; min-width: 3px; }
+  .proj-counts { display: flex; justify-content: space-between; gap: 6px; flex-wrap: wrap; }
+  .proj-count { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 600; color: var(--fg-2); font-family: var(--font-mono); }
+  .proj-count i { width: 7px; height: 7px; border-radius: 2px; font-style: normal; flex-shrink: 0; }
+  .proj-empty { font-size: 12px; color: var(--muted); }
+  .proj-empty strong { display: block; color: var(--fg-2); font-size: 12px; font-weight: 700; margin-bottom: 2px; }
+  .proj-foot { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 1px; }
+  .proj-meta { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; font-size: 11px; color: var(--muted); }
+  .proj-meta .is-danger { color: var(--danger); font-weight: 700; }
+  .wip-badge { font-size: 10px; font-weight: 700; color: oklch(45% 0.12 75); background: var(--warn-soft); border: 1px solid oklch(88% 0.08 80); border-radius: 999px; padding: 1px 8px; }
+  .proj-open { font-size: 12px; font-weight: 700; color: var(--accent); white-space: nowrap; }
+
+  /* Risk panel */
+  .risk-card { margin-bottom: 24px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px 18px; }
+  .risk-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+  .risk-head-main { display: flex; align-items: center; gap: 11px; min-width: 0; }
+  .risk-head-text { min-width: 0; }
+  .risk-head-icon { width: 34px; height: 34px; border-radius: 9px; background: var(--danger-soft); color: var(--danger); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .risk-head-icon svg { width: 17px; height: 17px; }
+  .risk-head-title { font-size: 14px; font-weight: 700; color: var(--fg); line-height: 1.3; white-space: nowrap; }
+  .risk-head-sub { font-size: 11px; color: var(--muted); line-height: 1.4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .risk-badge { font-size: 11px; font-weight: 700; font-family: var(--font-mono); color: var(--danger); background: var(--danger-soft); border: 1px solid oklch(89% 0.06 25); border-radius: 999px; padding: 3px 10px; white-space: nowrap; flex-shrink: 0; }
+  .risk-badge.ok { color: oklch(42% 0.13 145); background: var(--accent-soft); border-color: oklch(89% 0.05 145); }
+  .risk-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; align-items: stretch; }
+  .risk-col { display: flex; flex-direction: column; min-width: 0; background: var(--bg); border: 1px solid var(--border); border-top-width: 2px; border-radius: 9px; padding: 11px 12px 12px; }
+  .risk-col[data-od-id="risk-wip"] { border-top-color: var(--info); }
+  .risk-col[data-od-id="risk-stuck"] { border-top-color: oklch(70% 0.14 80); }
+  .risk-col[data-od-id="risk-overdue"] { border-top-color: var(--danger); }
+  .risk-col-title { display: flex; align-items: center; gap: 6px; font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin-bottom: 10px; white-space: nowrap; min-width: 0; }
+  .risk-col-title .rc-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .risk-col-count { margin-left: auto; font-family: var(--font-mono); font-size: 10px; font-weight: 700; letter-spacing: 0; text-transform: none; color: var(--fg-2); background: var(--surface); border: 1px solid var(--border); border-radius: 999px; padding: 0 7px; flex-shrink: 0; }
+  .risk-list { display: flex; flex-direction: column; gap: 8px; flex: 1; }
+  .risk-item { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--fg-2); background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; min-width: 0; }
+  .risk-item .r-name { color: var(--fg); font-weight: 600; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .risk-item .r-proj { display: inline-flex; align-items: center; gap: 4px; font-size: 10px; color: var(--muted); flex-shrink: 0; max-width: 45%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .risk-item .r-proj i { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+  .risk-item .r-val { font-family: var(--font-mono); font-size: 11px; font-weight: 700; color: var(--fg-2); flex-shrink: 0; }
+  .risk-item .r-val.is-danger { color: var(--danger); }
+  .risk-item .r-val.is-warn { color: oklch(45% 0.13 75); }
+  .risk-empty { font-size: 12px; color: var(--muted); padding: 8px 2px 4px; }
+  .risk-more { font-size: 11px; font-weight: 600; color: var(--muted); padding: 4px 2px 2px; }
+
+  @media (max-width: 1250px) {
+    .metrics-grid { grid-template-columns: repeat(3, 1fr); }
+  }
+  @media (max-width: 1100px) {
+    .risk-grid { grid-template-columns: 1fr; gap: 18px; }
+  }
+  @media (max-width: 900px) {
+    .nav-sidebar { width: 56px; }
+    .nav-brand-text, .nav-brand-sub, .nav-section-label, .nav-item span, .nav-badge, .nav-user-info { display: none; }
+    .nav-item { justify-content: center; padding: var(--space-3); }
+    .nav-item.active::before { display: none; }
+    .nav-brand { justify-content: center; padding: 0 0 var(--space-4); }
+    .nav-user { justify-content: center; padding: var(--space-3) var(--space-2); }
+    .metrics-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 700px) {
+    .nav-sidebar { display: none; }
+    .metrics-grid { grid-template-columns: repeat(2, 1fr); }
+    .proj-grid { grid-template-columns: 1fr; }
+  }
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+/* SQ-STYLE — trocador de projeto, chips de projeto, escopo de relatorios e CRUD de projetos */
+.sq-switch { position: relative; padding: 0 12px; margin: -4px 0 14px; }
+.sq-switch-btn { width: 100%; display: flex; align-items: center; gap: 8px; padding: 8px 10px; background: var(--surface, #fff); border: 1px solid var(--border); border-radius: 8px; cursor: pointer; font-family: inherit; font-size: 13px; font-weight: 600; color: var(--fg); transition: border-color .15s, box-shadow .15s; }
+.sq-switch-btn:hover { border-color: var(--muted); }
+.sq-switch.open .sq-switch-btn { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+.sq-switch-dot { width: 10px; height: 10px; border-radius: 50%; flex: 0 0 auto; }
+.sq-switch-name { flex: 1; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sq-switch-btn svg { width: 14px; height: 14px; color: var(--muted); transition: transform .15s; flex-shrink: 0; }
+.sq-switch.open .sq-switch-btn svg { transform: rotate(180deg); }
+.sq-menu { position: fixed; display: none; z-index: 300; background: var(--surface, #fff); border: 1px solid var(--border); border-radius: 10px; box-shadow: 0 12px 34px oklch(22% 0.02 240 / .2); padding: 6px; max-width: 280px; }
+.sq-menu.open { display: block; }
+.sq-menu-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); padding: 4px 8px 6px; }
+.sq-menu-item { display: flex; align-items: center; gap: 8px; width: 100%; padding: 7px 8px; border: none; background: none; border-radius: 6px; cursor: pointer; font-family: inherit; font-size: 13px; color: var(--fg); text-align: left; }
+.sq-menu-item:hover { background: var(--bg, oklch(98% 0.005 250)); }
+.sq-menu-dot { width: 9px; height: 9px; border-radius: 50%; flex: 0 0 auto; }
+.sq-menu-name { flex: 1; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sq-menu-sprint { font-size: 11px; color: var(--muted); flex-shrink: 0; font-weight: 500; }
+.sq-menu-check { width: 14px; height: 14px; color: var(--accent); flex-shrink: 0; visibility: hidden; }
+.sq-menu-item.active .sq-menu-check { visibility: visible; }
+.sq-menu-foot { border-top: 1px solid var(--border); margin-top: 6px; padding-top: 6px; }
+.sq-menu-foot .sq-menu-item { color: var(--muted); font-size: 12px; }
+.sq-switch-btn:focus-visible, .sq-menu-item:focus-visible, .sq-proj-activate:focus-visible, .sq-proj-del:focus-visible, .sq-add-btn:focus-visible, .report-scope select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.sq-proj-row input:focus-visible { outline: 2px solid var(--accent); outline-offset: -1px; }
+.sq-projects-check input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.member-projects:empty { display: none; }
+.sq-proj-row input { min-width: 0; }
+.backlog-empty, .gantt-empty { padding: 48px 20px; text-align: center; color: var(--muted); font-size: 13px; }
+.backlog-empty strong, .gantt-empty strong { display: block; margin-bottom: 6px; color: var(--fg); font-size: 14px; font-weight: 700; }
+.backlog-empty span, .gantt-empty span { font-size: 12px; }
+.member-projects { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 10px; }
+.member-project-chip { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 600; color: var(--muted); background: var(--bg, oklch(98% 0.005 250)); border: 1px solid var(--border); border-radius: 999px; padding: 2px 8px; }
+.member-project-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.sq-projects-check { display: flex; flex-wrap: wrap; gap: 6px; }
+.sq-projects-check label { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: var(--muted); background: var(--bg, oklch(98% 0.005 250)); border: 1px solid var(--border); border-radius: 999px; padding: 5px 10px; cursor: pointer; user-select: none; }
+.sq-projects-check label:has(input:checked) { border-color: var(--accent); color: var(--fg); background: var(--accent-soft); }
+.sq-projects-check input { margin: 0; accent-color: var(--accent); }
+.report-scope { display: flex; align-items: center; gap: 8px; }
+.report-scope label { font-size: 12px; font-weight: 600; color: var(--muted); }
+.report-scope select { border: 1px solid var(--border); border-radius: 8px; padding: 7px 10px; font-family: inherit; font-size: 13px; font-weight: 600; color: var(--fg); background: var(--surface, #fff); cursor: pointer; }
+.report-scope select:focus { outline: none; border-color: var(--accent); }
+.portfolio-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.portfolio-table th { text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); padding: 8px 10px; border-bottom: 1px solid var(--border); }
+.portfolio-table td { padding: 9px 10px; border-bottom: 1px solid var(--border); }
+.portfolio-table tr:last-child td { border-bottom: none; }
+.portfolio-name { display: inline-flex; align-items: center; gap: 7px; font-weight: 600; }
+.portfolio-dot { width: 8px; height: 8px; border-radius: 50%; }
+.portfolio-pct { font-weight: 700; color: var(--accent); }
+.project-list { display: flex; flex-direction: column; gap: 8px; }
+.sq-proj-row { display: flex; align-items: center; gap: 8px; background: var(--bg, oklch(98% 0.005 250)); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; }
+.sq-proj-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.sq-proj-row input { border: 1px solid transparent; background: transparent; border-radius: 6px; padding: 6px 8px; font-family: inherit; font-size: 13px; color: var(--fg); min-width: 0; }
+.sq-proj-row input.sq-proj-name { flex: 2; font-weight: 700; }
+.sq-proj-row input.sq-proj-sprint { flex: 1; color: var(--muted); font-weight: 500; }
+.sq-proj-row input:hover { border-color: var(--border); }
+.sq-proj-row input:focus { outline: none; border-color: var(--accent); background: var(--surface, #fff); }
+.sq-proj-badge { flex-shrink: 0; font-size: 11px; font-weight: 700; color: oklch(38% 0.12 145); background: var(--accent-soft); border-radius: 999px; padding: 4px 10px; }
+.sq-proj-activate { flex-shrink: 0; border: 1px solid var(--border); background: var(--surface, #fff); color: var(--fg); font-family: inherit; font-size: 12px; font-weight: 600; border-radius: 999px; padding: 4px 10px; cursor: pointer; }
+.sq-proj-activate:hover { border-color: var(--accent); color: var(--accent); }
+.sq-proj-del { flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border: none; background: none; border-radius: 6px; color: var(--muted); cursor: pointer; }
+.sq-proj-del:hover { background: oklch(60% 0.18 25 / .1); color: var(--danger); }
+.sq-proj-del:disabled { opacity: .35; cursor: not-allowed; }
+.sq-proj-del svg { width: 15px; height: 15px; }
+.sq-add-btn { display: inline-flex; align-items: center; gap: 7px; margin-top: 12px; border: 1px dashed var(--border); background: none; color: var(--fg); font-family: inherit; font-size: 13px; font-weight: 600; border-radius: 8px; padding: 9px 14px; cursor: pointer; width: 100%; justify-content: center; }
+.sq-add-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+.sq-add-btn:disabled { opacity: .45; cursor: not-allowed; }
+.sq-add-btn svg { width: 15px; height: 15px; }
+@media (max-width: 900px) {
+  .sq-switch { padding: 0 6px 10px; margin: -2px 0 10px; }
+  .sq-switch-name { display: none; }
+  .sq-switch-btn { justify-content: center; padding: 8px 6px; }
+  .sq-switch-btn svg { display: none; }
+}
+
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-breadcrumb">Projetos <span style="color:var(--muted);margin:0 2px">/</span> <span>Growth Squad</span></div>
+  <div class="sprint-chip">Sprint 14 — Ativo</div>
+</header>
+
+<div class="layout">
+  <nav class="nav-sidebar" data-od-id="nav-sidebar">
+    <div class="nav-brand">
+      <a href="home.html" style="text-decoration:none;display:flex;align-items:center;gap:10px">
+        <div class="nav-brand-icon">G</div>
+        <div><div class="nav-brand-text">Growth Squad</div><div class="nav-brand-sub">Sprint 14</div></div>
+      </a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-section-label">Principal</div>
+      <a href="home.html" class="nav-item active" data-od-id="nav-home"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25"/></svg><span>Home</span></a>
+      <a href="quadro-kanban.html" class="nav-item"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 4.5v15m6-15v15m-10.875 0h15.75c.621 0 1.125-.504 1.125-1.125V5.625c0-.621-.504-1.125-1.125-1.125H4.125C3.504 4.5 3 5.004 3 5.625v12.75c0 .621.504 1.125 1.125 1.125Z"/></svg><span>Quadro</span></a>
+      <a href="backlog.html" class="nav-item"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0ZM3.75 12h.007v.008H3.75V12Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm-.375 5.25h.007v.008H3.75v-.008Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"/></svg><span>Backlog</span></a>
+      <a href="cronograma.html" class="nav-item"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5"/></svg><span>Cronograma</span></a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-section-label">Análise</div>
+      <a href="relatorios.html" class="nav-item"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125.504v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z"/></svg><span>Relatórios</span></a>
+      <a href="equipe.html" class="nav-item"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z"/></svg><span>Equipe</span></a>
+    </div>
+    <div class="nav-spacer"></div>
+    <div class="nav-section">
+      <div class="nav-section-label">Sistema</div>
+      <a href="configuracoes.html" class="nav-item"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.325.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.431l-1.003.827c-.293.241-.438.613-.43.992a7.723 7.723 0 0 1 0 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.955.26 1.43l-1.298 2.247a1.125 1.125 0 0 1-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.47 6.47 0 0 1-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.94-1.11.94h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 0 1-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 0 1-1.369-.49l-1.297-2.247a1.125 1.125 0 0 1 .26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 0 1 0-.255c.007-.38-.138-.751-.43-.992l-1.004-.827a1.125 1.125 0 0 1-.26-1.431l1.297-2.247a1.125 1.125 0 0 1 1.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.086.22-.128.332-.183.582-.495.644-.869l.214-1.28Z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/></svg><span>Configurações</span></a>
+    </div>
+    <div class="nav-user">
+      <div class="avatar avatar-a" style="width:28px;height:28px;font-size:11px">A</div>
+      <div class="nav-user-info"><div class="nav-user-name">Ana Souza</div><div class="nav-user-role">Product Lead</div></div>
+    </div>
+  </nav>
+
+  <main class="content" data-od-id="home-content">
+    <div class="content-header">
+      <div>
+        <h1 class="content-title">Home</h1>
+        <p class="content-subtitle" id="home-subtitle">Visão executiva de todos os projetos</p>
+      </div>
+    </div>
+
+    <!-- KPIs do portfólio -->
+    <div class="metrics-grid" id="metrics-grid" data-od-id="home-kpis"></div>
+
+    <!-- Projetos -->
+    <div class="section-head" data-od-id="section-projects">
+      <h2 class="section-title">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25A2.25 2.25 0 0 1 13.5 18v-2.25Z"/></svg>
+        Projetos
+        <span class="section-count" id="proj-count">0</span>
+      </h2>
+      <div class="status-legend" id="status-legend" aria-label="Legenda de colunas"></div>
+    </div>
+    <div class="proj-grid" id="proj-grid" data-od-id="project-grid"></div>
+
+    <!-- Riscos -->
+    <div class="risk-card" data-od-id="risk-panel">
+      <div class="risk-head">
+        <div class="risk-head-main">
+          <span class="risk-head-icon" aria-hidden="true">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008z"/></svg>
+          </span>
+          <div class="risk-head-text">
+            <div class="risk-head-title">Riscos agora</div>
+            <div class="risk-head-sub" id="risk-sub">—</div>
+          </div>
+        </div>
+        <span class="risk-badge" id="risk-badge">—</span>
+      </div>
+      <div class="risk-grid" id="risk-grid"></div>
+    </div>
+  </main>
+</div>
+
+<script>
+/* SQ-STORE — armazenamento de projetos, seeds e trocador de projeto (injetado em todas as paginas) */
+window.SQ = (function () {
+  'use strict';
+  var PKEY = 'sq-projects';
+  var AKEY = 'sq-active-project';
+  var MKEY = 'sq-max-projects';
+  var MAX = 8;
+  var MAX_MIN = 1;
+  var MAX_HARD = 20;
+  var COLORS = {
+    green: 'oklch(58% 0.16 145)',
+    blue: 'oklch(58% 0.15 250)',
+    purple: 'oklch(55% 0.15 300)',
+    orange: 'oklch(65% 0.15 75)',
+    cyan: 'oklch(60% 0.12 200)'
+  };
+  var COLOR_ORDER = ['green', 'blue', 'purple', 'orange', 'cyan'];
+  var DEFAULTS = [
+    { id: 'p1', name: 'Growth Squad', sprint: 'Sprint 14', color: 'green' },
+    { id: 'p2', name: 'App Mobile', sprint: 'Sprint 7', color: 'blue' },
+    { id: 'p3', name: 'Portal do Cliente', sprint: 'Sprint 3', color: 'purple' },
+    { id: 'p4', name: 'Automações', sprint: 'Sprint 12', color: 'orange' },
+    { id: 'p5', name: 'Data Platform', sprint: 'Sprint 9', color: 'cyan' }
+  ];
+
+  var SEEDS = {
+    p2: {
+      'M-01': { title: 'Onboarding com biometria', assignee: 'Ana Souza', tag: 'Design', priority: 'high', status: 'progress', lane: 'Feature',
+        messages: [{ author: 'Ana', avatar: 'a', time: '2h atrás', text: 'Fluxo de Face ID aprovado pelo time de segurança.' }],
+        subtasks: [
+          { text: 'Mapear fluxo de autenticação', assignee: 'ana', status: 'done', startDate: '2026-08-18', endDate: '2026-08-19' },
+          { text: 'Implementar Face ID no iOS', assignee: 'ana', status: 'in-progress', startDate: '2026-08-20', endDate: '2026-08-24' },
+          { text: 'Impressão digital no Android', assignee: 'bruno', status: 'in-progress', startDate: '2026-08-24', endDate: '2026-08-27' },
+          { text: 'Testes de usabilidade', assignee: 'carla', status: 'in-progress', startDate: '2026-08-28', endDate: '2026-08-30' }
+        ] },
+      'M-02': { title: 'Push de carrinho abandonado', assignee: 'Elena Ribeiro', tag: 'Growth', priority: 'med', status: 'todo',
+        messages: [{ author: 'Elena', avatar: 'e', time: '40min atrás', text: 'Jornada pronta, falta revisão de compliance.' }],
+        subtasks: [
+          { text: 'Definir gatilhos de abandono', assignee: 'elena', status: 'done', startDate: '2026-08-18', endDate: '2026-08-19' },
+          { text: 'Criar segmento de audiência', assignee: 'elena', status: 'in-progress', startDate: '2026-08-21', endDate: '2026-08-23' },
+          { text: 'Configurar jornada no Braze', assignee: 'ana', status: 'in-progress', startDate: '2026-08-25', endDate: '2026-08-27' }
+        ] },
+      'M-03': { title: 'Deep links de campanha', assignee: 'Bruno Lima', tag: 'Infra', priority: 'low', status: 'backlog',
+        messages: [{ author: 'Bruno', avatar: 'b', time: '1h atrás', text: 'iOS e Android precisam de regras separadas.' }],
+        subtasks: [
+          { text: 'Padronizar scheme universal', assignee: 'bruno', status: 'done', startDate: '2026-08-20', endDate: '2026-08-22' },
+          { text: 'Configurar AASA e applink', assignee: 'bruno', status: 'in-progress', startDate: '2026-08-24', endDate: '2026-08-26' },
+          { text: 'Validar com marketing', assignee: 'elena', status: 'in-progress', startDate: '2026-08-27', endDate: '2026-08-29' }
+        ] },
+      'M-04': { title: 'Crash reporting no iOS', assignee: 'Carla Mendes', tag: 'Bug', priority: 'high', status: 'review', lane: 'Bug',
+        messages: [{ author: 'Carla', avatar: 'c', time: '3h atrás', text: 'Passamos de 30 crashes/dia para 4.' }],
+        subtasks: [
+          { text: 'Integrar SDK do Crashlytics', assignee: 'carla', status: 'done', startDate: '2026-08-18', endDate: '2026-08-20' },
+          { text: 'Mapear crashes do último mês', assignee: 'carla', status: 'done', startDate: '2026-08-21', endDate: '2026-08-23' },
+          { text: 'Painel de alertas por versão', assignee: 'bruno', status: 'in-progress', startDate: '2026-08-25', endDate: '2026-08-28' }
+        ] },
+      'M-05': { title: 'Dashboard de retenção do app', assignee: 'Diego Alves', tag: 'Data', priority: 'med', status: 'done',
+        messages: [{ author: 'Diego', avatar: 'd', time: '5h atrás', text: 'Publicado no Metabase para todo o time.' }],
+        subtasks: [
+          { text: 'Query de coortes por canal', assignee: 'diego', status: 'done', startDate: '2026-08-18', endDate: '2026-08-21' },
+          { text: 'Visões D1/D7/D30', assignee: 'diego', status: 'done', startDate: '2026-08-22', endDate: '2026-08-25' },
+          { text: 'Alerta de queda de retenção', assignee: 'diego', status: 'done', startDate: '2026-08-26', endDate: '2026-08-28' }
+        ] }
+    },
+    p3: {
+      'C-01': { title: 'SSO com Google Workspace', assignee: 'Bruno Lima', tag: 'Infra', priority: 'high', status: 'progress',
+        messages: [{ author: 'Bruno', avatar: 'b', time: '1h atrás', text: 'Consent screen aprovado, seguindo para mapeamento de grupos.' }],
+        subtasks: [
+          { text: 'Configurar app OAuth2', assignee: 'bruno', status: 'done', startDate: '2026-08-18', endDate: '2026-08-20' },
+          { text: 'Mapear grupos e permissões', assignee: 'bruno', status: 'in-progress', startDate: '2026-08-21', endDate: '2026-08-24' },
+          { text: 'Migrar clientes enterprise', assignee: 'ana', status: 'in-progress', startDate: '2026-08-25', endDate: '2026-08-29' }
+        ] },
+      'C-02': { title: 'Histórico de faturas', assignee: 'Carla Mendes', tag: 'Design', priority: 'med', status: 'todo',
+        messages: [{ author: 'Carla', avatar: 'c', time: '2h atrás', text: 'Incluí download em PDF e XML na listagem.' }],
+        subtasks: [
+          { text: 'Wireframes da listagem', assignee: 'carla', status: 'done', startDate: '2026-08-19', endDate: '2026-08-21' },
+          { text: 'Detalhe de pagamento e nota', assignee: 'carla', status: 'in-progress', startDate: '2026-08-23', endDate: '2026-08-26' },
+          { text: 'Handoff para desenvolvimento', assignee: 'carla', status: 'in-progress', startDate: '2026-08-27', endDate: '2026-08-29' }
+        ] },
+      'C-03': { title: 'Autenticação em dois fatores', assignee: 'Ana Souza', tag: 'Infra', priority: 'high', status: 'progress',
+        messages: [{ author: 'Ana', avatar: 'a', time: '4h atrás', text: 'SMS tem custo por envio — avaliamos TOTP como padrão.' }],
+        subtasks: [
+          { text: 'Envio de código por SMS', assignee: 'ana', status: 'done', startDate: '2026-08-18', endDate: '2026-08-21' },
+          { text: 'Recovery codes', assignee: 'bruno', status: 'in-progress', startDate: '2026-08-23', endDate: '2026-08-26' },
+          { text: 'Forçar 2FA para admins', assignee: 'ana', status: 'in-progress', startDate: '2026-08-27', endDate: '2026-08-30' }
+        ] },
+      'C-04': { title: 'Exportação de relatórios em PDF', assignee: 'Diego Alves', tag: 'Data', priority: 'med', status: 'review',
+        messages: [{ author: 'Diego', avatar: 'd', time: '6h atrás', text: 'Geração média caiu de 12s para 3s.' }],
+        subtasks: [
+          { text: 'Template de relatório', assignee: 'diego', status: 'done', startDate: '2026-08-18', endDate: '2026-08-20' },
+          { text: 'Serviço de renderização', assignee: 'bruno', status: 'done', startDate: '2026-08-21', endDate: '2026-08-24' },
+          { text: 'Limites de geração assíncrona', assignee: 'diego', status: 'in-progress', startDate: '2026-08-26', endDate: '2026-08-28' }
+        ] },
+      'C-05': { title: 'Chat de suporte embarcado', assignee: 'Elena Ribeiro', tag: 'Growth', priority: 'low', status: 'backlog',
+        messages: [{ author: 'Elena', avatar: 'e', time: '1 dia atrás', text: 'Comparando três fornecedores por custo e SLA.' }],
+        subtasks: [
+          { text: 'Avaliar fornecedores', assignee: 'elena', status: 'in-progress', startDate: '2026-08-20', endDate: '2026-08-22' },
+          { text: 'Definir SLA de resposta', assignee: 'elena', status: 'in-progress', startDate: '2026-08-24', endDate: '2026-08-26' },
+          { text: 'Integração com CRM', assignee: 'bruno', status: 'in-progress', startDate: '2026-08-27', endDate: '2026-08-29' }
+        ] }
+    },
+    p4: {
+      'A-01': { title: 'RPA de conciliação bancária', assignee: 'Diego Alves', tag: 'Data', priority: 'high', status: 'progress',
+        messages: [{ author: 'Diego', avatar: 'd', time: '30min atrás', text: '92% das transações já conciliam sozinhas.' }],
+        subtasks: [
+          { text: 'Extratos dos 4 bancos', assignee: 'diego', status: 'done', startDate: '2026-08-18', endDate: '2026-08-20' },
+          { text: 'Regras de conciliação automática', assignee: 'diego', status: 'in-progress', startDate: '2026-08-21', endDate: '2026-08-25' },
+          { text: 'Fila de exceções', assignee: 'bruno', status: 'in-progress', startDate: '2026-08-26', endDate: '2026-08-30' }
+        ] },
+      'A-02': { title: 'Alerta de estoque mínimo', assignee: 'Bruno Lima', tag: 'Infra', priority: 'med', status: 'todo',
+        messages: [{ author: 'Bruno', avatar: 'b', time: '2h atrás', text: 'Webhook do ERP já entrega eventos a cada 15min.' }],
+        subtasks: [
+          { text: 'Webhook do ERP', assignee: 'bruno', status: 'done', startDate: '2026-08-19', endDate: '2026-08-21' },
+          { text: 'Regras por categoria', assignee: 'bruno', status: 'in-progress', startDate: '2026-08-23', endDate: '2026-08-25' },
+          { text: 'Notificação no Slack', assignee: 'ana', status: 'in-progress', startDate: '2026-08-26', endDate: '2026-08-28' }
+        ] },
+      'A-03': { title: 'Onboarding automático de fornecedores', assignee: 'Ana Souza', tag: 'Growth', priority: 'med', status: 'done',
+        messages: [{ author: 'Ana', avatar: 'a', time: '1 dia atrás', text: 'Tempo de cadastro caiu de 5 dias para 4 horas.' }],
+        subtasks: [
+          { text: 'Formulário de cadastro', assignee: 'ana', status: 'done', startDate: '2026-08-18', endDate: '2026-08-20' },
+          { text: 'Validação de CNPJ', assignee: 'bruno', status: 'done', startDate: '2026-08-21', endDate: '2026-08-23' },
+          { text: 'Aprovação em dois níveis', assignee: 'ana', status: 'done', startDate: '2026-08-24', endDate: '2026-08-27' }
+        ] },
+      'A-04': { title: 'Formulário dinâmico de aprovação', assignee: 'Carla Mendes', tag: 'Design', priority: 'low', status: 'backlog',
+        messages: [{ author: 'Carla', avatar: 'c', time: '5h atrás', text: 'Testando regras condicionais com o financeiro.' }],
+        subtasks: [
+          { text: 'Estudo de campos condicionais', assignee: 'carla', status: 'in-progress', startDate: '2026-08-21', endDate: '2026-08-23' },
+          { text: 'Protótipo de fluxo', assignee: 'carla', status: 'in-progress', startDate: '2026-08-25', endDate: '2026-08-27' },
+          { text: 'Testes com o financeiro', assignee: 'ana', status: 'in-progress', startDate: '2026-08-28', endDate: '2026-08-30' }
+        ] },
+      'A-05': { title: 'Webhook de sincronização com CRM', assignee: 'Bruno Lima', tag: 'Infra', priority: 'high', status: 'review',
+        messages: [{ author: 'Bruno', avatar: 'b', time: '4h atrás', text: 'Retries com backoff passaram nos testes de carga.' }],
+        subtasks: [
+          { text: 'Contrato de eventos', assignee: 'bruno', status: 'done', startDate: '2026-08-18', endDate: '2026-08-20' },
+          { text: 'Retries com backoff', assignee: 'bruno', status: 'done', startDate: '2026-08-22', endDate: '2026-08-24' },
+          { text: 'Monitoramento de falhas', assignee: 'diego', status: 'in-progress', startDate: '2026-08-26', endDate: '2026-08-29' }
+        ] }
+    },
+    p5: {
+      'D-01': { title: 'Lakehouse na camada prata', assignee: 'Diego Alves', tag: 'Data', priority: 'high', status: 'progress',
+        messages: [{ author: 'Diego', avatar: 'd', time: '1h atrás', text: 'Modelagem revisada, jobs dbt rodando em staging.' }],
+        subtasks: [
+          { text: 'Modelagem das tabelas', assignee: 'diego', status: 'done', startDate: '2026-08-18', endDate: '2026-08-20' },
+          { text: 'Jobs de transformação dbt', assignee: 'diego', status: 'in-progress', startDate: '2026-08-22', endDate: '2026-08-26' },
+          { text: 'Testes de qualidade', assignee: 'carla', status: 'in-progress', startDate: '2026-08-27', endDate: '2026-08-30' }
+        ] },
+      'D-02': { title: 'Catálogo de dados com linhagem', assignee: 'Carla Mendes', tag: 'Design', priority: 'med', status: 'todo',
+        messages: [{ author: 'Carla', avatar: 'c', time: '3h atrás', text: 'Busca por termos entra na próxima rodada de testes.' }],
+        subtasks: [
+          { text: 'Wireframes do catálogo', assignee: 'carla', status: 'done', startDate: '2026-08-19', endDate: '2026-08-21' },
+          { text: 'Página de detalhe do dataset', assignee: 'carla', status: 'in-progress', startDate: '2026-08-23', endDate: '2026-08-26' },
+          { text: 'Busca por termos', assignee: 'elena', status: 'in-progress', startDate: '2026-08-27', endDate: '2026-08-29' }
+        ] },
+      'D-03': { title: 'Pipeline de streaming com Kafka', assignee: 'Bruno Lima', tag: 'Infra', priority: 'high', status: 'review',
+        messages: [{ author: 'Bruno', avatar: 'b', time: '2h atrás', text: 'Throughput validado com 12k eventos/s.' }],
+        subtasks: [
+          { text: 'Cluster em staging', assignee: 'bruno', status: 'done', startDate: '2026-08-18', endDate: '2026-08-21' },
+          { text: 'Consumidores de eventos', assignee: 'bruno', status: 'done', startDate: '2026-08-22', endDate: '2026-08-25' },
+          { text: 'Replay e DLQ', assignee: 'ana', status: 'in-progress', startDate: '2026-08-26', endDate: '2026-08-29' }
+        ] },
+      'D-04': { title: 'Testes de qualidade de dados', assignee: 'Diego Alves', tag: 'Data', priority: 'med', status: 'done',
+        messages: [{ author: 'Diego', avatar: 'd', time: '1 dia atrás', text: 'Regras rodando a cada ingestão, alertas no Slack.' }],
+        subtasks: [
+          { text: 'Regras de unicidade', assignee: 'diego', status: 'done', startDate: '2026-08-18', endDate: '2026-08-20' },
+          { text: 'Testes de schema', assignee: 'diego', status: 'done', startDate: '2026-08-21', endDate: '2026-08-23' },
+          { text: 'Dashboard de anomalias', assignee: 'diego', status: 'done', startDate: '2026-08-24', endDate: '2026-08-27' }
+        ] },
+      'D-05': { title: 'Dashboard de custos de cloud', assignee: 'Elena Ribeiro', tag: 'Growth', priority: 'low', status: 'backlog',
+        messages: [{ author: 'Elena', avatar: 'e', time: '2 dias atrás', text: 'Rateio por time vai usar a tag de centro de custo.' }],
+        subtasks: [
+          { text: 'Integração com a fatura', assignee: 'elena', status: 'in-progress', startDate: '2026-08-20', endDate: '2026-08-22' },
+          { text: 'Rateio por time', assignee: 'elena', status: 'in-progress', startDate: '2026-08-24', endDate: '2026-08-26' },
+          { text: 'Alerta de estouro', assignee: 'diego', status: 'in-progress', startDate: '2026-08-27', endDate: '2026-08-29' }
+        ] }
+    }
+  };
+
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  function maxProjects() {
+    var v = parseInt(localStorage.getItem(MKEY), 10);
+    if (isNaN(v)) return MAX;
+    if (v < MAX_MIN) v = MAX_MIN;
+    if (v > MAX_HARD) v = MAX_HARD;
+    return v;
+  }
+
+  function setMaxProjects(n) {
+    var v = parseInt(n, 10);
+    if (isNaN(v)) return null;
+    if (v < MAX_MIN) v = MAX_MIN;
+    if (v > MAX_HARD) v = MAX_HARD;
+    try { localStorage.setItem(MKEY, String(v)); } catch (e) {}
+    return v;
+  }
+
+  function list() {
+    try {
+      var v = JSON.parse(localStorage.getItem(PKEY));
+      if (Array.isArray(v) && v.length) return v;
+    } catch (e) {}
+    return DEFAULTS.slice();
+  }
+
+  function saveList(l) {
+    try { localStorage.setItem(PKEY, JSON.stringify(l.slice(0, MAX_HARD))); } catch (e) {}
+  }
+
+  function activeId() {
+    var id = null;
+    try { id = localStorage.getItem(AKEY); } catch (e) {}
+    var l = list();
+    for (var i = 0; i < l.length; i++) if (l[i].id === id) return id;
+    return l[0].id;
+  }
+
+  function active() {
+    var id = activeId(), l = list();
+    for (var i = 0; i < l.length; i++) if (l[i].id === id) return l[i];
+    return l[0];
+  }
+
+  function color(p) {
+    var pr = p || active();
+    return COLORS[pr && pr.color] || COLORS.green;
+  }
+
+  function key(base) { return base + ':' + activeId(); }
+
+  function tasksOf(pid) {
+    try {
+      var raw = localStorage.getItem('backlog-tasks:' + pid);
+      if (raw) {
+        var v = JSON.parse(raw);
+        if (v && typeof v === 'object') return v;
+      }
+    } catch (e) {}
+    if (SEEDS[pid]) {
+      try { return JSON.parse(JSON.stringify(SEEDS[pid])); } catch (e) { return SEEDS[pid]; }
+    }
+    return null;
+  }
+
+  function boardOf(pid) {
+    var t = tasksOf(pid);
+    if (!t) return null;
+    var colMap = { backlog: 'backlog', todo: 'todo', progress: 'in-progress', review: 'in-review', done: 'done' };
+    var pts = { high: 5, med: 3, low: 2 };
+    var cols = { backlog: [], todo: [], 'in-progress': [], 'in-review': [], done: [] };
+    Object.keys(t).forEach(function (id) {
+      var task = t[id];
+      var st = task.subtasks || [];
+      var memberKey = (task.assignee || 'ana').toLowerCase().split(' ')[0];
+      var tagKey = (task.tag || 'Growth').toLowerCase();
+      cols[colMap[task.status] || 'backlog'].push({
+        id: id,
+        member: memberKey,
+        label: tagKey,
+        lane: task.lane || '',
+        description: task.description || '',
+        start: (st[0] && st[0].startDate) || '',
+        end: (st[st.length - 1] && st[st.length - 1].endDate) || '',
+        subtasks: JSON.stringify(st.map(function (s) {
+          return { text: s.text, assignee: s.assignee || memberKey, status: s.status || 'in-progress', startDate: s.startDate || '', endDate: s.endDate || '' };
+        })),
+        title: task.title,
+        points: pts[task.priority] || 3
+      });
+    });
+    return { columns: cols, savedFilters: {} };
+  }
+
+  function ganttOf(pid) {
+    var t = tasksOf(pid);
+    if (!t) return null;
+    return Object.keys(t).map(function (id) {
+      var task = t[id];
+      var st = task.subtasks || [];
+      var memberKey = (task.assignee || 'ana').toLowerCase().split(' ')[0];
+      var min = '', max = '';
+      st.forEach(function (s) {
+        if (s.startDate && (!min || s.startDate < min)) min = s.startDate;
+        if (s.endDate && (!max || s.endDate > max)) max = s.endDate;
+      });
+      if (!min) min = '2026-08-18';
+      if (!max || max < min) max = min;
+      return {
+        id: id,
+        title: task.title,
+        member: memberKey,
+        label: (task.tag || 'Growth').toLowerCase(),
+        startDate: min,
+        endDate: max,
+        subtasks: st.map(function (s) {
+          return { text: s.text, member: s.assignee || memberKey, start: s.startDate || min, end: s.endDate || min, done: s.status === 'done' };
+        })
+      };
+    });
+  }
+
+  function projectsFor(memberKey) {
+    var found = {};
+    list().forEach(function (p) {
+      var hit = false;
+      var t = tasksOf(p.id);
+      if (t) {
+        outer1:
+        for (var k in t) {
+          var task = t[k];
+          if ((task.assignee || '').toLowerCase().split(' ')[0] === memberKey) { hit = true; break; }
+          var subs = task.subtasks || [];
+          for (var i = 0; i < subs.length; i++) {
+            if ((subs[i].assignee || '') === memberKey) { hit = true; break outer1; }
+          }
+        }
+      }
+      if (!hit) {
+        try {
+          var b = JSON.parse(localStorage.getItem('kanban-board-state:' + p.id));
+          if (b && b.columns) {
+            outer2:
+            for (var c in b.columns) {
+              var cards = b.columns[c] || [];
+              for (var j = 0; j < cards.length; j++) {
+                if ((cards[j].member || '') === memberKey) { hit = true; break outer2; }
+              }
+            }
+          }
+        } catch (e) {}
+      }
+      if (hit) found[p.id] = true;
+    });
+    var out = list().filter(function (p) { return found[p.id]; }).map(function (p) { return p.id; });
+    return out.length ? out : ['p1'];
+  }
+
+  function setActive(id) {
+    try { localStorage.setItem(AKEY, id); } catch (e) {}
+    location.reload();
+  }
+
+  function newProject() {
+    var l = list();
+    if (l.length >= maxProjects()) return null;
+    var n = 1;
+    l.forEach(function (p) {
+      var m = /^p(\d+)$/.exec(p.id);
+      if (m && parseInt(m[1], 10) >= n) n = parseInt(m[1], 10) + 1;
+    });
+    var used = {};
+    l.forEach(function (p) { used[p.color] = true; });
+    var col = COLOR_ORDER[l.length % COLOR_ORDER.length];
+    for (var i = 0; i < COLOR_ORDER.length; i++) {
+      if (!used[COLOR_ORDER[i]]) { col = COLOR_ORDER[i]; break; }
+    }
+    var proj = { id: 'p' + n, name: 'Novo Projeto', sprint: 'Sprint 1', color: col };
+    l.push(proj);
+    saveList(l);
+    return proj;
+  }
+
+  function removeProject(pid) {
+    var l = list().filter(function (p) { return p.id !== pid; });
+    if (!l.length) return false;
+    saveList(l);
+    ['backlog-tasks', 'kanban-board-state', 'kanban-filters', 'gantt-tasks'].forEach(function (base) {
+      try { localStorage.removeItem(base + ':' + pid); } catch (e) {}
+    });
+    if (activeId() === pid) { try { localStorage.setItem(AKEY, l[0].id); } catch (e) {} }
+    return true;
+  }
+
+  var LANES_MAX = 12;
+  var LANES_MAX_LEN = 24;
+  var LANES_DEFAULT = { enabled: true, labels: ['Feature', 'Bug'] };
+
+  function normalizeLanes(cfg) {
+    var out = { enabled: true, labels: [] };
+    if (cfg && typeof cfg === 'object' && cfg.enabled === false) out.enabled = false;
+    var src = (cfg && Array.isArray(cfg.labels)) ? cfg.labels : LANES_DEFAULT.labels;
+    var seen = {};
+    for (var i = 0; i < src.length && out.labels.length < LANES_MAX; i++) {
+      var raw = typeof src[i] === 'string' ? src[i].replace(/^\s+|\s+$/g, '') : '';
+      if (!raw || raw.length > LANES_MAX_LEN) continue;
+      var k = raw.toLowerCase();
+      if (seen[k]) continue;
+      seen[k] = true;
+      out.labels.push(raw);
+    }
+    return out;
+  }
+
+  function lanesOf(pid) {
+    var l = list();
+    for (var i = 0; i < l.length; i++) {
+      if (l[i].id === pid) return normalizeLanes(l[i].lanes);
+    }
+    return normalizeLanes(LANES_DEFAULT);
+  }
+
+  function setLanes(pid, cfg) {
+    var l = list();
+    var norm = normalizeLanes(cfg);
+    for (var i = 0; i < l.length; i++) {
+      if (l[i].id === pid) { l[i].lanes = norm; saveList(l); return norm; }
+    }
+    return null;
+  }
+
+  function migrate() {
+    try {
+      if (!localStorage.getItem(PKEY)) localStorage.setItem(PKEY, JSON.stringify(DEFAULTS));
+      if (!localStorage.getItem(AKEY)) localStorage.setItem(AKEY, 'p1');
+      ['kanban-board-state', 'kanban-filters', 'backlog-tasks', 'gantt-tasks'].forEach(function (base) {
+        try {
+          var legacy = localStorage.getItem(base);
+          if (legacy && !localStorage.getItem(base + ':p1')) localStorage.setItem(base + ':p1', legacy);
+        } catch (e) {}
+      });
+      try {
+        var m = JSON.parse(localStorage.getItem('growth-squad-members'));
+        if (Array.isArray(m)) {
+          var changed = false;
+          m.forEach(function (x) {
+            if (!Array.isArray(x.projects)) { x.projects = projectsFor(String(x.name || '').split(' ')[0].toLowerCase()); changed = true; }
+          });
+          if (changed) localStorage.setItem('growth-squad-members', JSON.stringify(m));
+        }
+      } catch (e) {}
+    } catch (e) {}
+  }
+
+  function injectSwitcher() {
+    var brand = document.querySelector('.nav-brand');
+    if (!brand || document.querySelector('.sq-switch')) return;
+    var p = active();
+
+    var bt = document.querySelector('.nav-brand-text');
+    if (bt) bt.textContent = p.name;
+    var bs = document.querySelector('.nav-brand-sub');
+    if (bs) bs.textContent = p.sprint;
+    var bi = document.querySelector('.nav-brand-icon');
+    if (bi) bi.textContent = p.name.charAt(0).toUpperCase();
+    var crumb = document.querySelector('.topbar-breadcrumb span:last-child');
+    if (crumb) crumb.textContent = p.name;
+    var chip = document.querySelector('.sprint-chip');
+    if (chip) chip.textContent = p.sprint + ' - Ativo';
+
+    var wrap = document.createElement('div');
+    wrap.className = 'sq-switch';
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'sq-switch-btn';
+    btn.setAttribute('aria-haspopup', 'true');
+    btn.setAttribute('aria-expanded', 'false');
+    btn.innerHTML = '<span class="sq-switch-dot" style="background:' + color(p) + '"></span>' +
+      '<span class="sq-switch-name">' + esc(p.name) + '</span>' +
+      '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5"/></svg>';
+    wrap.appendChild(btn);
+    brand.insertAdjacentElement('afterend', wrap);
+
+    var menu = document.createElement('div');
+    menu.className = 'sq-menu';
+    menu.innerHTML = '<div class="sq-menu-label">Projetos</div>' +
+      list().map(function (pr) {
+        return '<button type="button" class="sq-menu-item' + (pr.id === p.id ? ' active' : '') + '" data-pid="' + pr.id + '">' +
+          '<span class="sq-menu-dot" style="background:' + color(pr) + '"></span>' +
+          '<span class="sq-menu-name">' + esc(pr.name) + '</span>' +
+          '<span class="sq-menu-sprint">' + esc(pr.sprint) + '</span>' +
+          '<svg class="sq-menu-check" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/></svg>' +
+          '</button>';
+      }).join('') +
+      '<div class="sq-menu-foot"><button type="button" class="sq-menu-item" data-sq-settings="1">' +
+      '<span class="sq-menu-name">Configurações de projetos</span><span class="sq-menu-sprint">›</span></button></div>';
+    document.body.appendChild(menu);
+
+    function place() {
+      var r = btn.getBoundingClientRect();
+      menu.style.top = (r.bottom + 6) + 'px';
+      menu.style.left = Math.max(8, Math.min(r.left, window.innerWidth - 260)) + 'px';
+      menu.style.minWidth = Math.max(r.width, 230) + 'px';
+    }
+    function openMenu() { place(); menu.classList.add('open'); wrap.classList.add('open'); btn.setAttribute('aria-expanded', 'true'); }
+    function closeMenu() { menu.classList.remove('open'); wrap.classList.remove('open'); btn.setAttribute('aria-expanded', 'false'); }
+
+    btn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      if (menu.classList.contains('open')) closeMenu(); else openMenu();
+    });
+    menu.addEventListener('click', function (e) {
+      var item = e.target.closest('.sq-menu-item[data-pid]');
+      if (item) {
+        closeMenu();
+        if (item.getAttribute('data-pid') !== activeId()) setActive(item.getAttribute('data-pid'));
+        return;
+      }
+      if (e.target.closest('[data-sq-settings]')) { closeMenu(); location.href = 'configuracoes.html'; }
+    });
+    document.addEventListener('click', function (e) {
+      if (menu.classList.contains('open') && !menu.contains(e.target) && !wrap.contains(e.target)) closeMenu();
+    });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeMenu(); });
+    window.addEventListener('scroll', function () { if (menu.classList.contains('open')) closeMenu(); }, true);
+    window.addEventListener('resize', closeMenu);
+  }
+
+  migrate();
+  injectSwitcher();
+
+  return {
+    list: list,
+    saveList: saveList,
+    active: active,
+    activeId: activeId,
+    setActive: setActive,
+    color: color,
+    key: key,
+    esc: esc,
+    tasksOf: tasksOf,
+    boardOf: boardOf,
+    ganttOf: ganttOf,
+    projectsFor: projectsFor,
+    newProject: newProject,
+    removeProject: removeProject,
+    lanesOf: lanesOf,
+    setLanes: setLanes,
+    SEEDS: SEEDS,
+    COLORS: COLORS,
+    MAX: MAX,
+    LIMITS: { min: MAX_MIN, max: MAX_HARD, def: MAX },
+    maxProjects: maxProjects,
+    setMaxProjects: setMaxProjects
+  };
+})();
+
+</script>
+<script>
+(function () {
+  'use strict';
+  const SEED_P1 = {
+  'G-01': { title: 'Implementar A/B test no onboarding', assignee: 'Ana Souza', tag: 'Growth', priority: 'high', status: 'todo',
+    subtasks: [
+      { text: 'Definir hipóteses e métricas de sucesso', assignee: 'ana', status: 'done', startDate: '2026-08-20', endDate: '2026-08-22' },
+      { text: 'Criar variantes no LaunchDarkly', assignee: 'ana', status: 'in-progress', startDate: '2026-08-23', endDate: '2026-08-25' },
+      { text: 'Configurar segmentação de usuários', assignee: 'bruno', status: 'in-progress', startDate: '2026-08-26', endDate: '2026-08-28' },
+      { text: 'Documentar plano de rollout', assignee: 'ana', status: 'in-progress', startDate: '2026-08-29', endDate: '2026-08-30' }
+    ]
+  },
+  'G-02': { title: 'Configurar pipeline de dados do mixpanel', assignee: 'Bruno Lima', tag: 'Infra', priority: 'med', status: 'todo',
+    subtasks: [
+      { text: 'Mapear eventos do funnel de compra', assignee: 'bruno', status: 'done', startDate: '2026-08-18', endDate: '2026-08-20' },
+      { text: 'Configurar identidade de usuário', assignee: 'bruno', status: 'in-progress', startDate: '2026-08-21', endDate: '2026-08-23' },
+      { text: 'Validar eventos em produção', assignee: 'diego', status: 'in-progress', startDate: '2026-08-24', endDate: '2026-08-26' },
+      { text: 'Documentar schema de eventos', assignee: 'diego', status: 'in-progress', startDate: '2026-08-27', endDate: '2026-08-28' }
+    ]
+  },
+  'G-03': { title: 'Redesign da tela de configurações', assignee: 'Carla Mendes', tag: 'Design', priority: 'med', status: 'todo',
+    subtasks: [
+      { text: 'Criar wireframes das novas telas', assignee: 'carla', status: 'done' },
+      { text: 'Design system: atualizar componentes', assignee: 'carla', status: 'done' },
+      { text: 'Prototipar fluxo de onboarding', assignee: 'carla', status: 'in-progress' },
+      { text: 'Entregar assets para desenvolvimento', assignee: 'carla', status: 'in-progress' }
+    ]
+  },
+  'G-04': { title: 'Dashboard de métricas de retenção', assignee: 'Diego Alves', tag: 'Data', priority: 'high', status: 'todo',
+    subtasks: [
+      { text: 'Criar queries de cohort D1/D7/D30', assignee: 'diego', status: 'done' },
+      { text: 'Configurar visualizações no Metabase', assignee: 'diego', status: 'in-progress' },
+      { text: 'Adicionar filtros por segmento', assignee: 'diego', status: 'in-progress' },
+      { text: 'Configurar alerta de queda de retenção', assignee: 'diego', status: 'in-progress' }
+    ]
+  },
+  'G-05': { title: 'Copy para notificação push de engajamento', assignee: 'Elena Ribeiro', tag: 'Growth', priority: 'low', status: 'todo',
+    subtasks: [
+      { text: 'Escrever 3 variações de copy', assignee: 'elena', status: 'done' },
+      { text: 'Revisar com time de produto', assignee: 'elena', status: 'in-progress' },
+      { text: 'Configurar teste A/B no Braze', assignee: 'elena', status: 'in-progress' }
+    ]
+  },
+  'G-06': { title: 'Funil de conversão — etapa de convite', assignee: 'Ana Souza', tag: 'Growth', priority: 'high', status: 'progress',
+    subtasks: [
+      { text: 'Analisar drop-off na etapa de convite', assignee: 'ana', status: 'done' },
+      { text: 'Corrigir bug no Safari', assignee: 'bruno', status: 'done' },
+      { text: 'Implementar reenvio automático de convite', assignee: 'bruno', status: 'in-progress' },
+      { text: 'Criar dashboard de monitoramento', assignee: 'ana', status: 'in-progress' }
+    ]
+  },
+  'G-07': { title: 'Migração do banco para Postgres 16', assignee: 'Bruno Lima', tag: 'Infra', priority: 'high', status: 'progress',
+    subtasks: [
+      { text: 'Migração do schema em staging', assignee: 'bruno', status: 'done' },
+      { text: 'Testes de performance e compatibilidade', assignee: 'diego', status: 'done' },
+      { text: 'Backup completo de produção', assignee: 'bruno', status: 'in-progress' },
+      { text: 'Executar migração em produção', assignee: 'bruno', status: 'in-progress' },
+      { text: 'Validar integridade dos dados', assignee: 'diego', status: 'in-progress' }
+    ]
+  },
+  'G-08': { title: 'Erro 500 ao exportar CSV com mais de 10k linhas', assignee: 'Carla Mendes', tag: 'Bug', priority: 'high', status: 'progress',
+    subtasks: [
+      { text: 'Reproduzir bug em ambiente local', assignee: 'carla', status: 'done' },
+      { text: 'Implementar exportação com streaming', assignee: 'bruno', status: 'in-progress' },
+      { text: 'Testar com 50k+ linhas', assignee: 'carla', status: 'in-progress' },
+      { text: 'Deploy e monitoramento', assignee: 'bruno', status: 'in-progress' }
+    ]
+  },
+  'G-09': { title: 'ETL de eventos do app mobile', assignee: 'Diego Alves', tag: 'Data', priority: 'med', status: 'progress',
+    subtasks: [
+      { text: 'Mapear eventos de lifecycle do app', assignee: 'diego', status: 'done' },
+      { text: 'Configurar pipeline de ingestão', assignee: 'diego', status: 'in-progress' },
+      { text: 'Validar qualidade dos dados', assignee: 'diego', status: 'in-progress' },
+      { text: 'Documentar schema no data catalog', assignee: 'diego', status: 'in-progress' }
+    ]
+  },
+  'G-10': { title: 'Landing page de black friday — variant B', assignee: 'Elena Ribeiro', tag: 'Growth', priority: 'med', status: 'review',
+    subtasks: [
+      { text: 'Criar variant B no VWO', assignee: 'elena', status: 'done' },
+      { text: 'Configurar metas de conversão', assignee: 'elena', status: 'done' },
+      { text: 'Aguardar significância estatística', assignee: 'ana', status: 'in-progress' },
+      { text: 'Documentar learnings do teste', assignee: 'elena', status: 'in-progress' }
+    ]
+  },
+  'G-11': { title: 'Integração com Braze para push transacional', assignee: 'Ana Souza', tag: 'Growth', priority: 'high', status: 'review',
+    subtasks: [
+      { text: 'Integrar SDK Braze no app', assignee: 'ana', status: 'done' },
+      { text: 'Criar templates de notificação', assignee: 'elena', status: 'done' },
+      { text: 'Configurar jornadas transacionais', assignee: 'ana', status: 'in-progress' },
+      { text: 'Teste end-to-end em staging', assignee: 'ana', status: 'in-progress' }
+    ]
+  },
+  'G-12': { title: 'Cache Redis para queries do dashboard', assignee: 'Bruno Lima', tag: 'Infra', priority: 'low', status: 'review',
+    subtasks: [
+      { text: 'Identificar queries candidatas a cache', assignee: 'bruno', status: 'done' },
+      { text: 'Implementar cache com TTL de 5min', assignee: 'bruno', status: 'done' },
+      { text: 'Monitorar hit rate em produção', assignee: 'bruno', status: 'in-progress' },
+      { text: 'Documentar estratégia de invalidação', assignee: 'bruno', status: 'in-progress' }
+    ]
+  },
+  'G-13': { title: 'Design system — tokens de cor atualizados', assignee: 'Carla Mendes', tag: 'Design', priority: 'low', status: 'done',
+    subtasks: [
+      { text: 'Migrar tokens para OKLch', assignee: 'carla', status: 'done' },
+      { text: 'Atualizar documentação no Storybook', assignee: 'carla', status: 'done' },
+      { text: 'Revisar componentes afetados', assignee: 'carla', status: 'in-progress' },
+      { text: 'Comunicar mudanças ao time', assignee: 'carla', status: 'in-progress' }
+    ]
+  },
+  'G-14': { title: 'Relatório semanal de cohort automatizado', assignee: 'Diego Alves', tag: 'Data', priority: 'med', status: 'done',
+    subtasks: [
+      { text: 'Criar query de cohort semanal', assignee: 'diego', status: 'done' },
+      { text: 'Configurar agendamento no Metabase', assignee: 'diego', status: 'done' },
+      { text: 'Configurar envio por email', assignee: 'diego', status: 'done' },
+      { text: 'Validar primeira execução', assignee: 'diego', status: 'in-progress' }
+    ]
+  },
+  'G-15': { title: 'Copy A/B test — tela de pricing', assignee: 'Elena Ribeiro', tag: 'Growth', priority: 'low', status: 'done',
+    subtasks: [
+      { text: 'Criar variações de copy', assignee: 'elena', status: 'done' },
+      { text: 'Configurar teste A/B', assignee: 'elena', status: 'done' },
+      { text: 'Analisar resultados', assignee: 'elena', status: 'done' },
+      { text: 'Implementar copy vencedora', assignee: 'elena', status: 'in-progress' }
+    ]
+  },
+  'G-16': { title: 'Fix: timezone incorreta nos emails agendados', assignee: 'Ana Souza', tag: 'Bug', priority: 'med', status: 'done',
+    subtasks: [
+      { text: 'Identificar causa do bug de timezone', assignee: 'ana', status: 'done' },
+      { text: 'Aplicar fix usando UTC do servidor', assignee: 'ana', status: 'done' },
+      { text: 'Testar em staging', assignee: 'bruno', status: 'done' },
+      { text: 'Deploy em produção', assignee: 'bruno', status: 'in-progress' }
+    ]
+  }
+};
+
+  var WIP = { todo: 8, 'in-progress': 5, 'in-review': 3 };
+  var COLS = ['backlog', 'todo', 'in-progress', 'in-review', 'done'];
+  var COL_LABEL = { backlog: 'Backlog', todo: 'A fazer', 'in-progress': 'Em andamento', 'in-review': 'Em revisão', done: 'Concluído' };
+  var COL_COLOR = { backlog: 'oklch(72% 0.02 240)', todo: 'var(--info)', 'in-progress': 'var(--warn)', 'in-review': 'oklch(60% 0.15 300)', done: 'oklch(55% 0.16 145)' };
+
+  var today = new Date();
+  today.setHours(0, 0, 0, 0);
+  var todayStr = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0');
+
+  function memberKey(name) { return String(name || '').toLowerCase().split(' ')[0]; }
+
+  function taskMap(pid) {
+    var t = SQ.tasksOf(pid);
+    if (t && Object.keys(t).length) return t;
+    if (pid === 'p1') return SEED_P1;
+    return {};
+  }
+
+  function columnsFor(pid, tm) {
+    try {
+      var raw = localStorage.getItem('kanban-board-state:' + pid);
+      if (raw) {
+        var b = JSON.parse(raw);
+        if (b && b.columns) return b.columns;
+      }
+    } catch (e) {}
+    var cols = { backlog: [], todo: [], 'in-progress': [], 'in-review': [], done: [] };
+    var map = { backlog: 'backlog', todo: 'todo', progress: 'in-progress', review: 'in-review', done: 'done' };
+    Object.keys(tm).forEach(function (id) {
+      cols[map[tm[id].status] || 'backlog'].push({ id: id });
+    });
+    return cols;
+  }
+
+  var projects = SQ.list();
+  var activeId = SQ.activeId();
+
+  var totalTasks = 0, doneTasks = 0, progTasks = 0, totalSub = 0, doneSub = 0, overdueSub = 0;
+  var memberSet = {};
+  var wipItems = [], stuckItems = [], overdueItems = [];
+
+  projects.forEach(function (p) {
+    var tm = taskMap(p.id);
+    var ids = Object.keys(tm);
+    totalTasks += ids.length;
+    ids.forEach(function (id) {
+      var t = tm[id];
+      if (t.status === 'done') doneTasks++;
+      if (t.status === 'progress') progTasks++;
+      if (t.priority === 'high' && (t.status === 'backlog' || t.status === 'todo')) {
+        stuckItems.push({ pid: p.id, name: p.name, color: SQ.color(p), title: t.title || id });
+      }
+      if (t.assignee) memberSet[memberKey(t.assignee)] = true;
+      var early = null, n = 0;
+      (t.subtasks || []).forEach(function (s) {
+        totalSub++;
+        if (s.status === 'done') doneSub++;
+        if (s.assignee) memberSet[String(s.assignee).toLowerCase()] = true;
+        if (s.endDate && s.endDate < todayStr && s.status !== 'done') {
+          overdueSub++; n++;
+          if (!early || s.endDate < early) early = s.endDate;
+        }
+      });
+      if (n) overdueItems.push({ pid: p.id, name: p.name, color: SQ.color(p), title: t.title || id, date: early, n: n });
+    });
+    var cols = columnsFor(p.id, tm);
+    Object.keys(WIP).forEach(function (c) {
+      var n = (cols[c] || []).length;
+      if (n >= WIP[c]) wipItems.push({ pid: p.id, name: p.name, color: SQ.color(p), col: c, n: n, max: WIP[c] });
+    });
+  });
+
+  overdueItems.sort(function (a, b) { return a.date < b.date ? -1 : a.date > b.date ? 1 : 0; });
+  var pct = totalSub > 0 ? Math.round((doneSub / totalSub) * 100) : 0;
+  var memberCount = Object.keys(memberSet).length;
+
+  var ICON = {
+    folder: '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25A2.25 2.25 0 0 1 13.5 18v-2.25Z"/></svg>',
+    bolt: '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"/></svg>',
+    clock: '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>',
+    check: '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>',
+    warn: '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008z"/></svg>',
+    users: '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z"/></svg>'
+  };
+
+  document.getElementById('metrics-grid').innerHTML = [
+    '<div class="metric-card" data-od-id="kpi-projects"><div class="metric-icon metric-icon-accent">' + ICON.folder + '</div><div><div class="metric-value">' + projects.length + '</div><div class="metric-label">Projetos no portfólio</div></div></div>',
+    '<div class="metric-card" data-od-id="kpi-progress"><div class="metric-icon metric-icon-warn">' + ICON.bolt + '</div><div><div class="metric-value">' + pct + '%</div><div class="metric-label">Progresso do portfólio</div></div></div>',
+    '<div class="metric-card" data-od-id="kpi-inprogress"><div class="metric-icon metric-icon-blue">' + ICON.clock + '</div><div><div class="metric-value">' + progTasks + '</div><div class="metric-label">Tarefas em andamento</div></div></div>',
+    '<div class="metric-card" data-od-id="kpi-done"><div class="metric-icon metric-icon-green">' + ICON.check + '</div><div><div class="metric-value">' + doneTasks + '</div><div class="metric-label">Tarefas concluídas</div></div></div>',
+    '<div class="metric-card" data-od-id="kpi-overdue"><div class="metric-icon metric-icon-danger">' + ICON.warn + '</div><div><div class="metric-value">' + overdueSub + '</div><div class="metric-label">Prazos vencidos</div></div></div>',
+    '<div class="metric-card" data-od-id="kpi-members"><div class="metric-icon metric-icon-purple">' + ICON.users + '</div><div><div class="metric-value">' + memberCount + '</div><div class="metric-label">Pessoas alocadas</div></div></div>'
+  ].join('');
+
+  document.getElementById('home-subtitle').textContent =
+    'Visão executiva — ' + projects.length + ' projetos · ' + totalTasks + ' tarefas · ' + totalSub + ' subtarefas';
+
+  document.getElementById('proj-count').textContent = String(projects.length);
+
+  document.getElementById('status-legend').innerHTML = COLS.map(function (c) {
+    return '<span class="status-legend-item"><span class="status-legend-dot" style="background:' + COL_COLOR[c] + '"></span>' + COL_LABEL[c] + '</span>';
+  }).join('');
+
+  function cardHTML(p) {
+    var tm = taskMap(p.id);
+    var cols = columnsFor(p.id, tm);
+    var counts = COLS.map(function (c) { return (cols[c] || []).length; });
+    var total = counts.reduce(function (a, b) { return a + b; }, 0);
+    var subTotal = 0, subDone = 0, overdueN = 0;
+    Object.keys(tm).forEach(function (id) {
+      (tm[id].subtasks || []).forEach(function (s) {
+        subTotal++;
+        if (s.status === 'done') subDone++;
+        else if (s.endDate && s.endDate < todayStr) overdueN++;
+      });
+    });
+    var pPct = subTotal > 0 ? Math.round((subDone / subTotal) * 100) : 0;
+    var wipCols = Object.keys(WIP).filter(function (c) { return (cols[c] || []).length >= WIP[c]; });
+    var isActive = p.id === activeId;
+    var color = SQ.color(p);
+
+    var body;
+    if (total > 0) {
+      var segs = COLS.map(function (c, i) {
+        if (!counts[i]) return '';
+        return '<span style="width:' + (counts[i] / total * 100) + '%;background:' + COL_COLOR[c] + '" title="' + COL_LABEL[c] + ': ' + counts[i] + '"></span>';
+      }).join('');
+      body =
+        '<div><div class="proj-progress-head"><span>Progresso das subtarefas</span><b>' + pPct + '%</b></div>' +
+        '<div class="proj-bar"><div class="proj-bar-fill" style="width:' + pPct + '%;background:' + color + '"></div></div></div>' +
+        '<div class="proj-status" role="img" aria-label="Distribuição por coluna: ' + COLS.map(function (c, i) { return COL_LABEL[c] + ' ' + counts[i]; }).join(', ') + '">' + segs + '</div>' +
+        '<div class="proj-counts">' + COLS.map(function (c, i) {
+          return '<span class="proj-count" title="' + COL_LABEL[c] + '"><i style="background:' + COL_COLOR[c] + '"></i>' + counts[i] + '</span>';
+        }).join('') + '</div>';
+    } else {
+      body =
+        '<div class="proj-empty"><strong>Sem tarefas ainda</strong>Abra o quadro para criar a primeira tarefa deste projeto.</div>' +
+        '<div class="proj-counts">' + COLS.map(function (c, i) {
+          return '<span class="proj-count" title="' + COL_LABEL[c] + '"><i style="background:' + COL_COLOR[c] + '"></i>' + counts[i] + '</span>';
+        }).join('') + '</div>';
+    }
+
+    return '<button type="button" class="proj-card' + (isActive ? ' is-active' : '') + '" data-pid="' + p.id + '" data-od-id="proj-card-' + p.id + '" aria-label="Abrir o quadro do projeto ' + SQ.esc(p.name) + '">' +
+      '<div class="proj-top"><span class="proj-dot" style="background:' + color + '"></span>' +
+      '<span class="proj-name">' + SQ.esc(p.name) + '</span>' +
+      (isActive ? '<span class="proj-active-chip">Ativo</span>' : '') +
+      '<span class="proj-sprint">' + SQ.esc(p.sprint) + '</span></div>' +
+      body +
+      '<div class="proj-foot"><div class="proj-meta">' +
+      '<span>' + total + ' tarefa' + (total === 1 ? '' : 's') + '</span>' +
+      (overdueN ? '<span class="is-danger">' + overdueN + ' vencida' + (overdueN === 1 ? '' : 's') + '</span>' : '') +
+      (wipCols.length ? '<span class="wip-badge">WIP ' + wipCols.length + 'x</span>' : '') +
+      '</div><span class="proj-open">Abrir quadro →</span></div>' +
+      '</button>';
+  }
+
+  var grid = document.getElementById('proj-grid');
+  grid.innerHTML = projects.map(cardHTML).join('');
+  grid.addEventListener('click', function (e) {
+    var card = e.target.closest('.proj-card');
+    if (!card) return;
+    try { localStorage.setItem('sq-active-project', card.getAttribute('data-pid')); } catch (err) {}
+    location.href = 'quadro-kanban.html';
+  });
+
+  function itemRow(inner) { return '<div class="risk-item">' + inner + '</div>'; }
+  function projTag(it) { return '<span class="r-proj"><i style="background:' + it.color + '"></i>' + SQ.esc(it.name) + '</span>'; }
+
+  var wipRows = wipItems.slice(0, 5).map(function (it) {
+    return itemRow('<span class="r-name">' + COL_LABEL[it.col] + '</span>' + projTag(it) + '<span class="r-val is-warn">' + it.n + '/' + it.max + '</span>');
+  }).join('');
+  var stuckRows = stuckItems.slice(0, 5).map(function (it) {
+    return itemRow('<span class="r-name">' + SQ.esc(it.title) + '</span>' + projTag(it) + '<span class="r-val is-warn">Alta</span>');
+  }).join('');
+  var overdueRows = overdueItems.slice(0, 5).map(function (it) {
+    return itemRow('<span class="r-name">' + SQ.esc(it.title) + '</span>' + projTag(it) + '<span class="r-val is-danger">' + it.date + '</span>');
+  }).join('');
+
+  function more(n, shown) { return n > shown ? '<div class="risk-more">+ ' + (n - shown) + ' mais</div>' : ''; }
+
+  document.getElementById('risk-grid').innerHTML =
+    '<div class="risk-col" data-od-id="risk-wip"><div class="risk-col-title"><span class="rc-dot" style="background:var(--info)"></span>Colunas no limite (WIP)<span class="risk-col-count">' + wipItems.length + '</span></div>' +
+      '<div class="risk-list">' + (wipRows || '<div class="risk-empty">Nenhuma coluna no limite.</div>') + more(wipItems.length, 5) + '</div></div>' +
+    '<div class="risk-col" data-od-id="risk-stuck"><div class="risk-col-title"><span class="rc-dot" style="background:var(--warn)"></span>Prioridade alta parada<span class="risk-col-count">' + stuckItems.length + '</span></div>' +
+      '<div class="risk-list">' + (stuckRows || '<div class="risk-empty">Nenhuma tarefa de prioridade alta parada.</div>') + more(stuckItems.length, 5) + '</div></div>' +
+    '<div class="risk-col" data-od-id="risk-overdue"><div class="risk-col-title"><span class="rc-dot" style="background:var(--danger)"></span>Prazos vencidos<span class="risk-col-count">' + overdueItems.length + '</span></div>' +
+      '<div class="risk-list">' + (overdueRows || '<div class="risk-empty">Nenhum prazo vencido.</div>') + more(overdueItems.length, 5) + '</div></div>';
+
+  var riskTotal = wipItems.length + stuckItems.length + overdueSub;
+  var badge = document.getElementById('risk-badge');
+  var sub = document.getElementById('risk-sub');
+  function pl(n, s, p) { return n + ' ' + (n === 1 ? s : p); }
+  if (riskTotal > 0) {
+    badge.textContent = riskTotal + ' risco' + (riskTotal === 1 ? '' : 's');
+    sub.textContent = pl(wipItems.length, 'coluna', 'colunas') + ' em WIP · ' + pl(stuckItems.length, 'tarefa parada', 'tarefas paradas') + ' · ' + pl(overdueSub, 'prazo vencido', 'prazos vencidos');
+  } else {
+    badge.textContent = 'Sem riscos ativos';
+    badge.className = 'risk-badge ok';
+    sub.textContent = 'Nada pendente nas três frentes';
+  }
+})();
+</script>
+</body>
+</html>

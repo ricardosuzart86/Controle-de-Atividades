@@ -1,0 +1,1426 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cronograma — Growth Squad</title>
+<style>
+  :root {
+    --bg: oklch(98% 0.005 250);
+    --surface: oklch(100% 0 0);
+    --fg: oklch(22% 0.02 240);
+    --fg-2: oklch(35% 0.018 240);
+    --muted: oklch(50% 0.018 240);
+    --border: oklch(90% 0.008 240);
+    --accent: oklch(58% 0.16 145);
+    --accent-soft: oklch(94% 0.04 145);
+    --danger: oklch(60% 0.18 25);
+    --danger-soft: oklch(94% 0.04 25);
+    --warn: oklch(75% 0.14 80);
+    --warn-soft: oklch(95% 0.04 80);
+    --info: oklch(62% 0.14 250);
+    --info-soft: oklch(94% 0.04 250);
+    --font-body: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', system-ui, sans-serif;
+    --font-mono: 'JetBrains Mono', 'IBM Plex Mono', ui-monospace, Menlo, monospace;
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 16px;
+    --space-5: 20px;
+    --space-6: 24px;
+    --space-8: 32px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: var(--font-body); background: var(--bg); color: var(--fg); font-size: 13px; line-height: 1.5; min-height: 100vh; display: flex; flex-direction: column; }
+
+  .topbar { background: var(--surface); border-bottom: 1px solid var(--border); padding: 10px 20px; display: flex; align-items: center; gap: 16px; flex-shrink: 0; z-index: 10; }
+  .topbar-breadcrumb { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--muted); }
+  .topbar-breadcrumb span { color: var(--fg); font-weight: 600; }
+  .sprint-chip { display: inline-flex; align-items: center; gap: 5px; background: var(--accent-soft); color: oklch(38% 0.12 145); font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 999px; letter-spacing: 0.02em; }
+  .sprint-chip::before { content: ''; width: 6px; height: 6px; background: var(--accent); border-radius: 50%; }
+
+  .layout { display: flex; flex: 1; overflow: hidden; }
+
+  .nav-sidebar { width: 220px; background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; flex-shrink: 0; padding: var(--space-4) 0; overflow-y: auto; }
+  .nav-brand { display: flex; align-items: center; gap: var(--space-3); padding: 0 var(--space-4) var(--space-5); border-bottom: 1px solid var(--border); margin-bottom: var(--space-3); }
+  .nav-brand-icon { width: 32px; height: 32px; background: linear-gradient(135deg, var(--accent), oklch(65% 0.16 160)); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 14px; flex-shrink: 0; }
+  .nav-brand-text { font-size: 14px; font-weight: 700; color: var(--fg); line-height: 1.2; }
+  .nav-brand-sub { font-size: 11px; color: var(--muted); font-weight: 400; }
+  .nav-section { padding: 0 var(--space-3); margin-bottom: var(--space-2); }
+  .nav-section-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); padding: var(--space-2) var(--space-2) var(--space-1); }
+  .nav-item { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-2) var(--space-3); border-radius: 8px; font-size: 13px; font-weight: 500; color: var(--fg-2); cursor: pointer; transition: all 0.15s; text-decoration: none; position: relative; }
+  .nav-item:hover { background: var(--bg); color: var(--fg); }
+  .nav-item.active { background: var(--accent-soft); color: oklch(38% 0.12 145); font-weight: 600; }
+  .nav-item.active::before { content: ''; position: absolute; left: 0; top: 6px; bottom: 6px; width: 3px; background: var(--accent); border-radius: 0 2px 2px 0; }
+  .nav-item svg { width: 18px; height: 18px; flex-shrink: 0; opacity: 0.7; }
+  .nav-item.active svg { opacity: 1; }
+  .nav-badge { margin-left: auto; background: var(--danger); color: white; font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 999px; font-family: var(--font-mono); }
+  .nav-spacer { flex: 1; }
+  .nav-user { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3) var(--space-4); border-top: 1px solid var(--border); margin-top: var(--space-2); }
+  .nav-user-info { flex: 1; min-width: 0; }
+  .nav-user-name { font-size: 13px; font-weight: 600; color: var(--fg); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .nav-user-role { font-size: 11px; color: var(--muted); }
+
+  .content { flex: 1; padding: 24px; overflow-y: auto; overflow-x: auto; }
+  .content-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; flex-wrap: wrap; gap: 12px; }
+  .content-title { font-size: 20px; font-weight: 700; color: var(--fg); }
+  .content-subtitle { font-size: 13px; color: var(--muted); margin-top: 2px; }
+
+  .avatar { width: 22px; height: 22px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: white; background: var(--muted); flex-shrink: 0; }
+  .avatar-a { background: oklch(55% 0.14 250); }
+  .avatar-b { background: oklch(55% 0.16 145); }
+  .avatar-c { background: oklch(55% 0.15 30); }
+  .avatar-d { background: oklch(55% 0.12 300); }
+  .avatar-e { background: oklch(55% 0.14 80); }
+  .avatar-f { background: oklch(55% 0.18 200); }
+  .avatar-g { background: oklch(55% 0.14 330); }
+
+  .tag { display: inline-block; font-size: 10px; font-weight: 600; letter-spacing: 0.03em; padding: 2px 7px; border-radius: 4px; }
+  .tag-growth { background: var(--accent-soft); color: oklch(38% 0.12 145); }
+  .tag-infra { background: var(--info-soft); color: oklch(40% 0.12 250); }
+  .tag-bug { background: var(--danger-soft); color: oklch(48% 0.14 25); }
+  .tag-design { background: oklch(94% 0.04 300); color: oklch(42% 0.12 300); }
+  .tag-data { background: var(--warn-soft); color: oklch(50% 0.12 80); }
+
+  /* Filter bar */
+  .filter-bar { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
+  .filter-group { display: flex; align-items: center; gap: 6px; }
+  .filter-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 500; }
+  .filter-btn { display: inline-flex; align-items: center; gap: 4px; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 4px 10px; font-size: 12px; color: var(--fg); cursor: pointer; transition: all 0.2s ease; font-family: var(--font-body); }
+  .filter-btn:hover { border-color: var(--muted); background: var(--bg); }
+  .filter-btn.active { border-color: var(--accent); background: var(--accent-soft); color: oklch(38% 0.12 145); }
+
+  /* View mode toggle */
+  .view-toggle { display: inline-flex; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin-left: auto; }
+  .view-toggle-btn { padding: 6px 14px; font-size: 12px; font-weight: 500; color: var(--fg-2); background: var(--surface); border: none; cursor: pointer; transition: all 0.2s ease; font-family: var(--font-body); border-right: 1px solid var(--border); }
+  .view-toggle-btn:last-child { border-right: none; }
+  .view-toggle-btn:hover { background: var(--bg); color: var(--fg); }
+  .view-toggle-btn.active { background: var(--accent); color: white; font-weight: 600; }
+
+  /* Month/quarter columns */
+  .gantt-month { flex: 1; text-align: center; padding: 6px 0; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); background: var(--bg); border-bottom: 2px solid var(--border); }
+  .gantt-week-col { min-width: 80px; flex: 1; text-align: center; padding: 4px 0; border-left: 1px solid oklch(95% 0.005 240); font-size: 10px; color: var(--muted); }
+  .gantt-week-col:first-child { border-left: none; }
+
+  /* Status legend */
+  .status-legend { display: flex; gap: 16px; margin-bottom: 16px; flex-wrap: wrap; }
+  .status-legend-item { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 500; color: var(--fg-2); }
+  .status-legend-dot { width: 10px; height: 10px; border-radius: 3px; }
+
+  /* Summary cards */
+  .summary-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 20px; }
+  .summary-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; transition: box-shadow 0.2s ease, transform 0.2s ease; }
+  .summary-card:hover { box-shadow: 0 4px 12px oklch(0% 0 0 / 0.06); transform: translateY(-1px); }
+  .summary-card-value { font-size: 22px; font-weight: 700; color: var(--fg); font-family: var(--font-mono); }
+  .summary-card-label { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  /* Gantt chart */
+  .gantt-wrapper { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+  .gantt-header { display: flex; position: sticky; top: 0; z-index: 5; }
+  .gantt-label-col { min-width: 260px; width: 260px; flex-shrink: 0; border-right: 1px solid var(--border); background: var(--surface); }
+  .gantt-label-header { padding: 10px 16px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); border-bottom: 2px solid var(--border); background: var(--bg); }
+  .gantt-timeline-cols { flex: 1; overflow-x: auto; }
+  .gantt-weeks { display: flex; }
+  .gantt-week { flex: 1; text-align: center; padding: 6px 0; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); background: var(--bg); border-bottom: 2px solid var(--border); }
+  .gantt-days { display: flex; position: relative; }
+  .gantt-day { min-width: 48px; flex: 1; text-align: center; padding: 4px 0; border-left: 1px solid oklch(95% 0.005 240); }
+  .gantt-day:first-child { border-left: none; }
+  .gantt-day-date { display: block; font-family: var(--font-mono); font-size: 12px; font-weight: 700; color: var(--fg-2); }
+  .gantt-day-name { display: block; font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
+  .gantt-day.weekend { background: oklch(97% 0.003 250); }
+  .gantt-day.today { background: oklch(94% 0.03 145); }
+  .gantt-day.today .gantt-day-date { color: var(--accent); }
+
+  /* Rows */
+  .gantt-body { position: relative; }
+  .gantt-row { display: flex; border-bottom: 1px solid var(--border); min-height: 44px; align-items: center; }
+  .gantt-row:last-child { border-bottom: none; }
+  .gantt-row:hover { background: oklch(98.5% 0.003 250); }
+  .gantt-row.expanded { background: oklch(99% 0.002 250); }
+
+  .gantt-row-label { min-width: 260px; width: 260px; flex-shrink: 0; border-right: 1px solid var(--border); padding: 6px 12px 6px 16px; display: flex; align-items: center; gap: 8px; }
+  .gantt-row-label.subtask { padding-left: 36px; }
+  .gantt-toggle { width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; cursor: pointer; border: none; background: none; color: var(--muted); border-radius: 4px; transition: all 0.15s; flex-shrink: 0; font-size: 10px; }
+  .gantt-toggle:hover { background: var(--border); color: var(--fg); }
+  .gantt-toggle.expanded { transform: rotate(90deg); }
+  .gantt-toggle.hidden { visibility: hidden; }
+
+  .gantt-row-info { flex: 1; min-width: 0; }
+  .gantt-row-name { font-size: 13px; font-weight: 600; color: var(--fg); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .gantt-row-name.subtask-name { font-size: 12px; font-weight: 400; color: var(--fg-2); }
+  .gantt-row-meta { display: flex; align-items: center; gap: 6px; margin-top: 2px; }
+
+  .gantt-row-bars { flex: 1; position: relative; min-height: 44px; display: flex; align-items: center; }
+
+  /* Bars */
+  .gantt-bar { position: absolute; height: 20px; border-radius: 4px; display: flex; align-items: center; padding: 0 8px; font-size: 10px; font-weight: 600; color: white; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; z-index: 1; cursor: default; transition: opacity 0.15s; }
+  .gantt-bar:hover { opacity: 0.85; }
+  .gantt-bar-growth { background: var(--accent); }
+  .gantt-bar-infra { background: var(--info); }
+  .gantt-bar-bug { background: var(--danger); }
+  .gantt-bar-design { background: oklch(55% 0.14 300); }
+  .gantt-bar-data { background: oklch(68% 0.14 80); }
+
+  .gantt-bar.subtask-bar { height: 14px; border-radius: 3px; font-size: 9px; opacity: 0.8; }
+  .gantt-bar.completed { opacity: 0.5; }
+
+  /* Tooltip */
+  .gantt-tooltip { position: fixed; background: var(--fg); color: white; padding: 10px 14px; border-radius: 8px; font-size: 12px; max-width: 280px; z-index: 100; pointer-events: none; box-shadow: 0 8px 24px rgba(0,0,0,0.2); display: none; line-height: 1.5; }
+  .gantt-tooltip .tt-title { font-weight: 600; margin-bottom: 4px; }
+  .gantt-tooltip .tt-dates { font-family: var(--font-mono); font-size: 11px; opacity: 0.8; }
+  .gantt-tooltip .tt-meta { margin-top: 4px; display: flex; gap: 8px; align-items: center; }
+
+  /* Today line */
+  .gantt-today-line { position: absolute; top: 0; bottom: 0; width: 2px; background: var(--danger); z-index: 3; pointer-events: none; }
+  .gantt-today-line::before { content: 'Hoje'; position: absolute; top: -18px; left: -14px; font-size: 9px; font-weight: 700; color: var(--danger); white-space: nowrap; }
+
+  /* Progress bar */
+  .gantt-progress { position: absolute; bottom: 0; left: 0; height: 3px; background: rgba(255,255,255,0.4); border-radius: 0 0 4px 4px; }
+
+  @media (max-width: 900px) {
+    .nav-sidebar { width: 56px; }
+    .nav-brand-text, .nav-brand-sub, .nav-section-label, .nav-item span, .nav-badge, .nav-user-info { display: none; }
+    .nav-item { justify-content: center; padding: var(--space-3); }
+    .nav-item.active::before { display: none; }
+    .nav-brand { justify-content: center; padding: 0 0 var(--space-4); }
+    .nav-user { justify-content: center; padding: var(--space-3) var(--space-2); }
+  }
+  @media (max-width: 700px) { .nav-sidebar { display: none; } }
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+/* SQ-STYLE — trocador de projeto, chips de projeto, escopo de relatorios e CRUD de projetos */
+.sq-switch { position: relative; padding: 0 12px; margin: -4px 0 14px; }
+.sq-switch-btn { width: 100%; display: flex; align-items: center; gap: 8px; padding: 8px 10px; background: var(--surface, #fff); border: 1px solid var(--border); border-radius: 8px; cursor: pointer; font-family: inherit; font-size: 13px; font-weight: 600; color: var(--fg); transition: border-color .15s, box-shadow .15s; }
+.sq-switch-btn:hover { border-color: var(--muted); }
+.sq-switch.open .sq-switch-btn { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+.sq-switch-dot { width: 10px; height: 10px; border-radius: 50%; flex: 0 0 auto; }
+.sq-switch-name { flex: 1; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sq-switch-btn svg { width: 14px; height: 14px; color: var(--muted); transition: transform .15s; flex-shrink: 0; }
+.sq-switch.open .sq-switch-btn svg { transform: rotate(180deg); }
+.sq-menu { position: fixed; display: none; z-index: 300; background: var(--surface, #fff); border: 1px solid var(--border); border-radius: 10px; box-shadow: 0 12px 34px oklch(22% 0.02 240 / .2); padding: 6px; max-width: 280px; }
+.sq-menu.open { display: block; }
+.sq-menu-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); padding: 4px 8px 6px; }
+.sq-menu-item { display: flex; align-items: center; gap: 8px; width: 100%; padding: 7px 8px; border: none; background: none; border-radius: 6px; cursor: pointer; font-family: inherit; font-size: 13px; color: var(--fg); text-align: left; }
+.sq-menu-item:hover { background: var(--bg, oklch(98% 0.005 250)); }
+.sq-menu-dot { width: 9px; height: 9px; border-radius: 50%; flex: 0 0 auto; }
+.sq-menu-name { flex: 1; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sq-menu-sprint { font-size: 11px; color: var(--muted); flex-shrink: 0; font-weight: 500; }
+.sq-menu-check { width: 14px; height: 14px; color: var(--accent); flex-shrink: 0; visibility: hidden; }
+.sq-menu-item.active .sq-menu-check { visibility: visible; }
+.sq-menu-foot { border-top: 1px solid var(--border); margin-top: 6px; padding-top: 6px; }
+.sq-menu-foot .sq-menu-item { color: var(--muted); font-size: 12px; }
+.sq-switch-btn:focus-visible, .sq-menu-item:focus-visible, .sq-proj-activate:focus-visible, .sq-proj-del:focus-visible, .sq-add-btn:focus-visible, .report-scope select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.sq-proj-row input:focus-visible { outline: 2px solid var(--accent); outline-offset: -1px; }
+.sq-projects-check input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.member-projects:empty { display: none; }
+.sq-proj-row input { min-width: 0; }
+.backlog-empty, .gantt-empty { padding: 48px 20px; text-align: center; color: var(--muted); font-size: 13px; }
+.backlog-empty strong, .gantt-empty strong { display: block; margin-bottom: 6px; color: var(--fg); font-size: 14px; font-weight: 700; }
+.backlog-empty span, .gantt-empty span { font-size: 12px; }
+.member-projects { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 10px; }
+.member-project-chip { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 600; color: var(--muted); background: var(--bg, oklch(98% 0.005 250)); border: 1px solid var(--border); border-radius: 999px; padding: 2px 8px; }
+.member-project-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.sq-projects-check { display: flex; flex-wrap: wrap; gap: 6px; }
+.sq-projects-check label { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: var(--muted); background: var(--bg, oklch(98% 0.005 250)); border: 1px solid var(--border); border-radius: 999px; padding: 5px 10px; cursor: pointer; user-select: none; }
+.sq-projects-check label:has(input:checked) { border-color: var(--accent); color: var(--fg); background: var(--accent-soft); }
+.sq-projects-check input { margin: 0; accent-color: var(--accent); }
+.report-scope { display: flex; align-items: center; gap: 8px; }
+.report-scope label { font-size: 12px; font-weight: 600; color: var(--muted); }
+.report-scope select { border: 1px solid var(--border); border-radius: 8px; padding: 7px 10px; font-family: inherit; font-size: 13px; font-weight: 600; color: var(--fg); background: var(--surface, #fff); cursor: pointer; }
+.report-scope select:focus { outline: none; border-color: var(--accent); }
+.portfolio-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.portfolio-table th { text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); padding: 8px 10px; border-bottom: 1px solid var(--border); }
+.portfolio-table td { padding: 9px 10px; border-bottom: 1px solid var(--border); }
+.portfolio-table tr:last-child td { border-bottom: none; }
+.portfolio-name { display: inline-flex; align-items: center; gap: 7px; font-weight: 600; }
+.portfolio-dot { width: 8px; height: 8px; border-radius: 50%; }
+.portfolio-pct { font-weight: 700; color: var(--accent); }
+.project-list { display: flex; flex-direction: column; gap: 8px; }
+.sq-proj-row { display: flex; align-items: center; gap: 8px; background: var(--bg, oklch(98% 0.005 250)); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; }
+.sq-proj-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.sq-proj-row input { border: 1px solid transparent; background: transparent; border-radius: 6px; padding: 6px 8px; font-family: inherit; font-size: 13px; color: var(--fg); min-width: 0; }
+.sq-proj-row input.sq-proj-name { flex: 2; font-weight: 700; }
+.sq-proj-row input.sq-proj-sprint { flex: 1; color: var(--muted); font-weight: 500; }
+.sq-proj-row input:hover { border-color: var(--border); }
+.sq-proj-row input:focus { outline: none; border-color: var(--accent); background: var(--surface, #fff); }
+.sq-proj-badge { flex-shrink: 0; font-size: 11px; font-weight: 700; color: oklch(38% 0.12 145); background: var(--accent-soft); border-radius: 999px; padding: 4px 10px; }
+.sq-proj-activate { flex-shrink: 0; border: 1px solid var(--border); background: var(--surface, #fff); color: var(--fg); font-family: inherit; font-size: 12px; font-weight: 600; border-radius: 999px; padding: 4px 10px; cursor: pointer; }
+.sq-proj-activate:hover { border-color: var(--accent); color: var(--accent); }
+.sq-proj-del { flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border: none; background: none; border-radius: 6px; color: var(--muted); cursor: pointer; }
+.sq-proj-del:hover { background: oklch(60% 0.18 25 / .1); color: var(--danger); }
+.sq-proj-del:disabled { opacity: .35; cursor: not-allowed; }
+.sq-proj-del svg { width: 15px; height: 15px; }
+.sq-add-btn { display: inline-flex; align-items: center; gap: 7px; margin-top: 12px; border: 1px dashed var(--border); background: none; color: var(--fg); font-family: inherit; font-size: 13px; font-weight: 600; border-radius: 8px; padding: 9px 14px; cursor: pointer; width: 100%; justify-content: center; }
+.sq-add-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+.sq-add-btn:disabled { opacity: .45; cursor: not-allowed; }
+.sq-add-btn svg { width: 15px; height: 15px; }
+@media (max-width: 900px) {
+  .sq-switch { padding: 0 6px 10px; margin: -2px 0 10px; }
+  .sq-switch-name { display: none; }
+  .sq-switch-btn { justify-content: center; padding: 8px 6px; }
+  .sq-switch-btn svg { display: none; }
+}
+
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-breadcrumb">Projetos <span style="color:var(--muted);margin:0 2px">/</span> <span>Growth Squad</span></div>
+  <div class="sprint-chip">Sprint 14 — Ativo</div>
+</header>
+
+<div class="layout">
+  <nav class="nav-sidebar">
+    <div class="nav-brand">
+      <a href="home.html" style="text-decoration:none;display:flex;align-items:center;gap:10px">
+        <div class="nav-brand-icon">G</div>
+        <div><div class="nav-brand-text">Growth Squad</div><div class="nav-brand-sub">Sprint 14</div></div>
+      </a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-section-label">Principal</div>
+      <a href="home.html" class="nav-item" data-nav="home"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0-.621.504-1.125 1.125-1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25"/></svg><span>Home</span></a>
+      <a href="quadro-kanban.html" class="nav-item" data-nav="board"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 4.5v15m6-15v15m-10.875 0h15.75c.621 0 1.125-.504 1.125-1.125V5.625c0-.621-.504-1.125-1.125-1.125H4.125C3.504 4.5 3 5.004 3 5.625v12.75c0 .621.504 1.125 1.125 1.125Z"/></svg><span>Quadro</span></a>
+      <a href="backlog.html" class="nav-item" data-nav="backlog"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0ZM3.75 12h.007v.008H3.75V12Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm-.375 5.25h.007v.008H3.75v-.008Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"/></svg><span>Backlog</span><span class="nav-badge">5</span></a>
+      <a href="cronograma.html" class="nav-item active" data-nav="timeline"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5"/></svg><span>Cronograma</span></a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-section-label">Análise</div>
+      <a href="relatorios.html" class="nav-item" data-nav="reports"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z"/></svg><span>Relatórios</span></a>
+      <a href="equipe.html" class="nav-item" data-nav="members"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z"/></svg><span>Equipe</span></a>
+    </div>
+    <div class="nav-spacer"></div>
+    <div class="nav-section">
+      <div class="nav-section-label">Sistema</div>
+      <a href="configuracoes.html" class="nav-item" data-nav="settings"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.325.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.431l-1.003.827c-.293.241-.438.613-.43.992a7.723 7.723 0 0 1 0 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.955.26 1.43l-1.298 2.247a1.125 1.125 0 0 1-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.47 6.47 0 0 1-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.94-1.11.94h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 0 1-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 0 1-1.369-.49l-1.297-2.247a1.125 1.125 0 0 1 .26-1.431l1.004-.827c.292-.24.437-.613.43-.991a6.932 6.932 0 0 1 0-.255c.007-.38-.138-.751-.43-.992l-1.004-.827a1.125 1.125 0 0 1-.26-1.43l1.297-2.247a1.125 1.125 0 0 1 1.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.086.22-.128.332-.183.582-.495.644-.869l.214-1.28Z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/></svg><span>Configurações</span></a>
+    </div>
+    <div class="nav-user">
+      <div class="avatar avatar-a" style="width:28px;height:28px;font-size:11px">A</div>
+      <div class="nav-user-info"><div class="nav-user-name">Ana Souza</div><div class="nav-user-role">Product Lead</div></div>
+    </div>
+  </nav>
+
+  <main class="content">
+    <div class="content-header">
+      <div>
+        <h1 class="content-title">Cronograma</h1>
+        <p class="content-subtitle">Sprint 14 — 18/ago a 30/ago de 2026</p>
+      </div>
+    </div>
+
+    <div class="summary-cards" id="summary-cards"></div>
+
+    <div class="filter-bar">
+      <div class="filter-group" id="member-filter-group">
+        <span class="filter-label">Membro</span>
+        <button class="filter-btn active" data-filter="member" data-value="all">Todos</button>
+      </div>
+      <div class="filter-group">
+        <span class="filter-label">Label</span>
+        <button class="filter-btn active" data-filter="label" data-value="all">Todas</button>
+        <button class="filter-btn" data-filter="label" data-value="growth">Growth</button>
+        <button class="filter-btn" data-filter="label" data-value="infra">Infra</button>
+        <button class="filter-btn" data-filter="label" data-value="design">Design</button>
+        <button class="filter-btn" data-filter="label" data-value="bug">Bug</button>
+        <button class="filter-btn" data-filter="label" data-value="data">Data</button>
+      </div>
+      <div class="view-toggle">
+        <button class="view-toggle-btn active" data-view="week">Semana</button>
+        <button class="view-toggle-btn" data-view="month">Mês</button>
+        <button class="view-toggle-btn" data-view="quarter">Trimestre</button>
+        <button class="view-toggle-btn" data-view="semester">Semestre</button>
+      </div>
+    </div>
+
+    <div class="status-legend">
+      <div class="status-legend-item"><div class="status-legend-dot" style="background:var(--accent)"></div>Growth</div>
+      <div class="status-legend-item"><div class="status-legend-dot" style="background:var(--info)"></div>Infra</div>
+      <div class="status-legend-item"><div class="status-legend-dot" style="background:var(--danger)"></div>Bug</div>
+      <div class="status-legend-item"><div class="status-legend-dot" style="background:oklch(55% 0.14 300)"></div>Design</div>
+      <div class="status-legend-item"><div class="status-legend-dot" style="background:oklch(68% 0.14 80)"></div>Data</div>
+      <div class="status-legend-item"><div class="status-legend-dot" style="background:var(--danger);width:2px;height:14px;border-radius:0"></div>Hoje</div>
+    </div>
+
+    <div class="gantt-wrapper">
+      <div class="gantt-header">
+        <div class="gantt-label-col">
+          <div class="gantt-label-header">Tarefa</div>
+        </div>
+        <div class="gantt-timeline-cols" id="gantt-timeline-header"></div>
+      </div>
+      <div class="gantt-body" id="gantt-body"></div>
+    </div>
+
+    <div class="gantt-tooltip" id="gantt-tooltip"></div>
+  </main>
+</div>
+
+<script>
+/* SQ-STORE — armazenamento de projetos, seeds e trocador de projeto (injetado em todas as paginas) */
+window.SQ = (function () {
+  'use strict';
+  var PKEY = 'sq-projects';
+  var AKEY = 'sq-active-project';
+  var MKEY = 'sq-max-projects';
+  var MAX = 8;
+  var MAX_MIN = 1;
+  var MAX_HARD = 20;
+  var COLORS = {
+    green: 'oklch(58% 0.16 145)',
+    blue: 'oklch(58% 0.15 250)',
+    purple: 'oklch(55% 0.15 300)',
+    orange: 'oklch(65% 0.15 75)',
+    cyan: 'oklch(60% 0.12 200)'
+  };
+  var COLOR_ORDER = ['green', 'blue', 'purple', 'orange', 'cyan'];
+  var DEFAULTS = [
+    { id: 'p1', name: 'Growth Squad', sprint: 'Sprint 14', color: 'green' },
+    { id: 'p2', name: 'App Mobile', sprint: 'Sprint 7', color: 'blue' },
+    { id: 'p3', name: 'Portal do Cliente', sprint: 'Sprint 3', color: 'purple' },
+    { id: 'p4', name: 'Automações', sprint: 'Sprint 12', color: 'orange' },
+    { id: 'p5', name: 'Data Platform', sprint: 'Sprint 9', color: 'cyan' }
+  ];
+
+  var SEEDS = {
+    p2: {
+      'M-01': { title: 'Onboarding com biometria', assignee: 'Ana Souza', tag: 'Design', priority: 'high', status: 'progress', lane: 'Feature',
+        messages: [{ author: 'Ana', avatar: 'a', time: '2h atrás', text: 'Fluxo de Face ID aprovado pelo time de segurança.' }],
+        subtasks: [
+          { text: 'Mapear fluxo de autenticação', assignee: 'ana', status: 'done', startDate: '2026-08-18', endDate: '2026-08-19' },
+          { text: 'Implementar Face ID no iOS', assignee: 'ana', status: 'in-progress', startDate: '2026-08-20', endDate: '2026-08-24' },
+          { text: 'Impressão digital no Android', assignee: 'bruno', status: 'in-progress', startDate: '2026-08-24', endDate: '2026-08-27' },
+          { text: 'Testes de usabilidade', assignee: 'carla', status: 'in-progress', startDate: '2026-08-28', endDate: '2026-08-30' }
+        ] },
+      'M-02': { title: 'Push de carrinho abandonado', assignee: 'Elena Ribeiro', tag: 'Growth', priority: 'med', status: 'todo',
+        messages: [{ author: 'Elena', avatar: 'e', time: '40min atrás', text: 'Jornada pronta, falta revisão de compliance.' }],
+        subtasks: [
+          { text: 'Definir gatilhos de abandono', assignee: 'elena', status: 'done', startDate: '2026-08-18', endDate: '2026-08-19' },
+          { text: 'Criar segmento de audiência', assignee: 'elena', status: 'in-progress', startDate: '2026-08-21', endDate: '2026-08-23' },
+          { text: 'Configurar jornada no Braze', assignee: 'ana', status: 'in-progress', startDate: '2026-08-25', endDate: '2026-08-27' }
+        ] },
+      'M-03': { title: 'Deep links de campanha', assignee: 'Bruno Lima', tag: 'Infra', priority: 'low', status: 'backlog',
+        messages: [{ author: 'Bruno', avatar: 'b', time: '1h atrás', text: 'iOS e Android precisam de regras separadas.' }],
+        subtasks: [
+          { text: 'Padronizar scheme universal', assignee: 'bruno', status: 'done', startDate: '2026-08-20', endDate: '2026-08-22' },
+          { text: 'Configurar AASA e applink', assignee: 'bruno', status: 'in-progress', startDate: '2026-08-24', endDate: '2026-08-26' },
+          { text: 'Validar com marketing', assignee: 'elena', status: 'in-progress', startDate: '2026-08-27', endDate: '2026-08-29' }
+        ] },
+      'M-04': { title: 'Crash reporting no iOS', assignee: 'Carla Mendes', tag: 'Bug', priority: 'high', status: 'review', lane: 'Bug',
+        messages: [{ author: 'Carla', avatar: 'c', time: '3h atrás', text: 'Passamos de 30 crashes/dia para 4.' }],
+        subtasks: [
+          { text: 'Integrar SDK do Crashlytics', assignee: 'carla', status: 'done', startDate: '2026-08-18', endDate: '2026-08-20' },
+          { text: 'Mapear crashes do último mês', assignee: 'carla', status: 'done', startDate: '2026-08-21', endDate: '2026-08-23' },
+          { text: 'Painel de alertas por versão', assignee: 'bruno', status: 'in-progress', startDate: '2026-08-25', endDate: '2026-08-28' }
+        ] },
+      'M-05': { title: 'Dashboard de retenção do app', assignee: 'Diego Alves', tag: 'Data', priority: 'med', status: 'done',
+        messages: [{ author: 'Diego', avatar: 'd', time: '5h atrás', text: 'Publicado no Metabase para todo o time.' }],
+        subtasks: [
+          { text: 'Query de coortes por canal', assignee: 'diego', status: 'done', startDate: '2026-08-18', endDate: '2026-08-21' },
+          { text: 'Visões D1/D7/D30', assignee: 'diego', status: 'done', startDate: '2026-08-22', endDate: '2026-08-25' },
+          { text: 'Alerta de queda de retenção', assignee: 'diego', status: 'done', startDate: '2026-08-26', endDate: '2026-08-28' }
+        ] }
+    },
+    p3: {
+      'C-01': { title: 'SSO com Google Workspace', assignee: 'Bruno Lima', tag: 'Infra', priority: 'high', status: 'progress',
+        messages: [{ author: 'Bruno', avatar: 'b', time: '1h atrás', text: 'Consent screen aprovado, seguindo para mapeamento de grupos.' }],
+        subtasks: [
+          { text: 'Configurar app OAuth2', assignee: 'bruno', status: 'done', startDate: '2026-08-18', endDate: '2026-08-20' },
+          { text: 'Mapear grupos e permissões', assignee: 'bruno', status: 'in-progress', startDate: '2026-08-21', endDate: '2026-08-24' },
+          { text: 'Migrar clientes enterprise', assignee: 'ana', status: 'in-progress', startDate: '2026-08-25', endDate: '2026-08-29' }
+        ] },
+      'C-02': { title: 'Histórico de faturas', assignee: 'Carla Mendes', tag: 'Design', priority: 'med', status: 'todo',
+        messages: [{ author: 'Carla', avatar: 'c', time: '2h atrás', text: 'Incluí download em PDF e XML na listagem.' }],
+        subtasks: [
+          { text: 'Wireframes da listagem', assignee: 'carla', status: 'done', startDate: '2026-08-19', endDate: '2026-08-21' },
+          { text: 'Detalhe de pagamento e nota', assignee: 'carla', status: 'in-progress', startDate: '2026-08-23', endDate: '2026-08-26' },
+          { text: 'Handoff para desenvolvimento', assignee: 'carla', status: 'in-progress', startDate: '2026-08-27', endDate: '2026-08-29' }
+        ] },
+      'C-03': { title: 'Autenticação em dois fatores', assignee: 'Ana Souza', tag: 'Infra', priority: 'high', status: 'progress',
+        messages: [{ author: 'Ana', avatar: 'a', time: '4h atrás', text: 'SMS tem custo por envio — avaliamos TOTP como padrão.' }],
+        subtasks: [
+          { text: 'Envio de código por SMS', assignee: 'ana', status: 'done', startDate: '2026-08-18', endDate: '2026-08-21' },
+          { text: 'Recovery codes', assignee: 'bruno', status: 'in-progress', startDate: '2026-08-23', endDate: '2026-08-26' },
+          { text: 'Forçar 2FA para admins', assignee: 'ana', status: 'in-progress', startDate: '2026-08-27', endDate: '2026-08-30' }
+        ] },
+      'C-04': { title: 'Exportação de relatórios em PDF', assignee: 'Diego Alves', tag: 'Data', priority: 'med', status: 'review',
+        messages: [{ author: 'Diego', avatar: 'd', time: '6h atrás', text: 'Geração média caiu de 12s para 3s.' }],
+        subtasks: [
+          { text: 'Template de relatório', assignee: 'diego', status: 'done', startDate: '2026-08-18', endDate: '2026-08-20' },
+          { text: 'Serviço de renderização', assignee: 'bruno', status: 'done', startDate: '2026-08-21', endDate: '2026-08-24' },
+          { text: 'Limites de geração assíncrona', assignee: 'diego', status: 'in-progress', startDate: '2026-08-26', endDate: '2026-08-28' }
+        ] },
+      'C-05': { title: 'Chat de suporte embarcado', assignee: 'Elena Ribeiro', tag: 'Growth', priority: 'low', status: 'backlog',
+        messages: [{ author: 'Elena', avatar: 'e', time: '1 dia atrás', text: 'Comparando três fornecedores por custo e SLA.' }],
+        subtasks: [
+          { text: 'Avaliar fornecedores', assignee: 'elena', status: 'in-progress', startDate: '2026-08-20', endDate: '2026-08-22' },
+          { text: 'Definir SLA de resposta', assignee: 'elena', status: 'in-progress', startDate: '2026-08-24', endDate: '2026-08-26' },
+          { text: 'Integração com CRM', assignee: 'bruno', status: 'in-progress', startDate: '2026-08-27', endDate: '2026-08-29' }
+        ] }
+    },
+    p4: {
+      'A-01': { title: 'RPA de conciliação bancária', assignee: 'Diego Alves', tag: 'Data', priority: 'high', status: 'progress',
+        messages: [{ author: 'Diego', avatar: 'd', time: '30min atrás', text: '92% das transações já conciliam sozinhas.' }],
+        subtasks: [
+          { text: 'Extratos dos 4 bancos', assignee: 'diego', status: 'done', startDate: '2026-08-18', endDate: '2026-08-20' },
+          { text: 'Regras de conciliação automática', assignee: 'diego', status: 'in-progress', startDate: '2026-08-21', endDate: '2026-08-25' },
+          { text: 'Fila de exceções', assignee: 'bruno', status: 'in-progress', startDate: '2026-08-26', endDate: '2026-08-30' }
+        ] },
+      'A-02': { title: 'Alerta de estoque mínimo', assignee: 'Bruno Lima', tag: 'Infra', priority: 'med', status: 'todo',
+        messages: [{ author: 'Bruno', avatar: 'b', time: '2h atrás', text: 'Webhook do ERP já entrega eventos a cada 15min.' }],
+        subtasks: [
+          { text: 'Webhook do ERP', assignee: 'bruno', status: 'done', startDate: '2026-08-19', endDate: '2026-08-21' },
+          { text: 'Regras por categoria', assignee: 'bruno', status: 'in-progress', startDate: '2026-08-23', endDate: '2026-08-25' },
+          { text: 'Notificação no Slack', assignee: 'ana', status: 'in-progress', startDate: '2026-08-26', endDate: '2026-08-28' }
+        ] },
+      'A-03': { title: 'Onboarding automático de fornecedores', assignee: 'Ana Souza', tag: 'Growth', priority: 'med', status: 'done',
+        messages: [{ author: 'Ana', avatar: 'a', time: '1 dia atrás', text: 'Tempo de cadastro caiu de 5 dias para 4 horas.' }],
+        subtasks: [
+          { text: 'Formulário de cadastro', assignee: 'ana', status: 'done', startDate: '2026-08-18', endDate: '2026-08-20' },
+          { text: 'Validação de CNPJ', assignee: 'bruno', status: 'done', startDate: '2026-08-21', endDate: '2026-08-23' },
+          { text: 'Aprovação em dois níveis', assignee: 'ana', status: 'done', startDate: '2026-08-24', endDate: '2026-08-27' }
+        ] },
+      'A-04': { title: 'Formulário dinâmico de aprovação', assignee: 'Carla Mendes', tag: 'Design', priority: 'low', status: 'backlog',
+        messages: [{ author: 'Carla', avatar: 'c', time: '5h atrás', text: 'Testando regras condicionais com o financeiro.' }],
+        subtasks: [
+          { text: 'Estudo de campos condicionais', assignee: 'carla', status: 'in-progress', startDate: '2026-08-21', endDate: '2026-08-23' },
+          { text: 'Protótipo de fluxo', assignee: 'carla', status: 'in-progress', startDate: '2026-08-25', endDate: '2026-08-27' },
+          { text: 'Testes com o financeiro', assignee: 'ana', status: 'in-progress', startDate: '2026-08-28', endDate: '2026-08-30' }
+        ] },
+      'A-05': { title: 'Webhook de sincronização com CRM', assignee: 'Bruno Lima', tag: 'Infra', priority: 'high', status: 'review',
+        messages: [{ author: 'Bruno', avatar: 'b', time: '4h atrás', text: 'Retries com backoff passaram nos testes de carga.' }],
+        subtasks: [
+          { text: 'Contrato de eventos', assignee: 'bruno', status: 'done', startDate: '2026-08-18', endDate: '2026-08-20' },
+          { text: 'Retries com backoff', assignee: 'bruno', status: 'done', startDate: '2026-08-22', endDate: '2026-08-24' },
+          { text: 'Monitoramento de falhas', assignee: 'diego', status: 'in-progress', startDate: '2026-08-26', endDate: '2026-08-29' }
+        ] }
+    },
+    p5: {
+      'D-01': { title: 'Lakehouse na camada prata', assignee: 'Diego Alves', tag: 'Data', priority: 'high', status: 'progress',
+        messages: [{ author: 'Diego', avatar: 'd', time: '1h atrás', text: 'Modelagem revisada, jobs dbt rodando em staging.' }],
+        subtasks: [
+          { text: 'Modelagem das tabelas', assignee: 'diego', status: 'done', startDate: '2026-08-18', endDate: '2026-08-20' },
+          { text: 'Jobs de transformação dbt', assignee: 'diego', status: 'in-progress', startDate: '2026-08-22', endDate: '2026-08-26' },
+          { text: 'Testes de qualidade', assignee: 'carla', status: 'in-progress', startDate: '2026-08-27', endDate: '2026-08-30' }
+        ] },
+      'D-02': { title: 'Catálogo de dados com linhagem', assignee: 'Carla Mendes', tag: 'Design', priority: 'med', status: 'todo',
+        messages: [{ author: 'Carla', avatar: 'c', time: '3h atrás', text: 'Busca por termos entra na próxima rodada de testes.' }],
+        subtasks: [
+          { text: 'Wireframes do catálogo', assignee: 'carla', status: 'done', startDate: '2026-08-19', endDate: '2026-08-21' },
+          { text: 'Página de detalhe do dataset', assignee: 'carla', status: 'in-progress', startDate: '2026-08-23', endDate: '2026-08-26' },
+          { text: 'Busca por termos', assignee: 'elena', status: 'in-progress', startDate: '2026-08-27', endDate: '2026-08-29' }
+        ] },
+      'D-03': { title: 'Pipeline de streaming com Kafka', assignee: 'Bruno Lima', tag: 'Infra', priority: 'high', status: 'review',
+        messages: [{ author: 'Bruno', avatar: 'b', time: '2h atrás', text: 'Throughput validado com 12k eventos/s.' }],
+        subtasks: [
+          { text: 'Cluster em staging', assignee: 'bruno', status: 'done', startDate: '2026-08-18', endDate: '2026-08-21' },
+          { text: 'Consumidores de eventos', assignee: 'bruno', status: 'done', startDate: '2026-08-22', endDate: '2026-08-25' },
+          { text: 'Replay e DLQ', assignee: 'ana', status: 'in-progress', startDate: '2026-08-26', endDate: '2026-08-29' }
+        ] },
+      'D-04': { title: 'Testes de qualidade de dados', assignee: 'Diego Alves', tag: 'Data', priority: 'med', status: 'done',
+        messages: [{ author: 'Diego', avatar: 'd', time: '1 dia atrás', text: 'Regras rodando a cada ingestão, alertas no Slack.' }],
+        subtasks: [
+          { text: 'Regras de unicidade', assignee: 'diego', status: 'done', startDate: '2026-08-18', endDate: '2026-08-20' },
+          { text: 'Testes de schema', assignee: 'diego', status: 'done', startDate: '2026-08-21', endDate: '2026-08-23' },
+          { text: 'Dashboard de anomalias', assignee: 'diego', status: 'done', startDate: '2026-08-24', endDate: '2026-08-27' }
+        ] },
+      'D-05': { title: 'Dashboard de custos de cloud', assignee: 'Elena Ribeiro', tag: 'Growth', priority: 'low', status: 'backlog',
+        messages: [{ author: 'Elena', avatar: 'e', time: '2 dias atrás', text: 'Rateio por time vai usar a tag de centro de custo.' }],
+        subtasks: [
+          { text: 'Integração com a fatura', assignee: 'elena', status: 'in-progress', startDate: '2026-08-20', endDate: '2026-08-22' },
+          { text: 'Rateio por time', assignee: 'elena', status: 'in-progress', startDate: '2026-08-24', endDate: '2026-08-26' },
+          { text: 'Alerta de estouro', assignee: 'diego', status: 'in-progress', startDate: '2026-08-27', endDate: '2026-08-29' }
+        ] }
+    }
+  };
+
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  function maxProjects() {
+    var v = parseInt(localStorage.getItem(MKEY), 10);
+    if (isNaN(v)) return MAX;
+    if (v < MAX_MIN) v = MAX_MIN;
+    if (v > MAX_HARD) v = MAX_HARD;
+    return v;
+  }
+
+  function setMaxProjects(n) {
+    var v = parseInt(n, 10);
+    if (isNaN(v)) return null;
+    if (v < MAX_MIN) v = MAX_MIN;
+    if (v > MAX_HARD) v = MAX_HARD;
+    try { localStorage.setItem(MKEY, String(v)); } catch (e) {}
+    return v;
+  }
+
+  function list() {
+    try {
+      var v = JSON.parse(localStorage.getItem(PKEY));
+      if (Array.isArray(v) && v.length) return v;
+    } catch (e) {}
+    return DEFAULTS.slice();
+  }
+
+  function saveList(l) {
+    try { localStorage.setItem(PKEY, JSON.stringify(l.slice(0, MAX_HARD))); } catch (e) {}
+  }
+
+  function activeId() {
+    var id = null;
+    try { id = localStorage.getItem(AKEY); } catch (e) {}
+    var l = list();
+    for (var i = 0; i < l.length; i++) if (l[i].id === id) return id;
+    return l[0].id;
+  }
+
+  function active() {
+    var id = activeId(), l = list();
+    for (var i = 0; i < l.length; i++) if (l[i].id === id) return l[i];
+    return l[0];
+  }
+
+  function color(p) {
+    var pr = p || active();
+    return COLORS[pr && pr.color] || COLORS.green;
+  }
+
+  function key(base) { return base + ':' + activeId(); }
+
+  function tasksOf(pid) {
+    try {
+      var raw = localStorage.getItem('backlog-tasks:' + pid);
+      if (raw) {
+        var v = JSON.parse(raw);
+        if (v && typeof v === 'object') return v;
+      }
+    } catch (e) {}
+    if (SEEDS[pid]) {
+      try { return JSON.parse(JSON.stringify(SEEDS[pid])); } catch (e) { return SEEDS[pid]; }
+    }
+    return null;
+  }
+
+  function boardOf(pid) {
+    var t = tasksOf(pid);
+    if (!t) return null;
+    var colMap = { backlog: 'backlog', todo: 'todo', progress: 'in-progress', review: 'in-review', done: 'done' };
+    var pts = { high: 5, med: 3, low: 2 };
+    var cols = { backlog: [], todo: [], 'in-progress': [], 'in-review': [], done: [] };
+    Object.keys(t).forEach(function (id) {
+      var task = t[id];
+      var st = task.subtasks || [];
+      var memberKey = (task.assignee || 'ana').toLowerCase().split(' ')[0];
+      var tagKey = (task.tag || 'Growth').toLowerCase();
+      cols[colMap[task.status] || 'backlog'].push({
+        id: id,
+        member: memberKey,
+        label: tagKey,
+        lane: task.lane || '',
+        description: task.description || '',
+        start: (st[0] && st[0].startDate) || '',
+        end: (st[st.length - 1] && st[st.length - 1].endDate) || '',
+        subtasks: JSON.stringify(st.map(function (s) {
+          return { text: s.text, assignee: s.assignee || memberKey, status: s.status || 'in-progress', startDate: s.startDate || '', endDate: s.endDate || '' };
+        })),
+        title: task.title,
+        points: pts[task.priority] || 3
+      });
+    });
+    return { columns: cols, savedFilters: {} };
+  }
+
+  function ganttOf(pid) {
+    var t = tasksOf(pid);
+    if (!t) return null;
+    return Object.keys(t).map(function (id) {
+      var task = t[id];
+      var st = task.subtasks || [];
+      var memberKey = (task.assignee || 'ana').toLowerCase().split(' ')[0];
+      var min = '', max = '';
+      st.forEach(function (s) {
+        if (s.startDate && (!min || s.startDate < min)) min = s.startDate;
+        if (s.endDate && (!max || s.endDate > max)) max = s.endDate;
+      });
+      if (!min) min = '2026-08-18';
+      if (!max || max < min) max = min;
+      return {
+        id: id,
+        title: task.title,
+        member: memberKey,
+        label: (task.tag || 'Growth').toLowerCase(),
+        startDate: min,
+        endDate: max,
+        subtasks: st.map(function (s) {
+          return { text: s.text, member: s.assignee || memberKey, start: s.startDate || min, end: s.endDate || min, done: s.status === 'done' };
+        })
+      };
+    });
+  }
+
+  function projectsFor(memberKey) {
+    var found = {};
+    list().forEach(function (p) {
+      var hit = false;
+      var t = tasksOf(p.id);
+      if (t) {
+        outer1:
+        for (var k in t) {
+          var task = t[k];
+          if ((task.assignee || '').toLowerCase().split(' ')[0] === memberKey) { hit = true; break; }
+          var subs = task.subtasks || [];
+          for (var i = 0; i < subs.length; i++) {
+            if ((subs[i].assignee || '') === memberKey) { hit = true; break outer1; }
+          }
+        }
+      }
+      if (!hit) {
+        try {
+          var b = JSON.parse(localStorage.getItem('kanban-board-state:' + p.id));
+          if (b && b.columns) {
+            outer2:
+            for (var c in b.columns) {
+              var cards = b.columns[c] || [];
+              for (var j = 0; j < cards.length; j++) {
+                if ((cards[j].member || '') === memberKey) { hit = true; break outer2; }
+              }
+            }
+          }
+        } catch (e) {}
+      }
+      if (hit) found[p.id] = true;
+    });
+    var out = list().filter(function (p) { return found[p.id]; }).map(function (p) { return p.id; });
+    return out.length ? out : ['p1'];
+  }
+
+  function setActive(id) {
+    try { localStorage.setItem(AKEY, id); } catch (e) {}
+    location.reload();
+  }
+
+  function newProject() {
+    var l = list();
+    if (l.length >= maxProjects()) return null;
+    var n = 1;
+    l.forEach(function (p) {
+      var m = /^p(\d+)$/.exec(p.id);
+      if (m && parseInt(m[1], 10) >= n) n = parseInt(m[1], 10) + 1;
+    });
+    var used = {};
+    l.forEach(function (p) { used[p.color] = true; });
+    var col = COLOR_ORDER[l.length % COLOR_ORDER.length];
+    for (var i = 0; i < COLOR_ORDER.length; i++) {
+      if (!used[COLOR_ORDER[i]]) { col = COLOR_ORDER[i]; break; }
+    }
+    var proj = { id: 'p' + n, name: 'Novo Projeto', sprint: 'Sprint 1', color: col };
+    l.push(proj);
+    saveList(l);
+    return proj;
+  }
+
+  function removeProject(pid) {
+    var l = list().filter(function (p) { return p.id !== pid; });
+    if (!l.length) return false;
+    saveList(l);
+    ['backlog-tasks', 'kanban-board-state', 'kanban-filters', 'gantt-tasks'].forEach(function (base) {
+      try { localStorage.removeItem(base + ':' + pid); } catch (e) {}
+    });
+    if (activeId() === pid) { try { localStorage.setItem(AKEY, l[0].id); } catch (e) {} }
+    return true;
+  }
+
+  var LANES_MAX = 12;
+  var LANES_MAX_LEN = 24;
+  var LANES_DEFAULT = { enabled: true, labels: ['Feature', 'Bug'] };
+
+  function normalizeLanes(cfg) {
+    var out = { enabled: true, labels: [] };
+    if (cfg && typeof cfg === 'object' && cfg.enabled === false) out.enabled = false;
+    var src = (cfg && Array.isArray(cfg.labels)) ? cfg.labels : LANES_DEFAULT.labels;
+    var seen = {};
+    for (var i = 0; i < src.length && out.labels.length < LANES_MAX; i++) {
+      var raw = typeof src[i] === 'string' ? src[i].replace(/^\s+|\s+$/g, '') : '';
+      if (!raw || raw.length > LANES_MAX_LEN) continue;
+      var k = raw.toLowerCase();
+      if (seen[k]) continue;
+      seen[k] = true;
+      out.labels.push(raw);
+    }
+    return out;
+  }
+
+  function lanesOf(pid) {
+    var l = list();
+    for (var i = 0; i < l.length; i++) {
+      if (l[i].id === pid) return normalizeLanes(l[i].lanes);
+    }
+    return normalizeLanes(LANES_DEFAULT);
+  }
+
+  function setLanes(pid, cfg) {
+    var l = list();
+    var norm = normalizeLanes(cfg);
+    for (var i = 0; i < l.length; i++) {
+      if (l[i].id === pid) { l[i].lanes = norm; saveList(l); return norm; }
+    }
+    return null;
+  }
+
+  function migrate() {
+    try {
+      if (!localStorage.getItem(PKEY)) localStorage.setItem(PKEY, JSON.stringify(DEFAULTS));
+      if (!localStorage.getItem(AKEY)) localStorage.setItem(AKEY, 'p1');
+      ['kanban-board-state', 'kanban-filters', 'backlog-tasks', 'gantt-tasks'].forEach(function (base) {
+        try {
+          var legacy = localStorage.getItem(base);
+          if (legacy && !localStorage.getItem(base + ':p1')) localStorage.setItem(base + ':p1', legacy);
+        } catch (e) {}
+      });
+      try {
+        var m = JSON.parse(localStorage.getItem('growth-squad-members'));
+        if (Array.isArray(m)) {
+          var changed = false;
+          m.forEach(function (x) {
+            if (!Array.isArray(x.projects)) { x.projects = projectsFor(String(x.name || '').split(' ')[0].toLowerCase()); changed = true; }
+          });
+          if (changed) localStorage.setItem('growth-squad-members', JSON.stringify(m));
+        }
+      } catch (e) {}
+    } catch (e) {}
+  }
+
+  function injectSwitcher() {
+    var brand = document.querySelector('.nav-brand');
+    if (!brand || document.querySelector('.sq-switch')) return;
+    var p = active();
+
+    var bt = document.querySelector('.nav-brand-text');
+    if (bt) bt.textContent = p.name;
+    var bs = document.querySelector('.nav-brand-sub');
+    if (bs) bs.textContent = p.sprint;
+    var bi = document.querySelector('.nav-brand-icon');
+    if (bi) bi.textContent = p.name.charAt(0).toUpperCase();
+    var crumb = document.querySelector('.topbar-breadcrumb span:last-child');
+    if (crumb) crumb.textContent = p.name;
+    var chip = document.querySelector('.sprint-chip');
+    if (chip) chip.textContent = p.sprint + ' - Ativo';
+
+    var wrap = document.createElement('div');
+    wrap.className = 'sq-switch';
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'sq-switch-btn';
+    btn.setAttribute('aria-haspopup', 'true');
+    btn.setAttribute('aria-expanded', 'false');
+    btn.innerHTML = '<span class="sq-switch-dot" style="background:' + color(p) + '"></span>' +
+      '<span class="sq-switch-name">' + esc(p.name) + '</span>' +
+      '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5"/></svg>';
+    wrap.appendChild(btn);
+    brand.insertAdjacentElement('afterend', wrap);
+
+    var menu = document.createElement('div');
+    menu.className = 'sq-menu';
+    menu.innerHTML = '<div class="sq-menu-label">Projetos</div>' +
+      list().map(function (pr) {
+        return '<button type="button" class="sq-menu-item' + (pr.id === p.id ? ' active' : '') + '" data-pid="' + pr.id + '">' +
+          '<span class="sq-menu-dot" style="background:' + color(pr) + '"></span>' +
+          '<span class="sq-menu-name">' + esc(pr.name) + '</span>' +
+          '<span class="sq-menu-sprint">' + esc(pr.sprint) + '</span>' +
+          '<svg class="sq-menu-check" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/></svg>' +
+          '</button>';
+      }).join('') +
+      '<div class="sq-menu-foot"><button type="button" class="sq-menu-item" data-sq-settings="1">' +
+      '<span class="sq-menu-name">Configurações de projetos</span><span class="sq-menu-sprint">›</span></button></div>';
+    document.body.appendChild(menu);
+
+    function place() {
+      var r = btn.getBoundingClientRect();
+      menu.style.top = (r.bottom + 6) + 'px';
+      menu.style.left = Math.max(8, Math.min(r.left, window.innerWidth - 260)) + 'px';
+      menu.style.minWidth = Math.max(r.width, 230) + 'px';
+    }
+    function openMenu() { place(); menu.classList.add('open'); wrap.classList.add('open'); btn.setAttribute('aria-expanded', 'true'); }
+    function closeMenu() { menu.classList.remove('open'); wrap.classList.remove('open'); btn.setAttribute('aria-expanded', 'false'); }
+
+    btn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      if (menu.classList.contains('open')) closeMenu(); else openMenu();
+    });
+    menu.addEventListener('click', function (e) {
+      var item = e.target.closest('.sq-menu-item[data-pid]');
+      if (item) {
+        closeMenu();
+        if (item.getAttribute('data-pid') !== activeId()) setActive(item.getAttribute('data-pid'));
+        return;
+      }
+      if (e.target.closest('[data-sq-settings]')) { closeMenu(); location.href = 'configuracoes.html'; }
+    });
+    document.addEventListener('click', function (e) {
+      if (menu.classList.contains('open') && !menu.contains(e.target) && !wrap.contains(e.target)) closeMenu();
+    });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeMenu(); });
+    window.addEventListener('scroll', function () { if (menu.classList.contains('open')) closeMenu(); }, true);
+    window.addEventListener('resize', closeMenu);
+  }
+
+  migrate();
+  injectSwitcher();
+
+  return {
+    list: list,
+    saveList: saveList,
+    active: active,
+    activeId: activeId,
+    setActive: setActive,
+    color: color,
+    key: key,
+    esc: esc,
+    tasksOf: tasksOf,
+    boardOf: boardOf,
+    ganttOf: ganttOf,
+    projectsFor: projectsFor,
+    newProject: newProject,
+    removeProject: removeProject,
+    lanesOf: lanesOf,
+    setLanes: setLanes,
+    SEEDS: SEEDS,
+    COLORS: COLORS,
+    MAX: MAX,
+    LIMITS: { min: MAX_MIN, max: MAX_HARD, def: MAX },
+    maxProjects: maxProjects,
+    setMaxProjects: setMaxProjects
+  };
+})();
+
+</script>
+<script>
+(function() {
+  const today = new Date();
+  today.setHours(0,0,0,0);
+
+  const sprintStart = new Date(2026, 7, 18);
+  const sprintEnd = new Date(2026, 7, 30);
+
+  let currentView = 'week';
+  let viewStart = new Date(sprintStart);
+  let viewEnd = new Date(sprintEnd);
+  let totalDays = Math.round((viewEnd - viewStart) / 86400000) + 1;
+
+  const viewRanges = {
+    week: { start: new Date(2026, 7, 18), end: new Date(2026, 7, 30) },
+    month: { start: new Date(2026, 7, 1), end: new Date(2026, 8, 0) },
+    quarter: { start: new Date(2026, 7, 1), end: new Date(2026, 9, 31) },
+    semester: { start: new Date(2026, 6, 1), end: new Date(2026, 11, 31) }
+  };
+
+  function setView(view) {
+    currentView = view;
+    const range = viewRanges[view];
+    viewStart = new Date(range.start);
+    viewEnd = new Date(range.end);
+    totalDays = Math.round((viewEnd - viewStart) / 86400000) + 1;
+  }
+
+  const defaultMembers = {
+    ana: { name: 'Ana', initial: 'A', cls: 'avatar-a' },
+    bruno: { name: 'Bruno', initial: 'B', cls: 'avatar-b' },
+    carla: { name: 'Carla', initial: 'C', cls: 'avatar-c' },
+    diego: { name: 'Diego', initial: 'D', cls: 'avatar-d' },
+    elena: { name: 'Elena', initial: 'E', cls: 'avatar-e' }
+  };
+
+  function loadMembers() {
+    try {
+      var saved = JSON.parse(localStorage.getItem('growth-squad-members'));
+      if (Array.isArray(saved) && saved.length > 0) {
+        var result = {};
+        saved.forEach(function(m) {
+          var key = m.name.split(' ')[0].toLowerCase();
+          result[key] = { name: m.name.split(' ')[0], initial: m.name.charAt(0).toUpperCase(), cls: 'avatar-' + m.color };
+        });
+        if (Object.keys(result).length > 0) return result;
+      }
+    } catch(e) {}
+    return defaultMembers;
+  }
+
+  const members = loadMembers();
+
+  // Populate member filter buttons dynamically
+  (function() {
+    var filterGroup = document.getElementById('member-filter-group');
+    if (!filterGroup) return;
+    Object.keys(members).forEach(function(key) {
+      var btn = document.createElement('button');
+      btn.className = 'filter-btn';
+      btn.dataset.filter = 'member';
+      btn.dataset.value = key;
+      btn.textContent = members[key].name;
+      filterGroup.appendChild(btn);
+    });
+  })();
+
+  const tagMap = { growth: 'growth', infra: 'infra', design: 'design', bug: 'bug', data: 'data' };
+
+  const GANTT_P1 = [
+    { id: 'G-01', title: 'Implementar A/B test no onboarding', member: 'ana', label: 'growth', startDate: '2026-08-20', endDate: '2026-08-30', subtasks: [
+      { text: 'Definir hipóteses e métricas de sucesso', member: 'ana', start: '2026-08-20', end: '2026-08-22', done: true },
+      { text: 'Criar variantes no LaunchDarkly', member: 'ana', start: '2026-08-23', end: '2026-08-25', done: false },
+      { text: 'Configurar segmentação de usuários', member: 'bruno', start: '2026-08-26', end: '2026-08-28', done: false },
+      { text: 'Documentar plano de rollout', member: 'ana', start: '2026-08-29', end: '2026-08-30', done: false }
+    ]},
+    { id: 'G-02', title: 'Configurar pipeline de dados do Mixpanel', member: 'bruno', label: 'infra', startDate: '2026-08-18', endDate: '2026-08-28', subtasks: [
+      { text: 'Mapear eventos do funnel de compra', member: 'bruno', start: '2026-08-18', end: '2026-08-20', done: true },
+      { text: 'Configurar identidade de usuário', member: 'bruno', start: '2026-08-21', end: '2026-08-23', done: false },
+      { text: 'Validar eventos em produção', member: 'diego', start: '2026-08-24', end: '2026-08-26', done: false },
+      { text: 'Documentar schema de eventos', member: 'diego', start: '2026-08-27', end: '2026-08-28', done: false }
+    ]},
+    { id: 'G-03', title: 'Redesign da tela de configurações', member: 'carla', label: 'design', startDate: '2026-08-18', endDate: '2026-08-26', subtasks: [
+      { text: 'Criar wireframes das novas telas', member: 'carla', start: '2026-08-18', end: '2026-08-20', done: true },
+      { text: 'Design system: atualizar componentes', member: 'carla', start: '2026-08-20', end: '2026-08-22', done: true },
+      { text: 'Prototipar fluxo de onboarding', member: 'carla', start: '2026-08-23', end: '2026-08-25', done: false },
+      { text: 'Entregar assets para desenvolvimento', member: 'carla', start: '2026-08-25', end: '2026-08-26', done: false }
+    ]},
+    { id: 'G-04', title: 'Dashboard de métricas de retenção', member: 'diego', label: 'data', startDate: '2026-08-19', endDate: '2026-08-28', subtasks: [
+      { text: 'Criar queries de cohort D1/D7/D30', member: 'diego', start: '2026-08-19', end: '2026-08-21', done: true },
+      { text: 'Configurar visualizações no Metabase', member: 'diego', start: '2026-08-22', end: '2026-08-24', done: false },
+      { text: 'Adicionar filtros por segmento', member: 'diego', start: '2026-08-24', end: '2026-08-26', done: false },
+      { text: 'Configurar alerta de queda de retenção', member: 'diego', start: '2026-08-26', end: '2026-08-28', done: false }
+    ]},
+    { id: 'G-05', title: 'Copy para notificação push de engajamento', member: 'elena', label: 'growth', startDate: '2026-08-21', endDate: '2026-08-26', subtasks: [
+      { text: 'Escrever 3 variações de copy', member: 'elena', start: '2026-08-21', end: '2026-08-22', done: true },
+      { text: 'Revisar com time de produto', member: 'elena', start: '2026-08-23', end: '2026-08-24', done: false },
+      { text: 'Configurar teste A/B no Braze', member: 'elena', start: '2026-08-25', end: '2026-08-26', done: false }
+    ]},
+    { id: 'G-06', title: 'Funil de conversão — etapa de convite', member: 'ana', label: 'growth', startDate: '2026-08-18', endDate: '2026-08-26', subtasks: [
+      { text: 'Analisar drop-off na etapa de convite', member: 'ana', start: '2026-08-18', end: '2026-08-19', done: true },
+      { text: 'Corrigir bug no Safari', member: 'bruno', start: '2026-08-19', end: '2026-08-21', done: true },
+      { text: 'Implementar reenvio automático de convite', member: 'bruno', start: '2026-08-21', end: '2026-08-24', done: false },
+      { text: 'Criar dashboard de monitoramento', member: 'ana', start: '2026-08-24', end: '2026-08-26', done: false }
+    ]},
+    { id: 'G-07', title: 'Migração do banco para Postgres 16', member: 'bruno', label: 'infra', startDate: '2026-08-18', endDate: '2026-08-27', subtasks: [
+      { text: 'Migração do schema em staging', member: 'bruno', start: '2026-08-18', end: '2026-08-20', done: true },
+      { text: 'Testes de performance e compatibilidade', member: 'diego', start: '2026-08-20', end: '2026-08-22', done: true },
+      { text: 'Backup completo de produção', member: 'bruno', start: '2026-08-23', end: '2026-08-24', done: false },
+      { text: 'Executar migração em produção', member: 'bruno', start: '2026-08-25', end: '2026-08-26', done: false },
+      { text: 'Validar integridade dos dados', member: 'diego', start: '2026-08-26', end: '2026-08-27', done: false }
+    ]},
+    { id: 'G-08', title: 'Erro 500 ao exportar CSV (10k+ linhas)', member: 'carla', label: 'bug', startDate: '2026-08-18', endDate: '2026-08-23', subtasks: [
+      { text: 'Reproduzir bug em ambiente local', member: 'carla', start: '2026-08-18', end: '2026-08-19', done: true },
+      { text: 'Implementar exportação com streaming', member: 'bruno', start: '2026-08-19', end: '2026-08-21', done: false },
+      { text: 'Testar com 50k+ linhas', member: 'carla', start: '2026-08-21', end: '2026-08-22', done: false },
+      { text: 'Deploy e monitoramento', member: 'bruno', start: '2026-08-22', end: '2026-08-23', done: false }
+    ]},
+    { id: 'G-09', title: 'ETL de eventos do app mobile', member: 'diego', label: 'data', startDate: '2026-08-19', endDate: '2026-08-27', subtasks: [
+      { text: 'Mapear eventos de lifecycle do app', member: 'diego', start: '2026-08-19', end: '2026-08-21', done: true },
+      { text: 'Configurar pipeline de ingestão', member: 'diego', start: '2026-08-21', end: '2026-08-24', done: false },
+      { text: 'Validar qualidade dos dados', member: 'diego', start: '2026-08-24', end: '2026-08-26', done: false },
+      { text: 'Documentar schema no data catalog', member: 'diego', start: '2026-08-26', end: '2026-08-27', done: false }
+    ]},
+    { id: 'G-10', title: 'Landing page Black Friday', member: 'elena', label: 'growth', startDate: '2026-08-25', endDate: '2026-08-29', subtasks: [
+      { text: 'Definir copy e CTA da landing page', member: 'elena', start: '2026-08-25', end: '2026-08-26', done: false },
+      { text: 'Criar protótipo visual no Figma', member: 'elena', start: '2026-08-26', end: '2026-08-28', done: false },
+      { text: 'Implementar página em Next.js', member: 'elena', start: '2026-08-28', end: '2026-08-29', done: false }
+    ]},
+    { id: 'G-11', title: 'Automação de relatório semanal', member: 'ana', label: 'growth', startDate: '2026-08-20', endDate: '2026-08-25', subtasks: [
+      { text: 'Definir métricas do relatório', member: 'ana', start: '2026-08-20', end: '2026-08-21', done: false },
+      { text: 'Criar script de coleta de dados', member: 'ana', start: '2026-08-22', end: '2026-08-23', done: false },
+      { text: 'Configurar envio automático por email', member: 'ana', start: '2026-08-24', end: '2026-08-25', done: false }
+    ]},
+    { id: 'G-12', title: 'Cache Redis para queries lentas', member: 'bruno', label: 'infra', startDate: '2026-08-22', endDate: '2026-08-28', subtasks: [
+      { text: 'Identificar queries com latência > 2s', member: 'bruno', start: '2026-08-22', end: '2026-08-23', done: false },
+      { text: 'Implementar camada de cache Redis', member: 'bruno', start: '2026-08-24', end: '2026-08-26', done: false },
+      { text: 'Testar invalidação de cache', member: 'bruno', start: '2026-08-26', end: '2026-08-28', done: false }
+    ]},
+    { id: 'G-13', title: 'Redesign do dashboard principal', member: 'carla', label: 'design', startDate: '2026-08-23', endDate: '2026-08-29', subtasks: [
+      { text: 'Audit do dashboard atual', member: 'carla', start: '2026-08-23', end: '2026-08-24', done: false },
+      { text: 'Novos wireframes e fluxos', member: 'carla', start: '2026-08-25', end: '2026-08-27', done: false },
+      { text: 'Entrega de assets finais', member: 'carla', start: '2026-08-28', end: '2026-08-29', done: false }
+    ]},
+    { id: 'G-14', title: 'Modelo de previsão de churn', member: 'diego', label: 'data', startDate: '2026-08-25', endDate: '2026-08-30', subtasks: [
+      { text: 'Coleta e limpeza de dados históricos', member: 'diego', start: '2026-08-25', end: '2026-08-27', done: false },
+      { text: 'Treinamento do modelo preditivo', member: 'diego', start: '2026-08-27', end: '2026-08-29', done: false },
+      { text: 'Deploy da API de predição', member: 'diego', start: '2026-08-29', end: '2026-08-30', done: false }
+    ]},
+    { id: 'G-15', title: 'Testes de usabilidade — novo checkout', member: 'elena', label: 'growth', startDate: '2026-08-20', endDate: '2026-08-24', subtasks: [
+      { text: 'Recrutar participantes (5 usuários)', member: 'elena', start: '2026-08-20', end: '2026-08-21', done: false },
+      { text: 'Conduzir sessões de teste', member: 'elena', start: '2026-08-22', end: '2026-08-23', done: false },
+      { text: 'Consolidar achados e recomendações', member: 'elena', start: '2026-08-23', end: '2026-08-24', done: false }
+    ]},
+    { id: 'G-16', title: 'Fix: timeout na geração de relatórios', member: 'ana', label: 'bug', startDate: '2026-08-19', endDate: '2026-08-21', subtasks: [
+      { text: 'Reproduzir o timeout com dataset grande', member: 'ana', start: '2026-08-19', end: '2026-08-19', done: false },
+      { text: 'Otimizar query e indexação', member: 'ana', start: '2026-08-20', end: '2026-08-20', done: false },
+      { text: 'Validar em staging e deploy', member: 'ana', start: '2026-08-21', end: '2026-08-21', done: false }
+    ]}
+  ];
+
+  const allTasks = (function () {
+    const pid = SQ.activeId();
+    if (pid === 'p1') return GANTT_P1;
+    try {
+      const raw = localStorage.getItem('gantt-tasks:' + pid);
+      if (raw) {
+        const v = JSON.parse(raw);
+        if (Array.isArray(v) && v.length) return v;
+      }
+    } catch (e) {}
+    return SQ.ganttOf(pid) || [];
+  })();
+
+  (function updateSprintSubtitle() {
+    const sub = document.querySelector('.content-subtitle');
+    if (sub) sub.textContent = SQ.active().sprint + ' - 18/ago a 30/ago de 2026';
+  })();
+
+  let expandedTasks = new Set();
+  let filterMember = 'all';
+  let filterLabel = 'all';
+
+  function dateToDay(d) {
+    return Math.round((new Date(d) - viewStart) / 86400000);
+  }
+
+  function formatDate(d) {
+    const dt = new Date(d);
+    return dt.getDate() + '/' + (dt.getMonth()+1);
+  }
+
+  function isWeekend(d) {
+    const day = d.getDay();
+    return day === 0 || day === 6;
+  }
+
+  const dayNames = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+
+  function renderSummary() {
+    const total = allTasks.length;
+    const completed = allTasks.filter(t => {
+      if (!t.subtasks.length) return false;
+      return t.subtasks.every(s => s.done);
+    }).length;
+    const inProgress = allTasks.filter(t => {
+      const days = t.subtasks.map(s => dateToDay(s.end));
+      const minDay = Math.min(...days);
+      const maxDay = Math.max(...days);
+      return minDay <= dateToDay(today.toISOString().slice(0,10)) && maxDay >= dateToDay(today.toISOString().slice(0,10));
+    }).length;
+    const overdue = allTasks.filter(t => {
+      return t.subtasks.some(s => !s.done && new Date(s.end) < today);
+    }).length;
+
+    const totalSub = allTasks.reduce((a,t) => a + t.subtasks.length, 0);
+    const doneSub = allTasks.reduce((a,t) => a + t.subtasks.filter(s => s.done).length, 0);
+    const progress = totalSub > 0 ? Math.round((doneSub / totalSub) * 100) : 0;
+
+    document.getElementById('summary-cards').innerHTML = `
+      <div class="summary-card"><div class="summary-card-value">${total}</div><div class="summary-card-label">Tarefas</div></div>
+      <div class="summary-card"><div class="summary-card-value">${inProgress}</div><div class="summary-card-label">Em andamento</div></div>
+      <div class="summary-card"><div class="summary-card-value">${completed}</div><div class="summary-card-label">Concluídas</div></div>
+      <div class="summary-card"><div class="summary-card-value">${overdue}</div><div class="summary-card-label">Atrasadas</div></div>
+      <div class="summary-card"><div class="summary-card-value">${progress}%</div><div class="summary-card-label">Progresso geral</div></div>
+    `;
+  }
+
+  function renderHeader() {
+    if (currentView === 'week') {
+      renderWeekView();
+    } else if (currentView === 'month') {
+      renderMonthView();
+    } else if (currentView === 'quarter') {
+      renderQuarterView();
+    } else if (currentView === 'semester') {
+      renderSemesterView();
+    }
+  }
+
+  function renderWeekView() {
+    let weeksHtml = '';
+    const weeks = Math.ceil(totalDays / 7);
+    for (let w = 0; w < weeks; w++) {
+      const wStart = new Date(viewStart);
+      wStart.setDate(wStart.getDate() + w * 7);
+      const wEnd = new Date(wStart);
+      wEnd.setDate(wEnd.getDate() + 6);
+      if (wEnd > viewEnd) wEnd.setTime(viewEnd.getTime());
+      weeksHtml += `<div class="gantt-week">${formatDate(wStart)} — ${formatDate(wEnd)}</div>`;
+    }
+
+    let daysHtml = '';
+    for (let d = 0; d < totalDays; d++) {
+      const date = new Date(viewStart);
+      date.setDate(date.getDate() + d);
+      const isWE = isWeekend(date);
+      const isToday = date.getTime() === today.getTime();
+      const classes = ['gantt-day'];
+      if (isWE) classes.push('weekend');
+      if (isToday) classes.push('today');
+      daysHtml += `<div class="${classes.join(' ')}"><span class="gantt-day-date">${date.getDate()}</span><span class="gantt-day-name">${dayNames[date.getDay()]}</span></div>`;
+    }
+
+    document.getElementById('gantt-timeline-header').innerHTML = `
+      <div style="flex:1"><div class="gantt-weeks" style="display:flex">${weeksHtml}</div><div class="gantt-days" style="display:flex;position:relative">${daysHtml}${renderTodayLine()}</div></div>
+    `;
+  }
+
+  function renderMonthView() {
+    const monthNames = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+    let monthsHtml = '';
+    const startMonth = viewStart.getMonth();
+    const startYear = viewStart.getFullYear();
+    const endMonth = viewEnd.getMonth();
+    const endYear = viewEnd.getFullYear();
+    let m = startMonth, y = startYear;
+    while (y < endYear || (y === endYear && m <= endMonth)) {
+      monthsHtml += `<div class="gantt-month">${monthNames[m]} ${y}</div>`;
+      m++;
+      if (m > 11) { m = 0; y++; }
+    }
+
+    let weeksHtml = '';
+    const totalWeeks = Math.ceil(totalDays / 7);
+    for (let w = 0; w < totalWeeks; w++) {
+      const wStart = new Date(viewStart);
+      wStart.setDate(wStart.getDate() + w * 7);
+      const wEnd = new Date(wStart);
+      wEnd.setDate(wEnd.getDate() + 6);
+      if (wEnd > viewEnd) wEnd.setTime(viewEnd.getTime());
+      const weekNum = Math.ceil((wStart.getDate()) / 7);
+      weeksHtml += `<div class="gantt-week-col">S${weekNum}<br><span style="font-size:9px;color:var(--muted)">${formatDate(wStart)}-${formatDate(wEnd)}</span></div>`;
+    }
+
+    document.getElementById('gantt-timeline-header').innerHTML = `
+      <div style="flex:1"><div class="gantt-weeks" style="display:flex">${monthsHtml}</div><div class="gantt-days" style="display:flex;position:relative">${weeksHtml}${renderTodayLine()}</div></div>
+    `;
+  }
+
+  function renderQuarterView() {
+    const monthNames = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+    const quarterNames = ['Q1','Q2','Q3','Q4'];
+    const startQ = Math.floor(viewStart.getMonth() / 3);
+    const endQ = Math.floor(viewEnd.getMonth() / 3);
+
+    let quartersHtml = '';
+    for (let q = startQ; q <= endQ; q++) {
+      const qMonths = [];
+      for (let m = q*3; m < q*3+3; m++) qMonths.push(monthNames[m]);
+      quartersHtml += `<div class="gantt-month">${quarterNames[q]} — ${qMonths.join(' / ')}</div>`;
+    }
+
+    let monthsHtml = '';
+    const startMonth = viewStart.getMonth();
+    const startYear = viewStart.getFullYear();
+    const endMonth = viewEnd.getMonth();
+    const endYear = viewEnd.getFullYear();
+    let m = startMonth, y = startYear;
+    while (y < endYear || (y === endYear && m <= endMonth)) {
+      monthsHtml += `<div class="gantt-week-col">${monthNames[m]}<br><span style="font-size:9px;color:var(--muted)">${y}</span></div>`;
+      m++;
+      if (m > 11) { m = 0; y++; }
+    }
+
+    document.getElementById('gantt-timeline-header').innerHTML = `
+      <div style="flex:1"><div class="gantt-weeks" style="display:flex">${quartersHtml}</div><div class="gantt-days" style="display:flex;position:relative">${monthsHtml}${renderTodayLine()}</div></div>
+    `;
+  }
+
+  function renderSemesterView() {
+    const monthNames = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+    const semNames = ['1º Semestre','2º Semestre'];
+    const startSem = viewStart.getMonth() < 6 ? 0 : 1;
+    const endSem = viewEnd.getMonth() < 6 ? 0 : 1;
+
+    let semsHtml = '';
+    for (let s = startSem; s <= endSem; s++) {
+      const semMonths = [];
+      for (let m = s*6; m < s*6+6; m++) semMonths.push(monthNames[m]);
+      semsHtml += `<div class="gantt-month">${semNames[s]} — ${semMonths.join(' / ')}</div>`;
+    }
+
+    let monthsHtml = '';
+    const startMonth = viewStart.getMonth();
+    const startYear = viewStart.getFullYear();
+    const endMonth = viewEnd.getMonth();
+    const endYear = viewEnd.getFullYear();
+    let m = startMonth, y = startYear;
+    while (y < endYear || (y === endYear && m <= endMonth)) {
+      monthsHtml += `<div class="gantt-week-col">${monthNames[m]}<br><span style="font-size:9px;color:var(--muted)">${y}</span></div>`;
+      m++;
+      if (m > 11) { m = 0; y++; }
+    }
+
+    document.getElementById('gantt-timeline-header').innerHTML = `
+      <div style="flex:1"><div class="gantt-weeks" style="display:flex">${semsHtml}</div><div class="gantt-days" style="display:flex;position:relative">${monthsHtml}${renderTodayLine()}</div></div>
+    `;
+  }
+
+  function renderTodayLine() {
+    const dayOffset = dateToDay(today.toISOString().slice(0,10));
+    if (dayOffset < 0 || dayOffset >= totalDays) return '';
+    const pct = ((dayOffset + 0.5) / totalDays) * 100;
+    return `<div class="gantt-today-line" style="left:${pct}%"></div>`;
+  }
+
+  function barPosition(startStr, endStr) {
+    const startDay = Math.max(0, dateToDay(startStr));
+    const endDay = Math.min(totalDays - 1, dateToDay(endStr));
+    if (endDay < startDay) return null;
+    const left = (startDay / totalDays) * 100;
+    const width = ((endDay - startDay + 1) / totalDays) * 100;
+    return { left: left + '%', width: Math.max(width, 0.5) + '%' };
+  }
+
+  function shouldShow(task) {
+    if (filterMember !== 'all' && task.member !== filterMember) return false;
+    if (filterLabel !== 'all' && task.label !== filterLabel) return false;
+    return true;
+  }
+
+  function computeCompletedPct(subtasks) {
+    if (!subtasks.length) return 0;
+    return subtasks.filter(s => s.done).length / subtasks.length;
+  }
+
+  function renderBody() {
+    const body = document.getElementById('gantt-body');
+    let html = '';
+
+    const visible = allTasks.filter(shouldShow);
+
+    for (const task of visible) {
+      const pos = barPosition(task.startDate, task.endDate);
+      const pct = computeCompletedPct(task.subtasks);
+      const isExpanded = expandedTasks.has(task.id);
+      const m = members[task.member];
+      const tagClass = 'tag-' + task.label;
+
+      html += `<div class="gantt-row ${isExpanded ? 'expanded' : ''}" data-task="${task.id}">
+        <div class="gantt-row-label">
+          <button class="gantt-toggle ${isExpanded ? 'expanded' : ''}" data-toggle="${task.id}" title="Expandir/recolher subtarefas">▶</button>
+          <div class="gantt-row-info">
+            <div class="gantt-row-name">${task.id} — ${task.title}</div>
+            <div class="gantt-row-meta">
+              <span class="tag ${tagClass}">${task.label}</span>
+              <div class="avatar ${m.cls}" style="width:18px;height:18px;font-size:9px">${m.initial}</div>
+              <span style="font-size:11px;color:var(--muted)">${formatDate(task.startDate)} → ${formatDate(task.endDate)}</span>
+            </div>
+          </div>
+        </div>
+        <div class="gantt-row-bars" data-task="${task.id}">
+          ${pos ? `<div class="gantt-bar gantt-bar-${task.label}" style="left:${pos.left};width:${pos.width}" data-tooltip="${task.id}">
+            ${task.id}
+            <div class="gantt-progress" style="width:${pct*100}%"></div>
+          </div>` : ''}
+        </div>
+      </div>`;
+
+      if (isExpanded) {
+        for (let i = 0; i < task.subtasks.length; i++) {
+          const st = task.subtasks[i];
+          const stPos = barPosition(st.start, st.end);
+          const stM = members[st.member];
+          html += `<div class="gantt-row" data-task="${task.id}" data-subtask="${i}">
+            <div class="gantt-row-label subtask">
+              <div class="gantt-toggle hidden">▶</div>
+              <div class="gantt-row-info">
+                <div class="gantt-row-name subtask-name" style="${st.done ? 'text-decoration:line-through;opacity:0.5' : ''}">${st.text}</div>
+                <div class="gantt-row-meta">
+                  <div class="avatar ${stM.cls}" style="width:16px;height:16px;font-size:8px">${stM.initial}</div>
+                  <span style="font-size:11px;color:var(--muted)">${st.start ? formatDate(st.start) : ''} → ${st.end ? formatDate(st.end) : ''}</span>
+                </div>
+              </div>
+            </div>
+            <div class="gantt-row-bars">
+              ${stPos ? `<div class="gantt-bar subtask-bar gantt-bar-${task.label} ${st.done ? 'completed' : ''}" style="left:${stPos.left};width:${stPos.width}" data-tooltip-sub="${task.id}-${i}">
+                ${st.done ? '✓' : ''}
+              </div>` : ''}
+            </div>
+          </div>`;
+        }
+      }
+    }
+
+    if (!visible.length) {
+      body.innerHTML = '<div class="gantt-empty"><strong>Nenhuma tarefa no cronograma</strong><span>Adicione tarefas no Backlog ou ajuste os filtros</span></div>';
+      return;
+    }
+    body.innerHTML = html;
+  }
+
+  function render() {
+    renderSummary();
+    renderHeader();
+    renderBody();
+    attachEvents();
+  }
+
+  function attachEvents() {
+    document.querySelectorAll('[data-toggle]').forEach(btn => {
+      btn.addEventListener('click', function() {
+        const taskId = this.getAttribute('data-toggle');
+        if (expandedTasks.has(taskId)) expandedTasks.delete(taskId);
+        else expandedTasks.add(taskId);
+        render();
+      });
+    });
+
+    document.querySelectorAll('[data-filter]').forEach(btn => {
+      btn.addEventListener('click', function() {
+        const type = this.getAttribute('data-filter');
+        const value = this.getAttribute('data-value');
+        if (type === 'member') filterMember = value;
+        else filterLabel = value;
+
+        document.querySelectorAll(`[data-filter="${type}"]`).forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        render();
+      });
+    });
+
+    document.querySelectorAll('.view-toggle-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        const view = this.getAttribute('data-view');
+        setView(view);
+        document.querySelectorAll('.view-toggle-btn').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        render();
+      });
+    });
+
+    const tooltip = document.getElementById('gantt-tooltip');
+    document.querySelectorAll('[data-tooltip]').forEach(bar => {
+      bar.addEventListener('mouseenter', function(e) {
+        const taskId = this.getAttribute('data-tooltip');
+        const task = allTasks.find(t => t.id === taskId);
+        if (!task) return;
+        const m = members[task.member];
+        const pct = Math.round(computeCompletedPct(task.subtasks) * 100);
+        tooltip.innerHTML = `
+          <div class="tt-title">${task.id} — ${task.title}</div>
+          <div class="tt-dates">${formatDate(task.startDate)} → ${formatDate(task.endDate)}</div>
+          <div class="tt-meta">
+            <div class="avatar ${m.cls}" style="width:16px;height:16px;font-size:8px">${m.initial}</div>
+            <span>${m.name}</span>
+            <span style="opacity:0.6">•</span>
+            <span>${pct}% concluído</span>
+          </div>
+        `;
+        tooltip.style.display = 'block';
+      });
+      bar.addEventListener('mousemove', function(e) {
+        tooltip.style.left = (e.clientX + 12) + 'px';
+        tooltip.style.top = (e.clientY - 10) + 'px';
+      });
+      bar.addEventListener('mouseleave', function() {
+        tooltip.style.display = 'none';
+      });
+    });
+  }
+
+  render();
+})();
+</script>
+</body>
+</html>

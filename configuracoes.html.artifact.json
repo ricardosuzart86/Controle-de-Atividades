@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "kind": "html",
+  "title": "configuracoes.html",
+  "entry": "configuracoes.html",
+  "renderer": "html",
+  "status": "complete",
+  "exports": [
+    "html",
+    "pdf",
+    "zip"
+  ],
+  "createdAt": "2026-08-25T18:10:18.104Z",
+  "updatedAt": "2026-08-25T18:10:18.104Z",
+  "metadata": {
+    "inferred": true,
+    "reconciled": true
+  }
+}

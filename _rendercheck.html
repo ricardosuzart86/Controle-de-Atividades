@@ -1,0 +1,3654 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sprint Board — Growth Squad</title>
+<style>
+  :root {
+    /* Backlog-aligned tokens (OKLch) */
+    --bg: oklch(98% 0.005 250);
+    --surface: oklch(100% 0 0);
+    --fg: oklch(22% 0.02 240);
+    --fg-2: oklch(35% 0.018 240);
+    --muted: oklch(50% 0.018 240);
+    --border: oklch(90% 0.008 240);
+    --border-soft: oklch(94% 0.006 250);
+    --accent: oklch(58% 0.16 145);
+    --accent-soft: oklch(94% 0.04 145);
+    --accent-on: oklch(38% 0.12 145);
+    --success: oklch(65% 0.16 145);
+    --danger: oklch(60% 0.18 25);
+    --danger-soft: oklch(94% 0.04 25);
+    --warn: oklch(75% 0.14 80);
+    --warn-soft: oklch(95% 0.04 80);
+    --info: oklch(62% 0.14 250);
+    --info-soft: oklch(94% 0.04 250);
+    --font-display: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', system-ui, sans-serif;
+    --font-body: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', system-ui, sans-serif;
+    --font-mono: 'JetBrains Mono', 'IBM Plex Mono', ui-monospace, Menlo, monospace;
+    --radius-sm: 6px;
+    --radius-md: 8px;
+    --radius-lg: 10px;
+    --radius-pill: 9999px;
+    --motion-fast: 200ms;
+    --ease-standard: cubic-bezier(0.32, 0.72, 0, 1);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: var(--font-body);
+    background: var(--bg);
+    color: var(--fg);
+    font-size: 13px;
+    line-height: 1.5;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── Top Bar ── */
+  .topbar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-shrink: 0;
+    z-index: 10;
+  }
+
+  .topbar-breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  .topbar-breadcrumb span { color: var(--fg); font-weight: 600; }
+
+  .sprint-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: var(--accent-soft);
+    color: oklch(38% 0.12 145);
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 999px;
+    letter-spacing: 0.02em;
+  }
+
+  .sprint-chip::before {
+    content: '';
+    width: 6px; height: 6px;
+    background: var(--accent);
+    border-radius: 50%;
+  }
+
+  .topbar-filters {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: auto;
+  }
+
+  .filter-group {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .filter-label {
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 500;
+  }
+
+  .filter-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 4px 10px;
+    font-size: 12px;
+    color: var(--fg);
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: var(--font-body);
+    text-align: center;
+    white-space: nowrap;
+  }
+  /* Fallback color — low specificity so .avatar-a..g wins */
+  .filter-avatar { background: var(--muted); }
+
+  .filter-btn .filter-avatar {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 1;
+    color: #fff;
+    box-shadow: 0 0 0 2px var(--surface);
+    flex-shrink: 0;
+  }
+
+  .filter-btn-text {
+    line-height: 1;
+  }
+
+  .filter-count {
+    min-width: 17px;
+    height: 15px;
+    padding: 0 4px;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--fg);
+    background: var(--accent-soft);
+    border: 1px solid var(--accent);
+    flex-shrink: 0;
+  }
+
+  .filter-count.zero {
+    color: var(--muted);
+    background: var(--bg);
+    border-color: var(--border);
+  }
+
+  .filter-btn:hover {
+    border-color: var(--muted);
+    background: var(--bg);
+  }
+
+  .filter-btn.active {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+    color: oklch(38% 0.12 145);
+  }
+
+  .search-box {
+    position: relative;
+  }
+
+  .search-box input {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 5px 10px 5px 30px;
+    font-size: 12px;
+    font-family: var(--font-body);
+    color: var(--fg);
+    width: 180px;
+    transition: border-color 0.15s, width 0.2s;
+  }
+
+  .search-box input:focus {
+    outline: none;
+    border-color: var(--accent);
+    width: 240px;
+  }
+
+  .search-box input::placeholder { color: var(--muted); }
+
+  .search-box svg {
+    position: absolute;
+    left: 9px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--muted);
+    width: 14px;
+    height: 14px;
+  }
+
+  /* ── Layout ── */
+  .layout {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+  }
+
+  /* ── Nav Sidebar ── */
+  .nav-sidebar {
+    width: 220px;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    padding: 16px 0;
+    overflow-y: auto;
+  }
+
+  .nav-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0 16px 20px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 12px;
+  }
+
+  .nav-brand-icon {
+    width: 32px;
+    height: 32px;
+    background: linear-gradient(135deg, var(--accent), oklch(65% 0.16 160));
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 700;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+
+  .nav-brand-text {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--fg);
+    line-height: 1.2;
+  }
+
+  .nav-brand-sub {
+    font-size: 11px;
+    color: var(--muted);
+    font-weight: 400;
+  }
+
+  .nav-section {
+    padding: 0 12px;
+    margin-bottom: 8px;
+  }
+
+  .nav-section-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    padding: 8px 8px 6px;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--fg-2);
+    cursor: pointer;
+    transition: all 0.15s;
+    text-decoration: none;
+    position: relative;
+  }
+
+  .nav-item:hover {
+    background: var(--bg);
+    color: var(--fg);
+  }
+
+  .nav-item.active {
+    background: var(--accent-soft);
+    color: oklch(38% 0.12 145);
+    font-weight: 600;
+  }
+
+  .nav-item.active::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 6px;
+    bottom: 6px;
+    width: 3px;
+    background: var(--accent);
+    border-radius: 0 2px 2px 0;
+  }
+
+  .nav-item svg {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    opacity: 0.7;
+  }
+
+  .nav-item.active svg {
+    opacity: 1;
+  }
+
+  .nav-badge {
+    margin-left: auto;
+    background: var(--danger);
+    color: white;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 1px 6px;
+    border-radius: 999px;
+    font-family: var(--font-mono);
+  }
+
+  .nav-spacer {
+    flex: 1;
+  }
+
+  .nav-user {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    border-top: 1px solid var(--border);
+    margin-top: 8px;
+  }
+
+  .nav-user-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .nav-user-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--fg);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .nav-user-role {
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  /* ── Board ── */
+  .board {
+    flex: 1;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 12px;
+    padding: 16px;
+    overflow-x: auto;
+    align-items: start;
+  }
+
+  .column {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    min-height: 200px;
+    box-shadow: 0 1px 3px oklch(0% 0 0 / 0.04);
+  }
+
+  .column-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 12px 8px;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    background: var(--surface);
+    border-radius: 10px 10px 0 0;
+    z-index: 1;
+  }
+
+  .column-title-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .column-title {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--fg);
+    letter-spacing: 0.04em;
+  }
+
+  .column-wip {
+    margin-left: 8px;
+    background: var(--bg);
+    border: 1px solid oklch(88% 0.04 25);
+    border-radius: 999px;
+    font-size: 10px;
+    font-weight: 600;
+    color: oklch(80% 0.04 25);
+    padding: 1px 6px;
+    font-family: var(--font-mono);
+    flex-shrink: 0;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .column-wip.visible { opacity: 1; }
+  .column-wip.small { font-size: 9px; padding: 0 4px; }
+
+  .column-count {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--muted);
+    padding: 1px 7px;
+    font-family: var(--font-mono);
+    flex-shrink: 0;
+  }
+
+  .column-add {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px dashed var(--border);
+    border-radius: 6px;
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 14px;
+    font-family: var(--font-body);
+  }
+
+  .column-add:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-soft);
+    transform: scale(1.05);
+  }
+
+  .column-body {
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex: 1;
+    min-height: 80px;
+  }
+
+  .column-body.drag-over {
+    background: oklch(96% 0.02 145);
+    border-radius: 0 0 9px 9px;
+    outline: 2px dashed oklch(58% 0.16 145 / 0.3);
+    outline-offset: -2px;
+  }
+
+  /* ── Swimlane ── */
+  .swimlane {
+    border-top: 1px solid var(--border);
+    padding: 6px 12px 4px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .swimlane-dot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: var(--muted);
+  }
+
+  /* ── Card ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 12px;
+    cursor: grab;
+    transition: box-shadow 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
+    position: relative;
+  }
+
+  .card:hover {
+    border-color: oklch(82% 0.01 240);
+    box-shadow: 0 4px 12px oklch(0% 0 0 / 0.07), 0 1px 3px oklch(0% 0 0 / 0.04);
+  }
+
+  .card:active {
+    cursor: grabbing;
+    transform: scale(1.02);
+    box-shadow: 0 8px 24px oklch(0% 0 0 / 0.12), 0 2px 6px oklch(0% 0 0 / 0.06);
+    z-index: 10;
+  }
+
+  .card.dragging {
+    opacity: 0.4;
+    transform: rotate(1.5deg) scale(0.98);
+    box-shadow: none;
+  }
+
+  .card-tag {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    padding: 2px 7px;
+    border-radius: 4px;
+    margin-bottom: 6px;
+  }
+
+  .card-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 4px;
+    margin-bottom: 6px;
+  }
+  
+  .card-status.done {
+    background: oklch(92% 0.06 145);
+    color: oklch(35% 0.14 145);
+  }
+  .card-status.review {
+    background: oklch(92% 0.06 250);
+    color: oklch(38% 0.14 250);
+  }
+  .card-status.progress {
+    background: oklch(92% 0.06 80);
+    color: oklch(45% 0.14 80);
+  }
+  .card-status.backlog {
+    background: var(--bg);
+    color: var(--muted);
+    border: 1px solid var(--border);
+  }
+  .card-status.todo {
+    background: var(--bg);
+    color: var(--muted);
+    border: 1px solid var(--border);
+  }
+  .card-status svg { width: 11px; height: 11px; }
+
+  .card.done {
+    border-left: 3px solid var(--accent);
+  }
+  .card.done .card-title {
+    color: var(--muted);
+  }
+
+  .tag-growth { background: var(--accent-soft); color: oklch(38% 0.12 145); }
+  .tag-infra { background: var(--info-soft); color: oklch(40% 0.12 250); }
+  .tag-bug { background: var(--danger-soft); color: oklch(48% 0.14 25); }
+  .tag-design { background: oklch(94% 0.04 300); color: oklch(42% 0.12 300); }
+  .tag-data { background: var(--warn-soft); color: oklch(50% 0.12 80); }
+
+  .card-title {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--fg);
+    margin-bottom: 8px;
+    line-height: 1.45;
+    letter-spacing: -0.01em;
+  }
+
+  .card-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .card-assignee {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .avatar {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: 700;
+    color: white;
+    background: var(--muted);
+    flex-shrink: 0;
+  }
+
+  .avatar-lg { width: 28px; height: 28px; font-size: 11px; }
+
+  .avatar-a { background: oklch(55% 0.14 250); }
+  .avatar-b { background: oklch(55% 0.16 145); }
+  .avatar-c { background: oklch(55% 0.15 30); }
+  .avatar-d { background: oklch(55% 0.12 300); }
+  .avatar-e { background: oklch(55% 0.14 80); }
+  .avatar-f { background: oklch(55% 0.18 200); }
+  .avatar-g { background: oklch(55% 0.14 330); }
+
+  .card-assignee-name {
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  .card-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .card-points {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--muted);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1px 6px;
+  }
+
+  .card-subtasks {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: var(--muted);
+    margin-bottom: 6px;
+    font-family: var(--font-mono);
+    flex-wrap: wrap;
+  }
+  .card-subtasks svg {
+    color: var(--accent);
+    flex-shrink: 0;
+  }
+  .card-subtasks .st-count {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 1px 5px;
+    border-radius: 999px;
+    line-height: 1.3;
+  }
+  .card-subtasks .st-count.st-done { background: oklch(94% 0.04 145); color: oklch(40% 0.12 145); }
+  .card-subtasks .st-count.st-progress { background: oklch(94% 0.04 250); color: oklch(40% 0.12 250); }
+  .card-subtasks .st-count.st-cancelled { background: oklch(94% 0.04 25); color: oklch(50% 0.16 25); }
+  .card-subtasks .st-count.st-pending { background: oklch(96% 0.01 240); color: oklch(55% 0.01 240); }
+
+  .card-st-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    padding: 1px 5px;
+    border-radius: 999px;
+    font-size: 10px;
+    font-weight: 600;
+    font-family: var(--font-mono);
+    background: var(--bg);
+    color: var(--muted);
+    border: 1px solid var(--border);
+    margin-left: 4px;
+    vertical-align: middle;
+    line-height: 1.4;
+  }
+  .card-st-badge .stb-done { color: oklch(45% 0.14 145); }
+
+  .card-dates {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 10.5px;
+    color: var(--muted);
+    margin-bottom: 6px;
+    font-family: var(--font-mono);
+  }
+  .card-dates svg {
+    color: var(--info);
+    flex-shrink: 0;
+  }
+  .card-dates .date-sep {
+    color: var(--border);
+  }
+
+  .card-progress {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .progress-bar {
+    width: 40px;
+    height: 4px;
+    background: var(--bg);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 0.3s;
+  }
+
+  .progress-fill.green { background: var(--accent); }
+  .progress-fill.yellow { background: var(--warn); }
+  .progress-fill.red { background: var(--danger); }
+
+  .progress-text {
+    font-size: 10px;
+    font-family: var(--font-mono);
+    color: var(--muted);
+    font-weight: 500;
+  }
+
+  /* ── Sidebar ── */
+  .sidebar {
+    width: 260px;
+    background: var(--surface);
+    border-left: 1px solid var(--border);
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    overflow-y: auto;
+    flex-shrink: 0;
+  }
+
+  .sidebar-section h3 {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .sidebar-section h3 svg {
+    width: 14px;
+    height: 14px;
+    color: var(--muted);
+  }
+
+  .sprint-pulse-bar {
+    width: 100%;
+    height: 8px;
+    background: var(--bg);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 8px;
+  }
+
+  .sprint-pulse-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), oklch(65% 0.16 160));
+    border-radius: 4px;
+    transition: width 0.5s;
+  }
+
+  .sprint-pulse-stats {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .sprint-pulse-stats strong {
+    color: var(--fg);
+    font-weight: 600;
+  }
+
+  .top-assignees {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .assignee-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .assignee-info {
+    flex: 1;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .assignee-name {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--fg);
+  }
+
+  .assignee-count {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--muted);
+    font-weight: 500;
+  }
+
+  .blocked-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .blocked-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 8px;
+    background: var(--danger-soft);
+    border-radius: 6px;
+    border: 1px solid oklch(88% 0.04 25);
+    position: relative;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .blocked-item:hover {
+    background: oklch(92% 0.04 25);
+    border-color: var(--danger);
+  }
+  .blocked-item-actions {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    display: flex;
+    gap: 2px;
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+  .blocked-item:hover .blocked-item-actions { opacity: 1; }
+  .blocked-action-btn {
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+    border: none;
+    background: var(--surface);
+    color: var(--muted);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+  }
+  .blocked-action-btn:hover { color: var(--fg); background: var(--bg); }
+  .blocked-action-btn.delete:hover { color: var(--danger); }
+  .blocked-action-btn svg { width: 11px; height: 11px; }
+
+  .blocked-add {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    padding: 6px 10px;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--danger);
+    background: transparent;
+    border: 1px dashed oklch(80% 0.05 25);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.15s;
+    width: 100%;
+    font-family: var(--font-body);
+  }
+  .blocked-add:hover {
+    background: var(--danger-soft);
+    border-color: var(--danger);
+  }
+  .blocked-add svg { width: 12px; height: 12px; }
+
+  .blocked-task-link {
+    display: inline-block;
+    margin-top: 4px;
+    font-size: 10px;
+    color: var(--danger);
+    background: var(--surface);
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-family: var(--font-mono);
+    font-weight: 600;
+  }
+
+  .blocked-icon {
+    width: 16px;
+    height: 16px;
+    color: var(--danger);
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .blocked-text {
+    font-size: 12px;
+    color: oklch(35% 0.1 25);
+    line-height: 1.4;
+  }
+
+  .blocked-text strong {
+    font-weight: 600;
+    display: block;
+    margin-bottom: 2px;
+  }
+
+  /* ── Attention items ── */
+  .attention-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .attention-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 8px;
+    background: var(--warn-soft);
+    border-radius: 6px;
+    border: 1px solid oklch(88% 0.08 80);
+    position: relative;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .attention-item:hover {
+    background: oklch(92% 0.08 80);
+    border-color: var(--warn);
+  }
+  .attention-item-actions {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    display: flex;
+    gap: 2px;
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+  .attention-item:hover .attention-item-actions { opacity: 1; }
+  .attention-action-btn {
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+    border: none;
+    background: var(--surface);
+    color: var(--muted);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+  }
+  .attention-action-btn:hover { color: var(--fg); background: var(--bg); }
+  .attention-action-btn.delete:hover { color: var(--danger); }
+  .attention-action-btn svg { width: 11px; height: 11px; }
+
+  .attention-add {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    padding: 6px 10px;
+    font-size: 11px;
+    font-weight: 500;
+    color: oklch(55% 0.14 80);
+    background: transparent;
+    border: 1px dashed oklch(80% 0.08 80);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.15s;
+    width: 100%;
+    font-family: var(--font-body);
+  }
+  .attention-add:hover {
+    background: var(--warn-soft);
+    border-color: var(--warn);
+  }
+  .attention-add svg { width: 12px; height: 12px; }
+
+  .attention-task-link {
+    display: inline-block;
+    margin-top: 4px;
+    font-size: 10px;
+    color: oklch(50% 0.14 80);
+    background: var(--surface);
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-family: var(--font-mono);
+    font-weight: 600;
+  }
+
+  .attention-icon {
+    width: 16px;
+    height: 16px;
+    color: var(--warn);
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .attention-text {
+    font-size: 12px;
+    color: oklch(35% 0.1 80);
+    line-height: 1.4;
+  }
+
+  .attention-text strong {
+    font-weight: 600;
+    display: block;
+    margin-bottom: 2px;
+  }
+
+  .attention-header {
+    color: oklch(50% 0.14 80) !important;
+  }
+  .attention-header svg {
+    color: var(--warn) !important;
+    width: 14px;
+    height: 14px;
+  }
+
+  .blocked-header {
+    color: var(--danger) !important;
+  }
+  .blocked-header svg {
+    color: var(--danger) !important;
+  }
+
+  /* ── Drag ghost ── */
+  .drag-ghost {
+    position: fixed;
+    pointer-events: none;
+    z-index: 1000;
+    opacity: 0.9;
+  }
+
+  /* ── Editable elements ── */
+  [contenteditable="true"] {
+    outline: none;
+    border-radius: 3px;
+    transition: background 0.15s, box-shadow 0.15s;
+    cursor: text;
+  }
+  [contenteditable="true"]:hover {
+    background: oklch(94% 0.01 240);
+  }
+  [contenteditable="true"]:focus {
+    background: oklch(92% 0.02 145);
+    box-shadow: 0 0 0 2px oklch(58% 0.16 145 / 0.25);
+  }
+
+  /* ── Scrollbar ── */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+
+  /* ── Notification ── */
+  .od-notification {
+    position: fixed;
+    top: 24px;
+    right: 24px;
+    background: var(--accent);
+    color: var(--accent-on);
+    padding: 12px 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    z-index: 2000;
+    min-width: 280px;
+    font-family: var(--font-body);
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease;
+  }
+  .od-notification.show {
+    opacity: 1;
+    visibility: visible;
+  }
+  .od-notification.warning { background: var(--warn); color: var(--warn-on); }
+  .od-notification.error { background: var(--danger); color: var(--danger-on); }
+
+  @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+  @keyframes slideOut { from { transform: translateX(0); opacity: 1; } to { transform: translateX(120%); opacity: 0; } }
+
+  /* ── Modal Overlay ── */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(100, 100, 110, 0.15);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s, visibility 0.2s;
+  }
+  .modal-overlay.active {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  /* ── Modal Card ── */
+  .modal-card {
+    background: var(--surface);
+    border-radius: 12px;
+    width: 960px;
+    max-width: 95vw;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+    transform: translateY(20px) scale(0.95);
+    transition: transform 0.25s cubic-bezier(0.32, 0.72, 0, 1);
+  }
+  .modal-overlay.active .modal-card {
+    transform: translateY(0) scale(1);
+  }
+
+  .modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .modal-header h3 {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--fg);
+  }
+  .modal-close {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    border: none;
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+  }
+  .modal-close:hover {
+    background: var(--bg);
+    color: var(--fg);
+  }
+  .modal-close svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .modal-body {
+    padding: 20px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .modal-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .modal-field-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .modal-input {
+    padding: 10px 12px;
+    font-size: 14px;
+    font-family: var(--font-body);
+    color: var(--fg);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .modal-input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px oklch(58% 0.16 145 / 0.15);
+  }
+  .modal-input::placeholder {
+    color: var(--muted);
+  }
+
+  textarea.modal-input {
+    min-height: 80px;
+    resize: vertical;
+    line-height: 1.5;
+  }
+
+  .modal-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  #blocked-modal .modal-body {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  #blocked-modal .modal-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  #blocked-modal .modal-field:first-child,
+  #blocked-modal .modal-field:nth-child(2) {
+    width: 100%;
+  }
+  #blocked-modal textarea {
+    resize: vertical;
+    min-height: 80px;
+  }
+
+  .modal-select {
+    padding: 10px 12px;
+    font-size: 14px;
+    font-family: var(--font-body);
+    color: var(--fg);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    outline: none;
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='%236b7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='m19.5 8.25-7.5 7.5-7.5-7.5'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 32px;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .modal-select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px oklch(58% 0.16 145 / 0.15);
+  }
+
+  .modal-tags {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .modal-tag-btn {
+    padding: 6px 14px;
+    font-size: 12px;
+    font-weight: 600;
+    border-radius: 999px;
+    border: 2px solid transparent;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: var(--font-body);
+  }
+  .modal-tag-btn.tag-growth { background: oklch(94% 0.04 145); color: oklch(38% 0.12 145); }
+  .modal-tag-btn.tag-growth.selected { border-color: var(--accent); }
+  .modal-tag-btn.tag-infra { background: oklch(94% 0.04 250); color: oklch(38% 0.12 250); }
+  .modal-tag-btn.tag-infra.selected { border-color: var(--info); }
+  .modal-tag-btn.tag-design { background: oklch(94% 0.04 300); color: oklch(38% 0.12 300); }
+  .modal-tag-btn.tag-design.selected { border-color: oklch(58% 0.16 300); }
+  .modal-tag-btn.tag-bug { background: oklch(94% 0.04 25); color: oklch(38% 0.12 25); }
+  .modal-tag-btn.tag-bug.selected { border-color: var(--danger); }
+  .modal-tag-btn.tag-data { background: oklch(94% 0.04 80); color: oklch(38% 0.12 80); }
+  .modal-tag-btn.tag-data.selected { border-color: var(--warn); }
+
+  .modal-subtask-list { display: flex; flex-direction: column; gap: 6px; max-height: 180px; overflow-y: auto; }
+  .modal-subtask-item { display: flex; gap: 6px; align-items: center; padding: 6px 8px; background: var(--bg); border-radius: 5px; border: 1px solid var(--border); font-size: 12px; }
+  .modal-subtask-checkbox { width: 16px; height: 16px; cursor: pointer; accent-color: var(--accent); flex-shrink: 0; }
+  .modal-subtask-input { flex: 1; padding: 5px 8px; font-size: 12px; font-family: var(--font-body); color: var(--fg); background: var(--surface); border: 1px solid var(--border); border-radius: 4px; outline: none; }
+  .modal-subtask-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px oklch(58% 0.16 145 / 0.12); }
+  .modal-subtask-select { padding: 5px 8px; font-size: 12px; font-family: var(--font-body); color: var(--fg); background: var(--surface); border: 1px solid var(--border); border-radius: 4px; outline: none; }
+  .modal-subtask-remove { width: 22px; height: 22px; border-radius: 4px; border: none; background: transparent; color: var(--muted); cursor: pointer; display: flex; align-items: center; justify-content: center; }
+  .modal-subtask-remove:hover { background: var(--danger-soft); color: var(--danger); }
+  .modal-subtask-remove svg { width: 12px; height: 12px; }
+  .subtask-completed { text-decoration: line-through; opacity: 0.5; }
+
+  .subtask-status-badge { display: inline-flex; align-items: center; gap: 3px; padding: 2px 7px; border-radius: 999px; font-size: 10px; font-weight: 600; letter-spacing: 0.02em; white-space: nowrap; flex-shrink: 0; }
+  .subtask-status-badge.badge-done { background: oklch(94% 0.04 145); color: oklch(38% 0.12 145); }
+  .subtask-status-badge.badge-in-progress { background: oklch(94% 0.04 250); color: oklch(38% 0.12 250); }
+  .subtask-status-badge.badge-cancelled { background: oklch(94% 0.04 25); color: oklch(50% 0.16 25); }
+
+  .modal-subtask-status { padding: 5px 8px; font-size: 12px; font-family: var(--font-body); color: var(--fg); background: var(--surface); border: 1px solid var(--border); border-radius: 4px; outline: none; }
+  .modal-subtask-status:focus { border-color: var(--accent); box-shadow: 0 0 0 3px oklch(58% 0.16 145 / 0.12); }
+
+  .add-subtask-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: 6px;
+    padding: 4px 10px;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--muted);
+    background: transparent;
+    border: 1px dashed var(--border);
+    border-radius: 5px;
+    cursor: pointer;
+    font-family: var(--font-body);
+    transition: all 0.15s;
+    width: fit-content;
+  }
+  .add-subtask-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-soft);
+  }
+  .add-subtask-btn svg { width: 12px; height: 12px; }
+  
+  .subtask-text,
+  .subtask-assignee,
+  .subtask-dates {
+    display: inline-block;
+    padding: 4px 8px;
+    font-size: 13px;
+    font-family: var(--font-body);
+    color: var(--fg);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    margin-right: 8px;
+  }
+  
+  .modal-subtask-edit,
+  .modal-subtask-remove {
+    width: 28px;
+    height: 28px;
+    border-radius: 4px;
+    border: none;
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+    margin-left: 4px;
+  }
+  
+  .modal-subtask-edit:hover,
+  .modal-subtask-remove:hover {
+    background: var(--border);
+    color: var(--fg);
+  }
+  
+  .modal-subtask-edit:not(:hover),
+  .modal-subtask-remove:not(:hover) {
+    background: transparent;
+    color: var(--muted);
+  }
+  .modal-subtask-edit svg { width: 14px; height: 14px; }
+  .modal-subtask-edit:hover { background: var(--accent-soft); color: var(--accent); }
+
+  .modal-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 24px 20px;
+    border-top: 1px solid var(--border);
+  }
+  .modal-btn-delete {
+    padding: 8px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    border-radius: 8px;
+    border: 1px solid var(--danger);
+    background: transparent;
+    color: var(--danger);
+    cursor: pointer;
+    font-family: var(--font-body);
+    transition: all 0.15s;
+  }
+  .modal-btn-delete:hover {
+    background: var(--danger);
+    color: white;
+  }
+
+  .modal-actions {
+    display: flex;
+    gap: 10px;
+  }
+  .modal-btn-cancel {
+    padding: 8px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--fg-2);
+    cursor: pointer;
+    font-family: var(--font-body);
+    transition: all 0.15s;
+  }
+  .modal-btn-cancel:hover {
+    background: var(--bg);
+    color: var(--fg);
+  }
+  .modal-btn-save {
+    padding: 8px 20px;
+    font-size: 13px;
+    font-weight: 600;
+    border-radius: 8px;
+    border: none;
+    background: var(--accent);
+    color: white;
+    cursor: pointer;
+    font-family: var(--font-body);
+    transition: all 0.15s;
+  }
+  .modal-btn-save:hover {
+    filter: brightness(1.1);
+    box-shadow: 0 4px 12px oklch(58% 0.16 145 / 0.3);
+  }
+
+  /* ── Empty state ── */
+  .empty-col-hint {
+    text-align: center;
+    padding: 24px 16px;
+    color: var(--muted);
+    font-size: 12px;
+    border: 2px dashed var(--border-soft);
+    border-radius: var(--radius-md);
+    margin: 4px;
+    transition: all var(--motion-fast) var(--ease-standard);
+  }
+  .empty-col-hint:hover {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+    color: var(--accent);
+  }
+  .empty-col-hint svg {
+    width: 32px;
+    height: 32px;
+    margin-bottom: 8px;
+    opacity: 0.5;
+  }
+  .empty-col-hint p {
+    margin: 0;
+    line-height: 1.5;
+  }
+
+  /* ── Drop indicator ── */
+  .drop-indicator {
+    height: 4px;
+    background: var(--accent);
+    border-radius: 2px;
+    margin: 4px 0;
+    opacity: 0;
+    transition: opacity var(--motion-fast);
+  }
+  .drop-indicator.visible {
+    opacity: 1;
+    animation: pulse-drop 1s ease-in-out infinite;
+  }
+  @keyframes pulse-drop {
+    0%, 100% { transform: scaleX(0.95); }
+    50% { transform: scaleX(1.05); }
+  }
+
+  /* ── Toast notifications ── */
+  .toast-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .toast {
+    padding: 12px 20px;
+    border-radius: var(--radius-md);
+    background: var(--surface);
+    box-shadow: 0 4px 12px oklch(0% 0 0 / 0.1);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    animation: slideIn var(--motion-fast) var(--ease-standard);
+    max-width: 320px;
+  }
+  .toast.info { border-left: 4px solid var(--accent); }
+  .toast.success { border-left: 4px solid var(--success); }
+  .toast.warning { border-left: 4px solid var(--warn); }
+  .toast.error { border-left: 4px solid var(--danger); }
+  @keyframes slideIn {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+
+  /* ── Keyboard shortcuts ── */
+  .kbd {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 6px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    font-size: 11px;
+    font-family: var(--font-mono);
+    color: var(--muted);
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 1200px) {
+    .sidebar { display: none; }
+  }
+
+  @media (max-width: 900px) {
+    .nav-sidebar { width: 56px; }
+    .nav-brand-text, .nav-brand-sub, .nav-section-label,
+    .nav-item span, .nav-badge, .nav-user-info { display: none; }
+    .nav-item { justify-content: center; padding: 10px; }
+    .nav-item.active::before { display: none; }
+    .nav-brand { justify-content: center; padding: 0 0 16px; }
+    .nav-user { justify-content: center; padding: 12px 8px; }
+  }
+
+  @media (max-width: 700px) {
+    .nav-sidebar { display: none; }
+    .board { grid-template-columns: repeat(3, 1fr); }
+    .topbar-filters { flex-wrap: wrap; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ── Top Bar ── -->
+<header class="topbar" data-od-id="topbar">
+  <div class="topbar-breadcrumb">
+    Projetos <span style="color:var(--muted);margin:0 2px">/</span> <span>Growth Squad</span>
+  </div>
+  <div class="sprint-chip" data-od-id="sprint-chip">Sprint 14 — Ativo</div>
+
+  <div class="topbar-filters" data-od-id="filter-bar">
+    <div class="filter-group" id="member-filter-group">
+      <span class="filter-label">Membros</span>
+      <button class="filter-btn active" data-filter="member" data-value="all">Todos</button>
+    </div>
+    <div class="filter-group">
+      <span class="filter-label">Label</span>
+      <button class="filter-btn active" data-filter="label" data-value="all">Todos</button>
+      <button class="filter-btn" data-filter="label" data-value="growth">Growth</button>
+      <button class="filter-btn" data-filter="label" data-value="infra">Infra</button>
+      <button class="filter-btn" data-filter="label" data-value="bug">Bug</button>
+    </div>
+    <div class="search-box">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg>
+      <input type="text" placeholder="Buscar tarefa…" data-od-id="search-input">
+    </div>
+  </div>
+</header>
+
+<!-- ── Toast Container ── -->
+<div class="toast-container" id="toast-container" aria-live="polite" aria-atomic="true"></div>
+
+<!-- ── Main Layout ── -->
+<div class="layout">
+
+  <!-- ── Nav Sidebar ── -->
+  <nav class="nav-sidebar" data-od-id="nav-sidebar">
+    <div class="nav-brand">
+      <a href="quadro-kanban.html" style="text-decoration:none;display:flex;align-items:center;gap:10px">
+        <div class="nav-brand-icon">G</div>
+        <div>
+          <div class="nav-brand-text">Growth Squad</div>
+          <div class="nav-brand-sub">Sprint 14</div>
+        </div>
+      </a>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-section-label">Principal</div>
+      <a href="quadro-kanban.html" class="nav-item active" data-nav="board">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 4.5v15m6-15v15m-10.875 0h15.75c.621 0 1.125-.504 1.125-1.125V5.625c0-.621-.504-1.125-1.125-1.125H4.125C3.504 4.5 3 5.004 3 5.625v12.75c0 .621.504 1.125 1.125 1.125Z"/></svg>
+        <span>Quadro</span>
+      </a>
+      <a href="backlog.html" class="nav-item" data-nav="backlog">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0ZM3.75 12h.007v.008H3.75V12Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm-.375 5.25h.007v.008H3.75v-.008Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"/></svg>
+        <span>Backlog</span>
+        <span class="nav-badge">5</span>
+      </a>
+      <a href="cronograma.html" class="nav-item" data-nav="timeline">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5"/></svg>
+        <span>Cronograma</span>
+      </a>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-section-label">Análise</div>
+      <a href="relatorios.html" class="nav-item" data-nav="reports">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z"/></svg>
+        <span>Relatórios</span>
+      </a>
+      <a href="equipe.html" class="nav-item" data-nav="members">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z"/></svg>
+        <span>Equipe</span>
+      </a>
+    </div>
+
+    <div class="nav-spacer"></div>
+
+    <div class="nav-section">
+      <div class="nav-section-label">Sistema</div>
+      <a href="configuracoes.html" class="nav-item" data-nav="settings">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.325.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.431l-1.003.827c-.293.241-.438.613-.43.992a7.723 7.723 0 0 1 0 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.955.26 1.43l-1.298 2.247a1.125 1.125 0 0 1-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.47 6.47 0 0 1-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.94-1.11.94h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 0 1-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 0 1-1.369-.49l-1.297-2.247a1.125 1.125 0 0 1 .26-1.431l1.004-.827c.292-.24.437-.613.43-.991a6.932 6.932 0 0 1 0-.255c.007-.38-.138-.751-.43-.992l-1.004-.827a1.125 1.125 0 0 1-.26-1.43l1.297-2.247a1.125 1.125 0 0 1 1.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.086.22-.128.332-.183.582-.495.644-.869l.214-1.28Z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/></svg>
+        <span>Configurações</span>
+      </a>
+    </div>
+
+    <div class="nav-user">
+      <div class="avatar avatar-a avatar-lg">A</div>
+      <div class="nav-user-info">
+        <div class="nav-user-name">Ana Souza</div>
+        <div class="nav-user-role">Product Lead</div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ── Board ── -->
+  <main class="board" data-od-id="kanban-board">
+
+    <!-- BACKLOG -->
+    <section class="column" data-column="backlog" data-od-id="col-backlog">
+      <div class="column-header">
+        <div class="column-title-group">
+          <h2 class="column-title" contenteditable="true">Backlog</h2>
+          <span class="column-count" data-od-id="count-backlog">5</span>
+        </div>
+        <button class="column-add" title="Adicionar tarefa" aria-label="Adicionar tarefa ao Backlog">+</button>
+      </div>
+      <div class="column-body" data-od-id="body-backlog">
+
+        <div class="card" draggable="true" data-id="g-01" data-member="ana" data-label="growth" data-subtasks='[{"text":"Definir hipóteses e métricas de sucesso","assignee":"ana","status":"done","startDate":"2026-08-20","endDate":"2026-08-22"},{"text":"Criar variantes no LaunchDarkly","assignee":"ana","status":"in-progress","startDate":"2026-08-23","endDate":"2026-08-25"},{"text":"Configurar segmentação de usuários","assignee":"bruno","status":"in-progress","startDate":"2026-08-26","endDate":"2026-08-28"},{"text":"Documentar plano de rollout","assignee":"ana","status":"in-progress","startDate":"2026-08-29","endDate":"2026-08-30"}]'>
+          <span class="card-tag tag-growth">Growth</span>
+          <div class="card-title">Implementar A/B test no onboarding</div>
+          <div class="card-meta">
+            <div class="card-assignee">
+              <div class="avatar avatar-a">A</div>
+              <span class="card-assignee-name">Ana</span>
+            </div>
+            <div class="card-right">
+              <span class="card-points">5</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" draggable="true" data-id="g-02" data-member="bruno" data-label="infra" data-subtasks='[{"text":"Mapear eventos do funnel de compra","assignee":"bruno","status":"done","startDate":"2026-08-18","endDate":"2026-08-20"},{"text":"Configurar identidade de usuário","assignee":"bruno","status":"in-progress","startDate":"2026-08-21","endDate":"2026-08-23"},{"text":"Validar eventos em produção","assignee":"diego","status":"in-progress","startDate":"2026-08-24","endDate":"2026-08-26"},{"text":"Documentar schema de eventos","assignee":"diego","status":"in-progress","startDate":"2026-08-27","endDate":"2026-08-28"}]'>
+          <span class="card-tag tag-infra">Infra</span>
+          <div class="card-title">Configurar pipeline de dados do mixpanel</div>
+          <div class="card-meta">
+            <div class="card-assignee">
+              <div class="avatar avatar-b">B</div>
+              <span class="card-assignee-name">Bruno</span>
+            </div>
+            <div class="card-right">
+              <span class="card-points">3</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" draggable="true" data-id="g-03" data-member="carla" data-label="design">
+          <span class="card-tag tag-design">Design</span>
+          <div class="card-title">Redesign da tela de configurações</div>
+          <div class="card-meta">
+            <div class="card-assignee">
+              <div class="avatar avatar-c">C</div>
+              <span class="card-assignee-name">Carla</span>
+            </div>
+            <div class="card-right">
+              <span class="card-points">8</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" draggable="true" data-id="g-04" data-member="diego" data-label="data">
+          <span class="card-tag tag-data">Data</span>
+          <div class="card-title">Dashboard de métricas de retenção</div>
+          <div class="card-meta">
+            <div class="card-assignee">
+              <div class="avatar avatar-d">D</div>
+              <span class="card-assignee-name">Diego</span>
+            </div>
+            <div class="card-right">
+              <span class="card-points">5</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" draggable="true" data-id="g-05" data-member="elena" data-label="growth">
+          <span class="card-tag tag-growth">Growth</span>
+          <div class="card-title">Copy para notificação push de engajamento</div>
+          <div class="card-meta">
+            <div class="card-assignee">
+              <div class="avatar avatar-e">E</div>
+              <span class="card-assignee-name">Elena</span>
+            </div>
+            <div class="card-right">
+              <span class="card-points">2</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- A FAZER -->
+    <section class="column" data-column="todo" data-od-id="col-todo">
+      <div class="column-header">
+        <div class="column-title-group">
+          <h2 class="column-title" contenteditable="true">A fazer</h2>
+          <span class="column-count" data-od-id="count-todo">3</span>
+        </div>
+        <button class="column-add" title="Adicionar tarefa" aria-label="Adicionar tarefa a fazer">+</button>
+      </div>
+      <div class="column-body" data-od-id="body-todo">
+
+        <div class="card" draggable="true" data-id="g-17" data-member="ana" data-label="growth">
+          <span class="card-tag tag-growth">Growth</span>
+          <div class="card-title">Planejar experimento de ativação semana 1</div>
+          <div class="card-meta">
+            <div class="card-assignee">
+              <div class="avatar avatar-a">A</div>
+              <span class="card-assignee-name">Ana</span>
+            </div>
+            <div class="card-right">
+              <span class="card-points">3</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" draggable="true" data-id="g-18" data-member="bruno" data-label="infra">
+          <span class="card-tag tag-infra">Infra</span>
+          <div class="card-title">Configurar alertas de latência P95</div>
+          <div class="card-meta">
+            <div class="card-assignee">
+              <div class="avatar avatar-b">B</div>
+              <span class="card-assignee-name">Bruno</span>
+            </div>
+            <div class="card-right">
+              <span class="card-points">2</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" draggable="true" data-id="g-19" data-member="carla" data-label="design">
+          <span class="card-tag tag-design">Design</span>
+          <div class="card-title">Atualizar componentes do design system v2</div>
+          <div class="card-meta">
+            <div class="card-assignee">
+              <div class="avatar avatar-c">C</div>
+              <span class="card-assignee-name">Carla</span>
+            </div>
+            <div class="card-right">
+              <span class="card-points">5</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- IN PROGRESS -->
+    <section class="column" data-column="in-progress" data-od-id="col-in-progress">
+      <div class="column-header">
+        <div class="column-title-group">
+          <h2 class="column-title">Em andamento</h2>
+          <span class="column-count" data-od-id="count-in-progress">4</span>
+        </div>
+        <button class="column-add" title="Adicionar tarefa" aria-label="Adicionar tarefa em andamento">+</button>
+      </div>
+      <div class="column-body" data-od-id="body-in-progress">
+
+        <div class="swimlane"><span class="swimlane-dot"></span> Feature</div>
+
+        <div class="card" draggable="true" data-id="g-06" data-member="ana" data-label="growth">
+          <span class="card-tag tag-growth">Growth</span>
+          <div class="card-title">Funil de conversão — etapa de convite</div>
+          <div class="card-meta">
+            <div class="card-assignee">
+              <div class="avatar avatar-a">A</div>
+              <span class="card-assignee-name">Ana</span>
+            </div>
+            <div class="card-right">
+              <span class="card-points">8</span>
+              <div class="card-progress">
+                <div class="progress-bar"><div class="progress-fill green" style="width:60%"></div></div>
+                <span class="progress-text">60%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" draggable="true" data-id="g-07" data-member="bruno" data-label="infra">
+          <span class="card-tag tag-infra">Infra</span>
+          <div class="card-title">Migração do banco para Postgres 16</div>
+          <div class="card-meta">
+            <div class="card-assignee">
+              <div class="avatar avatar-b">B</div>
+              <span class="card-assignee-name">Bruno</span>
+            </div>
+            <div class="card-right">
+              <span class="card-points">13</span>
+              <div class="card-progress">
+                <div class="progress-bar"><div class="progress-fill yellow" style="width:35%"></div></div>
+                <span class="progress-text">35%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="swimlane"><span class="swimlane-dot"></span> Bug</div>
+
+        <div class="card" draggable="true" data-id="g-08" data-member="carla" data-label="bug">
+          <span class="card-tag tag-bug">Bug</span>
+          <div class="card-title">Erro 500 ao exportar CSV com mais de 10k linhas</div>
+          <div class="card-meta">
+            <div class="card-assignee">
+              <div class="avatar avatar-c">C</div>
+              <span class="card-assignee-name">Carla</span>
+            </div>
+            <div class="card-right">
+              <span class="card-points">3</span>
+              <div class="card-progress">
+                <div class="progress-bar"><div class="progress-fill red" style="width:20%"></div></div>
+                <span class="progress-text">20%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" draggable="true" data-id="g-09" data-member="diego" data-label="data">
+          <span class="card-tag tag-data">Data</span>
+          <div class="card-title">ETL de eventos do app mobile</div>
+          <div class="card-meta">
+            <div class="card-assignee">
+              <div class="avatar avatar-d">D</div>
+              <span class="card-assignee-name">Diego</span>
+            </div>
+            <div class="card-right">
+              <span class="card-points">5</span>
+              <div class="card-progress">
+                <div class="progress-bar"><div class="progress-fill green" style="width:75%"></div></div>
+                <span class="progress-text">75%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- IN REVIEW -->
+    <section class="column" data-column="in-review" data-od-id="col-in-review">
+      <div class="column-header">
+        <div class="column-title-group">
+          <h2 class="column-title">Em revisão</h2>
+          <span class="column-count" data-od-id="count-in-review">3</span>
+        </div>
+        <button class="column-add" title="Adicionar tarefa" aria-label="Adicionar tarefa em revisão">+</button>
+      </div>
+      <div class="column-body" data-od-id="body-in-review">
+
+        <div class="card" draggable="true" data-id="g-10" data-member="elena" data-label="growth">
+          <span class="card-tag tag-growth">Growth</span>
+          <div class="card-title">Landing page de black friday — variant B</div>
+          <div class="card-meta">
+            <div class="card-assignee">
+              <div class="avatar avatar-e">E</div>
+              <span class="card-assignee-name">Elena</span>
+            </div>
+            <div class="card-right">
+              <span class="card-points">5</span>
+              <div class="card-progress">
+                <div class="progress-bar"><div class="progress-fill green" style="width:90%"></div></div>
+                <span class="progress-text">90%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" draggable="true" data-id="g-11" data-member="ana" data-label="growth">
+          <span class="card-tag tag-growth">Growth</span>
+          <div class="card-title">Integração com Braze para push transacional</div>
+          <div class="card-meta">
+            <div class="card-assignee">
+              <div class="avatar avatar-a">A</div>
+              <span class="card-assignee-name">Ana</span>
+            </div>
+            <div class="card-right">
+              <span class="card-points">8</span>
+              <div class="card-progress">
+                <div class="progress-bar"><div class="progress-fill green" style="width:85%"></div></div>
+                <span class="progress-text">85%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" draggable="true" data-id="g-12" data-member="bruno" data-label="infra">
+          <span class="card-tag tag-infra">Infra</span>
+          <div class="card-title">Cache Redis para queries do dashboard</div>
+          <div class="card-meta">
+            <div class="card-assignee">
+              <div class="avatar avatar-b">B</div>
+              <span class="card-assignee-name">Bruno</span>
+            </div>
+            <div class="card-right">
+              <span class="card-points">3</span>
+              <div class="card-progress">
+                <div class="progress-bar"><div class="progress-fill green" style="width:100%"></div></div>
+                <span class="progress-text">100%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- DONE -->
+    <section class="column" data-column="done" data-od-id="col-done">
+      <div class="column-header">
+        <div class="column-title-group">
+          <h2 class="column-title">Concluído</h2>
+          <span class="column-count" data-od-id="count-done">4</span>
+        </div>
+        <button class="column-add" title="Adicionar tarefa" aria-label="Adicionar tarefa concluída" style="visibility:hidden">+</button>
+      </div>
+      <div class="column-body" data-od-id="body-done" style="opacity:0.7">
+
+        <div class="card" draggable="true" data-id="g-13" data-member="carla" data-label="design">
+          <span class="card-tag tag-design">Design</span>
+          <div class="card-title">Design system — tokens de cor atualizados</div>
+          <div class="card-meta">
+            <div class="card-assignee">
+              <div class="avatar avatar-c">C</div>
+              <span class="card-assignee-name">Carla</span>
+            </div>
+            <div class="card-right">
+              <span class="card-points">3</span>
+              <div class="card-progress">
+                <div class="progress-bar"><div class="progress-fill green" style="width:100%"></div></div>
+                <span class="progress-text">100%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" draggable="true" data-id="g-14" data-member="diego" data-label="data">
+          <span class="card-tag tag-data">Data</span>
+          <div class="card-title">Relatório semanal de cohort automatizado</div>
+          <div class="card-meta">
+            <div class="card-assignee">
+              <div class="avatar avatar-d">D</div>
+              <span class="card-assignee-name">Diego</span>
+            </div>
+            <div class="card-right">
+              <span class="card-points">5</span>
+              <div class="card-progress">
+                <div class="progress-bar"><div class="progress-fill green" style="width:100%"></div></div>
+                <span class="progress-text">100%</span>
+              </div>
+            </div>
+          </div>
+       </div>
+
+        <div class="card" draggable="true" data-id="g-15" data-member="elena" data-label="growth">
+          <span class="card-tag tag-growth">Growth</span>
+          <div class="card-title">Copy A/B test — tela de pricing</div>
+          <div class="card-meta">
+            <div class="card-assignee">
+              <div class="avatar avatar-e">E</div>
+              <span class="card-assignee-name">Elena</span>
+            </div>
+            <div class="card-right">
+              <span class="card-points">2</span>
+              <div class="card-progress">
+                <div class="progress-bar"><div class="progress-fill green" style="width:100%"></div></div>
+                <span class="progress-text">100%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" draggable="true" data-id="g-16" data-member="ana" data-label="bug">
+          <span class="card-tag tag-bug">Bug</span>
+          <div class="card-title">Fix: timezone incorreta nos emails agendados</div>
+          <div class="card-meta">
+            <div class="card-assignee">
+              <div class="avatar avatar-a">A</div>
+              <span class="card-assignee-name">Ana</span>
+            </div>
+            <div class="card-right">
+              <span class="card-points">2</span>
+              <div class="card-progress">
+                <div class="progress-bar"><div class="progress-fill green" style="width:100%"></div></div>
+                <span class="progress-text">100%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ── Sidebar ── -->
+  <aside class="sidebar" data-od-id="sidebar">
+
+    <div class="sidebar-section">
+      <h3>
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0118 16.5h-2.25m-7.5 0h7.5m-7.5 0l-1 3m8.5-3l1 3m0 0l.5 1.5m-.5-1.5h-9.5m0 0l-.5 1.5m.75-9l3-3 2.148 2.148A12.061 12.061 0 0116.5 7.605"/></svg>
+        Sprint Pulse
+      </h3>
+      <div class="sprint-pulse-bar">
+        <div class="sprint-pulse-fill" style="width:58%"></div>
+      </div>
+      <div class="sprint-pulse-stats">
+        <span><strong>8</strong> de 14 pontos</span>
+        <span>58%</span>
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <h3>
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/></svg>
+        Top Assignees
+      </h3>
+      <div class="top-assignees">
+        <div class="assignee-row">
+          <div class="avatar avatar-a">A</div>
+          <div class="assignee-info">
+            <span class="assignee-name">Ana</span>
+            <span class="assignee-count">4 tasks</span>
+          </div>
+        </div>
+        <div class="assignee-row">
+          <div class="avatar avatar-b">B</div>
+          <div class="assignee-info">
+            <span class="assignee-name">Bruno</span>
+            <span class="assignee-count">3 tasks</span>
+          </div>
+        </div>
+        <div class="assignee-row">
+          <div class="avatar avatar-c">C</div>
+          <div class="assignee-info">
+            <span class="assignee-name">Carla</span>
+            <span class="assignee-count">3 tasks</span>
+          </div>
+        </div>
+        <div class="assignee-row">
+          <div class="avatar avatar-d">D</div>
+          <div class="assignee-info">
+            <span class="assignee-name">Diego</span>
+            <span class="assignee-count">3 tasks</span>
+          </div>
+        </div>
+        <div class="assignee-row">
+          <div class="avatar avatar-e">E</div>
+          <div class="assignee-info">
+            <span class="assignee-name">Elena</span>
+            <span class="assignee-count">3 tasks</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <h3 class="blocked-header">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/></svg>
+        Bloqueios
+      </h3>
+      <div class="blocked-list" id="blocked-list"></div>
+      <button type="button" class="blocked-add" id="add-blocked-btn" style="margin-top: 8px;">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+        Adicionar bloqueio
+      </button>
+    </div>
+
+    <div style="border-top: 1px solid var(--border); margin-top: 16px; padding-top: 16px;">
+      <h3 class="attention-header">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/></svg>
+        Atenções
+      </h3>
+      <div class="attention-list" id="attention-list"></div>
+      <button type="button" class="attention-add" id="add-attention-btn" style="margin-top: 8px;">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+        Adicionar atenção
+      </button>
+    </div>
+
+  </aside>
+
+</div>
+
+<!-- ── Modal de Edição de Card ── -->
+<div class="modal-overlay" id="card-modal">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3>Editar tarefa</h3>
+      <button class="modal-close" id="modal-close-btn" aria-label="Fechar">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-field">
+        <label class="modal-field-label" for="modal-title">Título</label>
+        <input class="modal-input" type="text" id="modal-title" placeholder="Nome da tarefa">
+      </div>
+      <div class="modal-field">
+        <label class="modal-field-label" for="modal-desc">Descrição</label>
+        <textarea class="modal-input" id="modal-desc" placeholder="Descreva a tarefa..."></textarea>
+      </div>
+      <div class="modal-field">
+        <label class="modal-field-label">Label</label>
+        <div class="modal-tags" id="modal-tags">
+          <button type="button" class="modal-tag-btn tag-growth" data-tag="growth">Growth</button>
+          <button type="button" class="modal-tag-btn tag-infra" data-tag="infra">Infra</button>
+          <button type="button" class="modal-tag-btn tag-design" data-tag="design">Design</button>
+          <button type="button" class="modal-tag-btn tag-bug" data-tag="bug">Bug</button>
+          <button type="button" class="modal-tag-btn tag-data" data-tag="data">Data</button>
+        </div>
+      </div>
+      <div class="modal-row">
+        <div class="modal-field">
+          <label class="modal-field-label" for="modal-assignee">Responsável</label>
+          <select class="modal-select" id="modal-assignee">
+            <option value="ana">Ana</option>
+            <option value="bruno">Bruno</option>
+            <option value="carla">Carla</option>
+            <option value="diego">Diego</option>
+            <option value="elena">Elena</option>
+          </select>
+        </div>
+        <div class="modal-field">
+          <label class="modal-field-label" for="modal-points">Pontos</label>
+          <select class="modal-select" id="modal-points">
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="5">5</option>
+            <option value="8">8</option>
+            <option value="13">13</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-field">
+        <label class="modal-field-label" for="modal-status">Coluna</label>
+        <select class="modal-select" id="modal-status">
+          <option value="backlog">Backlog</option>
+          <option value="todo">A fazer</option>
+          <option value="in-progress">Em andamento</option>
+          <option value="in-review">Em revisão</option>
+          <option value="done">Concluído</option>
+        </select>
+      </div>
+      <div class="modal-row">
+        <div class="modal-field">
+          <label class="modal-field-label" for="modal-start">Data de início</label>
+          <input class="modal-input" type="date" id="modal-start">
+        </div>
+        <div class="modal-field">
+          <label class="modal-field-label" for="modal-end">Data de fim</label>
+          <input class="modal-input" type="date" id="modal-end">
+        </div>
+      </div>
+      <div class="modal-field">
+        <label class="modal-field-label">Subtarefas</label>
+        <div class="modal-subtask-list" id="modal-subtask-list"></div>
+        <button type="button" class="add-subtask-btn" id="add-subtask-btn">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+          Adicionar subtarefa
+        </button>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="modal-btn-delete" id="modal-delete-btn">
+        Excluir tarefa
+      </button>
+      <div class="modal-actions">
+        <button type="button" class="modal-btn-cancel" id="modal-cancel-btn">Cancelar</button>
+        <button type="button" class="modal-btn-save" id="modal-save-btn">Salvar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Subtask Modal -->
+<div class="modal-overlay" id="subtask-modal">
+  <div class="modal-card" style="width: 480px;">
+    <div class="modal-header">
+      <h3 id="subtask-modal-title">Nova subtarefa</h3>
+      <button class="modal-close" id="subtask-modal-close-btn" aria-label="Fechar">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-field">
+        <label class="modal-field-label" for="subtask-modal-text">Descrição</label>
+        <input class="modal-input" type="text" id="subtask-modal-text" placeholder="Descrição da subtarefa">
+      </div>
+      <div class="modal-field">
+        <label class="modal-field-label" for="subtask-modal-assignee">Responsável</label>
+        <select class="modal-select" id="subtask-modal-assignee">
+          <option value="">—</option>
+          <option value="ana">Ana</option>
+          <option value="bruno">Bruno</option>
+          <option value="carla">Carla</option>
+          <option value="diego">Diego</option>
+          <option value="elena">Elena</option>
+        </select>
+      </div>
+      <div class="modal-row">
+        <div class="modal-field">
+          <label class="modal-field-label" for="subtask-modal-start">Data de início</label>
+          <input class="modal-input" type="date" id="subtask-modal-start">
+        </div>
+        <div class="modal-field">
+          <label class="modal-field-label" for="subtask-modal-end">Data de fim</label>
+          <input class="modal-input" type="date" id="subtask-modal-end">
+        </div>
+      </div>
+      <div class="modal-field">
+        <label class="modal-field-label" for="subtask-modal-status">Status</label>
+        <select class="modal-select" id="subtask-modal-status">
+          <option value="in-progress">Em andamento</option>
+          <option value="done">Concluído</option>
+          <option value="cancelled">Cancelado</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="modal-btn-delete" id="subtask-modal-delete-btn" style="display:none">Excluir subtarefa</button>
+      <div class="modal-actions">
+        <button type="button" class="modal-btn-cancel" id="subtask-modal-cancel-btn">Cancelar</button>
+        <button type="button" class="modal-btn-save" id="subtask-modal-save-btn">Salvar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Blocked Modal -->
+<div class="modal-overlay" id="blocked-modal">
+  <div class="modal-card" style="width: 960px;">
+    <div class="modal-header">
+      <h3 id="blocked-modal-title">Novo bloqueio</h3>
+      <button class="modal-close" id="blocked-modal-close-btn" aria-label="Fechar">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-field">
+        <label class="modal-field-label" for="blocked-modal-title-input">Título do bloqueio</label>
+        <input class="modal-input" type="text" id="blocked-modal-title-input" placeholder="Ex: Aguardando aprovação do DBA">
+      </div>
+      <div class="modal-field">
+        <label class="modal-field-label" for="blocked-modal-desc">Descrição</label>
+        <textarea class="modal-input" id="blocked-modal-desc" placeholder="Detalhes do bloqueio..."></textarea>
+      </div>
+      <div class="modal-row">
+        <div class="modal-field">
+          <label class="modal-field-label" for="blocked-modal-task">Tarefa relacionada</label>
+          <select class="modal-select" id="blocked-modal-task">
+            <option value="">— Nenhuma —</option>
+          </select>
+        </div>
+        <div class="modal-field">
+          <label class="modal-field-label" for="blocked-modal-assignee">Responsável</label>
+          <select class="modal-select" id="blocked-modal-assignee">
+            <option value="">—</option>
+            <option value="ana">Ana</option>
+            <option value="bruno">Bruno</option>
+            <option value="carla">Carla</option>
+            <option value="diego">Diego</option>
+            <option value="elena">Elena</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="modal-btn-delete" id="blocked-modal-delete-btn" style="display:none">Excluir bloqueio</button>
+      <div class="modal-actions">
+        <button type="button" class="modal-btn-cancel" id="blocked-modal-cancel-btn">Cancelar</button>
+        <button type="button" class="modal-btn-save" id="blocked-modal-save-btn">Salvar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Attention Modal -->
+<div class="modal-overlay" id="attention-modal">
+  <div class="modal-card" style="width: 960px;">
+    <div class="modal-header">
+      <h3 id="attention-modal-title">Nova atenção</h3>
+      <button class="modal-close" id="attention-modal-close-btn" aria-label="Fechar">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-field">
+        <label class="modal-field-label" for="attention-modal-title-input">Título da atenção</label>
+        <input class="modal-input" type="text" id="attention-modal-title-input" placeholder="Ex: Risco de atraso no deploy">
+      </div>
+      <div class="modal-field">
+        <label class="modal-field-label" for="attention-modal-desc">Descrição</label>
+        <textarea class="modal-input" id="attention-modal-desc" placeholder="Detalhes do ponto de atenção..."></textarea>
+      </div>
+      <div class="modal-row">
+        <div class="modal-field">
+          <label class="modal-field-label" for="attention-modal-task">Tarefa relacionada</label>
+          <select class="modal-select" id="attention-modal-task">
+            <option value="">— Nenhuma —</option>
+          </select>
+        </div>
+        <div class="modal-field">
+          <label class="modal-field-label" for="attention-modal-assignee">Responsável</label>
+          <select class="modal-select" id="attention-modal-assignee">
+            <option value="">—</option>
+            <option value="ana">Ana</option>
+            <option value="bruno">Bruno</option>
+            <option value="carla">Carla</option>
+            <option value="diego">Diego</option>
+            <option value="elena">Elena</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="modal-btn-delete" id="attention-modal-delete-btn" style="display:none">Excluir atenção</button>
+      <div class="modal-actions">
+        <button type="button" class="modal-btn-cancel" id="attention-modal-cancel-btn">Cancelar</button>
+        <button type="button" class="modal-btn-save" id="attention-modal-save-btn">Salvar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  'use strict';
+
+  /* ── Variables ── */
+  let draggedCard = null;
+  let currentCard = null;
+  let currentTag = 'growth';
+  let addCardTargetColumn = null;
+  let currentBlockedId = null;
+  let currentAttentionId = null;
+  let currentSubtaskCard = null;
+  let currentSubtaskIndex = null;
+
+  const defaultMemberNames = {
+    ana: { name: 'Ana', avatar: 'A', class: 'avatar-a' },
+    bruno: { name: 'Bruno', avatar: 'B', class: 'avatar-b' },
+    carla: { name: 'Carla', avatar: 'C', class: 'avatar-c' },
+    diego: { name: 'Diego', avatar: 'D', class: 'avatar-d' },
+    elena: { name: 'Elena', avatar: 'E', class: 'avatar-e' }
+  };
+
+  function loadMemberNames() {
+    try {
+      var saved = JSON.parse(localStorage.getItem('growth-squad-members'));
+      if (Array.isArray(saved) && saved.length > 0) {
+        var result = {};
+        saved.forEach(function(m) {
+          var key = m.name.split(' ')[0].toLowerCase();
+          result[key] = { name: m.name.split(' ')[0], avatar: m.name.charAt(0).toUpperCase(), class: 'avatar-' + m.color };
+        });
+        if (Object.keys(result).length > 0) return result;
+      }
+    } catch(e) {}
+    return defaultMemberNames;
+  }
+
+  const memberNames = loadMemberNames();
+
+  const tagNames = {
+    growth: 'Growth', infra: 'Infra', design: 'Design', bug: 'Bug', data: 'Data'
+  };
+
+  const WIP_LIMITS = {
+    backlog: 10, todo: 8, 'in-progress': 5, 'in-review': 3, done: 10
+  };
+
+  var auditLog = [];
+  var savedFilters = JSON.parse(localStorage.getItem('kanban-filters')) || {};
+
+  const modal = document.getElementById('card-modal');
+  const modalTitle = document.getElementById('modal-title');
+  const modalDesc = document.getElementById('modal-desc');
+  const modalAssignee = document.getElementById('modal-assignee');
+  const modalPoints = document.getElementById('modal-points');
+  const modalStatus = document.getElementById('modal-status');
+  const modalStart = document.getElementById('modal-start');
+  const modalEnd = document.getElementById('modal-end');
+  const modalTags = document.getElementById('modal-tags');
+  const modalCloseBtn = document.getElementById('modal-close-btn');
+  const modalCancelBtn = document.getElementById('modal-cancel-btn');
+  const modalSaveBtn = document.getElementById('modal-save-btn');
+  const modalDeleteBtn = document.getElementById('modal-delete-btn');
+
+  const subtaskModal = document.getElementById('subtask-modal');
+  const subtaskModalTitle = document.getElementById('subtask-modal-title');
+  const subtaskModalText = document.getElementById('subtask-modal-text');
+  const subtaskModalAssignee = document.getElementById('subtask-modal-assignee');
+  const subtaskModalStart = document.getElementById('subtask-modal-start');
+  const subtaskModalEnd = document.getElementById('subtask-modal-end');
+  const subtaskModalStatus = document.getElementById('subtask-modal-status');
+  const subtaskModalDeleteBtn = document.getElementById('subtask-modal-delete-btn');
+
+  const blockedModal = document.getElementById('blocked-modal');
+  const blockedModalTitle = document.getElementById('blocked-modal-title');
+  const blockedTitleInput = document.getElementById('blocked-modal-title-input');
+  const blockedDescInput = document.getElementById('blocked-modal-desc');
+  const blockedTaskSelect = document.getElementById('blocked-modal-task');
+  const blockedAssigneeSelect = document.getElementById('blocked-modal-assignee');
+  const blockedDeleteBtn = document.getElementById('blocked-modal-delete-btn');
+
+  const attentionModal = document.getElementById('attention-modal');
+  const attentionModalTitle = document.getElementById('attention-modal-title');
+  const attentionTitleInput = document.getElementById('attention-modal-title-input');
+  const attentionDescInput = document.getElementById('attention-modal-desc');
+  const attentionTaskSelect = document.getElementById('attention-modal-task');
+  const attentionAssigneeSelect = document.getElementById('attention-modal-assignee');
+  const attentionDeleteBtn = document.getElementById('attention-modal-delete-btn');
+
+  let blockedItems = [];
+  let attentionItems = [];
+
+  // ── History (Undo/Redo) ──
+  let history = [];
+  let historyIndex = -1;
+  const MAX_HISTORY = 50;
+
+  function saveState() {
+    const state = getBoardState();
+    history = history.slice(0, historyIndex + 1);
+    history.push(JSON.stringify(state));
+    if (history.length > MAX_HISTORY) history.shift();
+    historyIndex = history.length - 1;
+    saveBoardState();
+  }
+
+  function undo() {
+    if (historyIndex > 0) {
+      historyIndex--;
+      restoreBoardState(JSON.parse(history[historyIndex]));
+      showNotification('Ação desfeita', 'info');
+    }
+  }
+
+  function redo() {
+    if (historyIndex < history.length - 1) {
+      historyIndex++;
+      restoreBoardState(JSON.parse(history[historyIndex]));
+      showNotification('Ação refeita', 'info');
+    }
+  }
+
+  function getBoardState() {
+    const columns = {};
+    document.querySelectorAll('.column').forEach(col => {
+      const colKey = col.dataset.column;
+      columns[colKey] = [];
+      col.querySelectorAll('.card').forEach(card => {
+        columns[colKey].push({
+          id: card.dataset.id,
+          member: card.dataset.member,
+          label: card.dataset.label,
+          description: card.dataset.description || '',
+          start: card.dataset.start || '',
+          end: card.dataset.end || '',
+          subtasks: card.dataset.subtasks || '[]',
+          title: card.querySelector('.card-title')?.textContent || card.dataset.id,
+          points: parseInt(card.querySelector('.card-points')?.textContent) || 0
+        });
+      });
+    });
+    return { columns, savedFilters };
+  }
+
+  function saveBoardState() {
+    localStorage.setItem('kanban-board-state', JSON.stringify(getBoardState()));
+  }
+
+  function restoreBoardState(state) {
+    if (!state || !state.columns) return;
+    Object.entries(state.columns).forEach(([colKey, cards]) => {
+      const col = document.querySelector('[data-column="' + colKey + '"] .column-body');
+      if (!col) return;
+      col.querySelectorAll('.card').forEach(c => c.remove());
+      cards.forEach(cardData => {
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.draggable = true;
+        card.dataset.id = cardData.id;
+        card.dataset.member = cardData.member;
+        card.dataset.label = cardData.label;
+        card.dataset.description = cardData.description;
+        card.dataset.start = cardData.start;
+        card.dataset.end = cardData.end;
+        card.dataset.subtasks = cardData.subtasks;
+        const memberInfo = memberNames[cardData.member] || memberNames['ana'];
+        card.innerHTML = `<span class="card-tag tag-${cardData.label}">${tagNames[cardData.label] || cardData.label}</span><div class="card-title">${card.querySelector('.card-title')?.textContent || cardData.id}</div><div class="card-meta"><div class="card-assignee"><div class="avatar ${memberInfo.class}">${memberInfo.avatar}</div><span class="card-assignee-name">${memberInfo.name}</span></div><div class="card-right"><span class="card-points">1</span></div></div>`;
+        card.addEventListener('dragstart', function(e) { draggedCard = this; this.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; });
+        card.addEventListener('dragend', function() { this.classList.remove('dragging'); draggedCard = null; document.querySelectorAll('.column-body').forEach(c => c.classList.remove('drag-over')); });
+        card.addEventListener('click', function() { openModal(this); });
+        col.appendChild(card);
+      });
+    });
+    updateCounts();
+    applyFilters();
+    document.querySelectorAll('.card').forEach(c => renderCardSubtasks(c));
+  }
+
+  function loadBoardState() {
+    try {
+      const saved = localStorage.getItem('kanban-board-state');
+      if (saved) {
+        const state = JSON.parse(saved);
+        if (state && state.columns) {
+          restoreBoardState(state);
+          savedFilters = state.savedFilters || {};
+          return true;
+        }
+      }
+    } catch (e) { console.warn('Failed to load board state:', e); }
+    return false;
+  }
+
+  // ── Keyboard shortcuts ──
+  document.addEventListener('keydown', function(e) {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
+      e.preventDefault();
+      undo();
+    }
+    if ((e.ctrlKey || e.metaKey) && e.key === 'z' && e.shiftKey) {
+      e.preventDefault();
+      redo();
+    }
+    if ((e.ctrlKey || e.metaKey) && e.key === 'y') {
+      e.preventDefault();
+      redo();
+    }
+  });
+
+  /* ── Drag & Drop ── */
+
+  document.querySelectorAll('.card[draggable="true"]').forEach(card => {
+    card.setAttribute('role', 'option');
+    card.setAttribute('aria-grabbed', 'false');
+    card.addEventListener('dragstart', function(e) {
+      draggedCard = this;
+      this.classList.add('dragging');
+      this.setAttribute('aria-grabbed', 'true');
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', this.dataset.id);
+    });
+
+    card.addEventListener('dragend', function() {
+      this.classList.remove('dragging');
+      this.setAttribute('aria-grabbed', 'false');
+      draggedCard = null;
+      document.querySelectorAll('.column-body').forEach(col => col.classList.remove('drag-over'));
+      document.querySelectorAll('.drop-indicator').forEach(ind => ind.remove());
+    });
+  });
+
+  document.querySelectorAll('.column-body').forEach(colBody => {
+    colBody.setAttribute('role', 'listbox');
+    colBody.setAttribute('aria-label', 'Área para soltar cards');
+    
+    colBody.addEventListener('dragover', function(e) {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      this.classList.add('drag-over');
+      
+      // Drop indicator
+      let indicator = this.querySelector('.drop-indicator');
+      if (!indicator) {
+        indicator = document.createElement('div');
+        indicator.className = 'drop-indicator';
+        this.appendChild(indicator);
+      }
+      indicator.classList.add('visible');
+    });
+
+    colBody.addEventListener('dragleave', function(e) {
+      if (!this.contains(e.relatedTarget)) {
+        this.classList.remove('drag-over');
+        const indicator = this.querySelector('.drop-indicator');
+        if (indicator) indicator.remove();
+      }
+    });
+
+    colBody.addEventListener('drop', function(e) {
+      e.preventDefault();
+      this.classList.remove('drag-over');
+      const indicator = this.querySelector('.drop-indicator');
+      if (indicator) indicator.remove();
+      
+      if (draggedCard) {
+        const targetColumn = this.closest('.column');
+        const targetColumnKey = targetColumn.dataset.column;
+        const wipLimit = WIP_LIMITS[targetColumnKey] || 10;
+        const currentCount = targetColumn.querySelector('.column-body').querySelectorAll('.card').length;
+        
+        const isSameColumn = draggedCard.parentElement === this;
+        const effectiveCount = isSameColumn ? currentCount : currentCount + 1;
+        
+        if (effectiveCount > wipLimit && !isSameColumn) {
+          showNotification('Limite WIP atingido para "' + targetColumn.querySelector('.column-title').textContent + '" (máx: ' + wipLimit + ')', 'warning');
+          return;
+        }
+        
+        const oldColumn = draggedCard.closest('.column')?.dataset.column;
+        const oldColumnName = oldColumn ? document.querySelector('[data-column="' + oldColumn + '"] .column-title').textContent : 'desconhecida';
+        const newColumnName = targetColumn.querySelector('.column-title').textContent;
+        
+        this.appendChild(draggedCard);
+        updateCounts();
+        saveState();
+        
+        // Audit log
+        if (oldColumn !== targetColumnKey) {
+          auditLog.push({
+            timestamp: new Date().toISOString(),
+            cardId: draggedCard.dataset.id,
+            cardTitle: draggedCard.querySelector('.card-title').textContent,
+            fromColumn: oldColumn,
+            toColumn: targetColumnKey,
+            fromColumnName: oldColumnName,
+            toColumnName: newColumnName
+          });
+          
+          showNotification('Card movido de "' + oldColumnName + '" para "' + newColumnName + '"', 'success');
+        }
+      }
+    });
+  });
+
+  function updateCounts() {
+    document.querySelectorAll('.column').forEach(col => {
+      const body = col.querySelector('.column-body');
+      const count = body.querySelectorAll('.card').length;
+      col.querySelector('.column-count').textContent = count;
+      
+      // Empty state
+      let emptyHint = body.querySelector('.empty-col-hint');
+      if (count === 0 && !emptyHint) {
+        emptyHint = document.createElement('div');
+        emptyHint.className = 'empty-col-hint';
+        emptyHint.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 4.5v15m6-15v15m-10.875 0h15.75c.621 0 1.125-.504 1.125-1.125V5.625c0-.621-.504-1.125-1.125-1.125H4.125C3.504 4.5 3 5.004 3 5.625v12.75c0 .621.504 1.125 1.125 1.125Z"/></svg><p>Nenhuma tarefa<br>Arraste ou clique +</p>`;
+        body.appendChild(emptyHint);
+      } else if (count > 0 && emptyHint) {
+        emptyHint.remove();
+      }
+      
+      // WIP limit indicator
+      const wipLimit = WIP_LIMITS[col.dataset.column] || 10;
+      const countEl = col.querySelector('.column-count');
+      const wipEl = col.querySelector('.column-wip');
+      if (count > wipLimit) {
+        countEl.style.color = 'var(--danger)';
+        countEl.title = 'Acima do limite WIP (' + wipLimit + ')';
+        if (wipEl) wipEl.classList.add('visible');
+      } else {
+        countEl.style.color = '';
+        countEl.title = '';
+        if (wipEl) wipEl.classList.remove('visible');
+      }
+    });
+    document.querySelectorAll('.card').forEach(card => {
+      renderCardSubtasks(card);
+    });
+    updateMemberFilterCounts();
+  }
+
+  // Badge with the number of tasks per member in the member filter buttons.
+  // Counts respect the active label + search filters (but not the member
+  // filter itself), so each badge shows what clicking that button would show.
+  function updateMemberFilterCounts() {
+    var activeLabel = document.querySelector('.filter-group .filter-btn[data-filter="label"].active');
+    var labelFilter = activeLabel ? activeLabel.dataset.value : 'all';
+    var searchInput = document.querySelector('[data-od-id="search-input"]');
+    var searchVal = searchInput ? searchInput.value.toLowerCase() : '';
+
+    var counts = {}, total = 0;
+    document.querySelectorAll('.card').forEach(function(card) {
+      if (labelFilter !== 'all' && card.dataset.label !== labelFilter) return;
+      var title = card.querySelector('.card-title');
+      if (searchVal && (!title || title.textContent.toLowerCase().indexOf(searchVal) === -1)) return;
+      var m = card.dataset.member;
+      if (!m) return;
+      counts[m] = (counts[m] || 0) + 1;
+      total++;
+    });
+    document.querySelectorAll('.filter-btn[data-filter="member"]').forEach(function(btn) {
+      var v = btn.dataset.value;
+      var n = (v === 'all') ? total : (counts[v] || 0);
+      var badge = btn.querySelector('.filter-count');
+      if (!badge) {
+        badge = document.createElement('span');
+        badge.className = 'filter-count';
+        btn.appendChild(badge);
+      }
+      badge.textContent = n;
+      badge.classList.toggle('zero', n === 0 && v !== 'all');
+      badge.title = n + (n === 1 ? ' tarefa' : ' tarefas');
+    });
+  }
+
+  // Add WIP badges to each column header
+  document.querySelectorAll('.column-header').forEach(header => {
+    const wipSpan = document.createElement('span');
+    wipSpan.className = 'column-wip';
+    wipSpan.textContent = '/ ' + (WIP_LIMITS[header.closest('.column').dataset.column] || 10);
+    header.querySelector('.column-count').insertAdjacentElement('afterend', wipSpan);
+  });
+
+  /* ── Filters ── */
+  // Event delegation on the filter bar so buttons created dynamically
+  // (member filter buttons are injected later) also work.
+  function restoreFilterButtons() {
+    document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      var key = btn.dataset.filter + '-' + btn.dataset.value;
+      if (savedFilters[key]) btn.classList.add('active');
+    });
+    // Every group must default to its "Todos" button when nothing is saved
+    document.querySelectorAll('.filter-group').forEach(group => {
+      if (!group.querySelector('.filter-btn.active')) {
+        var allBtn = group.querySelector('.filter-btn[data-value="all"]');
+        if (allBtn) allBtn.classList.add('active');
+      }
+    });
+  }
+
+  document.querySelector('.topbar-filters').addEventListener('click', function(e) {
+    var btn = e.target.closest('.filter-btn');
+    if (!btn) return;
+    var key = btn.dataset.filter + '-' + btn.dataset.value;
+    var group = btn.closest('.filter-group');
+    var filterType = btn.dataset.filter;
+
+    if (filterType === 'label') {
+      if (btn.classList.contains('active')) {
+        btn.classList.remove('active');
+        delete savedFilters[key];
+      } else {
+        group.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        savedFilters[key] = true;
+      }
+    } else {
+      if (group) {
+        group.querySelectorAll('.filter-btn').forEach(b => {
+          b.classList.remove('active');
+          delete savedFilters[b.dataset.filter + '-' + b.dataset.value];
+        });
+        btn.classList.add('active');
+        savedFilters[key] = true;
+      }
+    }
+    // Save filters to localStorage
+    localStorage.setItem('kanban-filters', JSON.stringify(savedFilters));
+    applyFilters();
+  });
+
+  function applyFilters() {
+    const activeMember = document.querySelector('.filter-group .filter-btn[data-filter="member"].active');
+    const activeLabel = document.querySelector('.filter-group .filter-btn[data-filter="label"].active');
+    const searchVal = document.querySelector('[data-od-id="search-input"]').value.toLowerCase();
+
+    const memberFilter = activeMember ? activeMember.dataset.value : 'all';
+    const labelFilter = activeLabel ? activeLabel.dataset.value : 'all';
+
+    document.querySelectorAll('.card').forEach(card => {
+      const matchMember = memberFilter === 'all' || card.dataset.member === memberFilter;
+      const matchLabel = labelFilter === 'all' || card.dataset.label === labelFilter;
+      const matchSearch = !searchVal || card.querySelector('.card-title').textContent.toLowerCase().includes(searchVal);
+      card.style.display = (matchMember && matchLabel && matchSearch) ? '' : 'none';
+    });
+
+    updateCounts();
+  }
+
+  document.querySelector('[data-od-id="search-input"]').addEventListener('input', applyFilters);
+
+  function showNotification(message, type) {
+    const container = document.getElementById('toast-container');
+    if (!container) return;
+    const toast = document.createElement('div');
+    toast.className = 'toast ' + (type || 'info');
+    toast.setAttribute('role', 'status');
+    const icons = {
+      info: '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="18" height="18"><path stroke-linecap="round" stroke-linejoin="round" d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z"/></svg>',
+      success: '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="18" height="18"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>',
+      warning: '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="18" height="18"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z"/></svg>',
+      error: '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="18" height="18"><path stroke-linecap="round" stroke-linejoin="round" d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>'
+    };
+    toast.innerHTML = (icons[type] || icons.info) + '<span>' + message + '</span>';
+    container.appendChild(toast);
+    setTimeout(function() {
+      if (toast.parentNode) {
+        toast.style.animation = 'slideOut 0.3s ease forwards';
+        setTimeout(function() { if (toast.parentNode) toast.remove(); }, 300);
+      }
+    }, 3500);
+  }
+
+  // ── Nav sidebar ── */
+  const currentPage = window.location.pathname.split('/').pop() || 'quadro-kanban.html';
+  document.querySelectorAll('.nav-item').forEach(item => {
+    const href = item.getAttribute('href');
+    if (href === currentPage) {
+      item.classList.add('active');
+    } else {
+      item.classList.remove('active');
+    }
+  });
+
+  /* ── Add card via modal ── */
+
+  document.querySelectorAll('.column-add').forEach(btn => {
+    btn.addEventListener('click', function() {
+      addCardTargetColumn = this.closest('.column').dataset.column;
+      openCreateModal();
+    });
+  });
+
+  function openCreateModal() {
+    modalTitle.value = '';
+    modalDesc.value = '';
+    modalAssignee.value = 'ana';
+    modalPoints.value = '1';
+    modalStatus.value = addCardTargetColumn || 'backlog';
+    currentTag = 'growth';
+
+    modalTags.querySelectorAll('.modal-tag-btn').forEach(b => {
+      b.classList.toggle('selected', b.dataset.tag === 'growth');
+    });
+
+    const emptyCard = document.createElement('div');
+    emptyCard.dataset.subtasks = '[]';
+    currentCard = emptyCard;
+    renderSubtasksInModal(emptyCard);
+
+    modal.querySelector('h3').textContent = 'Nova tarefa';
+    modalDeleteBtn.style.display = 'none';
+    modal.classList.add('active');
+    setTimeout(() => modalTitle.focus(), 100);
+  }
+
+  function createCard() {
+    const newTitle = modalTitle.value.trim();
+    if (!newTitle) return;
+
+    const newMember = modalAssignee.value;
+    const newPoints = modalPoints.value;
+    const newStatus = modalStatus.value;
+    const newTag = currentTag;
+    const newDesc = modalDesc.value.trim();
+    const newStart = modalStart.value || '';
+    const newEnd = modalEnd.value || '';
+    const newSubtasks = getCardSubtasks(currentCard);
+
+    const colBody = document.querySelector('[data-column="' + newStatus + '"] .column-body');
+    if (!colBody) return;
+
+    const memberInfo = memberNames[newMember];
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.draggable = true;
+    card.dataset.id = 'g-new-' + Date.now();
+    card.dataset.member = newMember;
+    card.dataset.label = newTag;
+    card.dataset.subtasks = JSON.stringify(newSubtasks);
+    if (newDesc) card.dataset.description = newDesc;
+    if (newStart) card.dataset.start = newStart;
+    if (newEnd) card.dataset.end = newEnd;
+
+    card.innerHTML = `
+      <span class="card-tag tag-${newTag}">${tagNames[newTag]}</span>
+      <div class="card-title">${newTitle}</div>
+      <div class="card-meta">
+        <div class="card-assignee">
+          <div class="avatar ${memberInfo.class}">${memberInfo.avatar}</div>
+          <span class="card-assignee-name">${memberInfo.name}</span>
+        </div>
+        <div class="card-right">
+          <span class="card-points">${newPoints}</span>
+        </div>
+      </div>
+    `;
+
+    card.addEventListener('dragstart', function(e) {
+      draggedCard = this;
+      this.classList.add('dragging');
+      this.setAttribute('aria-grabbed', 'true');
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', this.dataset.id);
+    });
+    card.addEventListener('dragend', function() {
+      this.classList.remove('dragging');
+      this.setAttribute('aria-grabbed', 'false');
+      draggedCard = null;
+      document.querySelectorAll('.column-body').forEach(col => col.classList.remove('drag-over'));
+    });
+    card.addEventListener('click', function() {
+      openModal(this);
+    });
+
+    colBody.appendChild(card);
+    renderCardSubtasks(card);
+    updateCounts();
+    saveState();
+    closeModal();
+    showNotification('Card criado com sucesso!', 'success');
+  }
+
+  /* ── Modal de Edição de Card ── */
+  function openModal(card) {
+    currentCard = card;
+    const member = card.dataset.member;
+    const label = card.dataset.label;
+    const title = card.querySelector('.card-title').textContent;
+    const points = card.querySelector('.card-points').textContent;
+    const column = card.closest('.column').dataset.column;
+
+    modalTitle.value = title;
+    modalDesc.value = card.dataset.description || '';
+    modalAssignee.value = member;
+    modalPoints.value = points;
+    modalStatus.value = column;
+    modalStart.value = card.dataset.start || '';
+    modalEnd.value = card.dataset.end || '';
+    currentTag = label;
+
+    modalTags.querySelectorAll('.modal-tag-btn').forEach(btn => {
+      btn.classList.toggle('selected', btn.dataset.tag === label);
+    });
+
+    renderSubtasksInModal(card);
+
+    modal.querySelector('h3').textContent = 'Editar tarefa';
+    modalDeleteBtn.style.display = 'block';
+    modal.classList.add('active');
+    setTimeout(() => modalTitle.focus(), 100);
+  }
+
+  function computeCardDateRange(card) {
+    const manualStart = card.dataset.start || '';
+    const manualEnd = card.dataset.end || '';
+    const subtasks = getCardSubtasks(card);
+    let subStart = null;
+    let subEnd = null;
+    subtasks.forEach(function(st) {
+      if (st.startDate) {
+        if (!subStart || st.startDate < subStart) subStart = st.startDate;
+      }
+      if (st.endDate) {
+        if (!subEnd || st.endDate > subEnd) subEnd = st.endDate;
+      }
+    });
+    return {
+      start: manualStart || subStart || '',
+      end: manualEnd || subEnd || '',
+      isManual: !!manualStart || !!manualEnd
+    };
+  }
+
+  function formatDateShort(d) {
+    if (!d) return '';
+    var parts = d.split('-');
+    if (parts.length !== 3) return d;
+    return parts[2] + '/' + parts[1];
+  }
+
+  function closeModal() {
+    modal.classList.remove('active');
+    currentCard = null;
+    modal.querySelector('h3').textContent = 'Editar tarefa';
+    modalDeleteBtn.style.display = 'block';
+  }
+
+  // ── Subtask Modal ──
+  function openSubtaskModal(card, index) {
+    currentSubtaskCard = card;
+    currentSubtaskIndex = index;
+    const subtasks = getCardSubtasks(card);
+    const isNew = index === null;
+    const subtask = isNew ? null : subtasks[index];
+
+    subtaskModalTitle.textContent = isNew ? 'Nova subtarefa' : 'Editar subtarefa';
+    subtaskModalText.value = subtask ? subtask.text : '';
+    subtaskModalAssignee.value = subtask?.assignee || '';
+    subtaskModalStart.value = subtask?.startDate || '';
+    subtaskModalEnd.value = subtask?.endDate || '';
+    subtaskModalStatus.value = subtask?.status || 'in-progress';
+    subtaskModalDeleteBtn.style.display = isNew ? 'none' : 'block';
+
+    subtaskModal.classList.add('active');
+    setTimeout(() => subtaskModalText.focus(), 100);
+  }
+
+  function closeSubtaskModal() {
+    subtaskModal.classList.remove('active');
+    currentSubtaskCard = null;
+    currentSubtaskIndex = null;
+  }
+
+  function saveSubtask() {
+    const text = subtaskModalText.value.trim();
+    if (!text || !currentSubtaskCard) return;
+
+    const assignee = subtaskModalAssignee.value || null;
+    const startDate = subtaskModalStart.value || null;
+    const endDate = subtaskModalEnd.value || null;
+    const status = subtaskModalStatus.value || 'in-progress';
+
+    const subtasks = getCardSubtasks(currentSubtaskCard);
+
+    if (currentSubtaskIndex === null) {
+      subtasks.push({ text, assignee, status, startDate, endDate });
+    } else {
+      const st = subtasks[currentSubtaskIndex];
+      st.text = text;
+      st.assignee = assignee;
+      st.startDate = startDate;
+      st.endDate = endDate;
+      st.status = status;
+    }
+
+    setCardSubtasks(currentSubtaskCard, subtasks);
+    renderSubtasksInModal(currentSubtaskCard);
+    renderCardSubtasks(currentSubtaskCard);
+    closeSubtaskModal();
+  }
+
+  function deleteSubtask() {
+    if (currentSubtaskIndex === null) return;
+    if (confirm('Excluir esta subtarefa?')) {
+      const subtasks = getCardSubtasks(currentSubtaskCard);
+      subtasks.splice(currentSubtaskIndex, 1);
+      setCardSubtasks(currentSubtaskCard, subtasks);
+      renderSubtasksInModal(currentSubtaskCard);
+      renderCardSubtasks(currentSubtaskCard);
+      closeSubtaskModal();
+    }
+  }
+
+  document.getElementById('subtask-modal-close-btn').addEventListener('click', closeSubtaskModal);
+  document.getElementById('subtask-modal-cancel-btn').addEventListener('click', closeSubtaskModal);
+  document.getElementById('subtask-modal-save-btn').addEventListener('click', saveSubtask);
+  document.getElementById('subtask-modal-delete-btn').addEventListener('click', deleteSubtask);
+  subtaskModal.addEventListener('click', function(e) { if (e.target === subtaskModal) closeSubtaskModal(); });
+  document.addEventListener('keydown', function(e) { if (e.key === 'Escape' && subtaskModal.classList.contains('active')) closeSubtaskModal(); });
+
+  // ── Subtasks in Card Modal ──
+  function getCardSubtasks(card) {
+    if (!card.dataset.subtasks) return [];
+    try {
+      return JSON.parse(card.dataset.subtasks);
+    } catch {
+      return [];
+    }
+  }
+
+  function setCardSubtasks(card, subtasks) {
+    card.dataset.subtasks = JSON.stringify(subtasks);
+  }
+
+function renderSubtasksInModal(card) {
+  const list = document.getElementById('modal-subtask-list');
+  const subtasks = getCardSubtasks(card);
+
+  const statusLabels = { 'done': 'Concluído', 'in-progress': 'Em andamento', 'cancelled': 'Cancelado' };
+  const statusClasses = { 'done': 'badge-done', 'in-progress': 'badge-in-progress', 'cancelled': 'badge-cancelled' };
+
+  list.innerHTML = '';
+  subtasks.forEach((st, i) => {
+    const div = document.createElement('div');
+    div.className = 'modal-subtask-item';
+    const assigneeName = st.assignee && memberNames[st.assignee] ? memberNames[st.assignee].name : '—';
+    const stStatus = st.status || (st.completed ? 'done' : 'in-progress');
+    div.innerHTML = `
+      <span class="subtask-status-badge ${statusClasses[stStatus] || 'badge-in-progress'}">${statusLabels[stStatus] || 'Em andamento'}</span>
+      <span class="subtask-text ${stStatus === 'done' ? 'subtask-completed' : ''}">${st.text || ''}</span>
+      <span class="subtask-assignee">${assigneeName}</span>
+      <span class="subtask-dates">
+        ${st.startDate ? st.startDate : ''} 
+        ${st.endDate ? ' ' + st.endDate : ''}
+      </span>
+      <button type="button" class="modal-subtask-edit" data-index="${i}" aria-label="Editar subtarefa">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z"/></svg>
+      </button>
+      <button type="button" class="modal-subtask-remove" data-index="${i}" aria-label="Remover subtarefa">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+    `;
+    list.appendChild(div);
+  });
+
+  // Add edit event listeners for each subtask
+  list.querySelectorAll('.modal-subtask-edit').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const index = parseInt(this.dataset.index);
+      openSubtaskModal(card, index);
+    });
+  });
+
+  // Add remove event listeners for each subtask
+  list.querySelectorAll('.modal-subtask-remove').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const index = parseInt(this.dataset.index);
+      const subtasks = getCardSubtasks(card);
+      subtasks.splice(index, 1);
+      setCardSubtasks(card, subtasks);
+      renderSubtasksInModal(card);
+    });
+  });
+}
+
+  // Add subtask button in card modal
+document.getElementById('add-subtask-btn').addEventListener('click', function() {
+  openSubtaskModal(currentCard, null);
+});
+
+  function renderCardSubtasks(card) {
+    const column = card.closest('.column')?.dataset.column;
+    
+    // Status badge
+    let statusBadge = card.querySelector('.card-status');
+    if (column) {
+      if (!statusBadge) {
+        statusBadge = document.createElement('span');
+        statusBadge.className = 'card-status';
+        const tagEl = card.querySelector('.card-tag');
+        if (tagEl) tagEl.insertAdjacentElement('afterend', statusBadge);
+        else card.insertBefore(statusBadge, card.firstChild);
+      }
+      
+      const statusConfig = {
+        'backlog': { class: 'backlog', text: 'Backlog', icon: 'M9 4.5v15m6-15v15' },
+        'todo': { class: 'todo', text: 'A fazer', icon: 'M12 6v6l4 2' },
+        'in-progress': { class: 'progress', text: 'Em andamento', icon: 'M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z' },
+        'in-review': { class: 'review', text: 'Em revisão', icon: 'M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z' },
+        'done': { class: 'done', text: 'Concluído', icon: 'M4.5 12.75l6 6 9-13.5' }
+      };
+      
+      const cfg = statusConfig[column] || statusConfig['backlog'];
+      statusBadge.className = 'card-status ' + cfg.class;
+      statusBadge.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="${cfg.icon}"/></svg><span>${cfg.text}</span>`;
+      
+      card.classList.toggle('done', column === 'done');
+    } else if (statusBadge) {
+      statusBadge.remove();
+    }
+    
+    // Subtask bar
+    let subtaskBar = card.querySelector('.card-subtasks');
+    const subtasks = getCardSubtasks(card);
+
+    if (subtasks.length === 0) {
+      if (subtaskBar) subtaskBar.remove();
+      const oldBadge = card.querySelector('.card-st-badge');
+      if (oldBadge) oldBadge.remove();
+    } else {
+      if (!subtaskBar) {
+        subtaskBar = document.createElement('div');
+        subtaskBar.className = 'card-subtasks';
+        card.querySelector('.card-meta').insertAdjacentElement('beforebegin', subtaskBar);
+      }
+
+      const done = subtasks.filter(s => s.status === 'done' || s.completed).length;
+      const inProgress = subtasks.filter(s => s.status === 'in-progress' || (!s.status && !s.completed)).length;
+      const cancelled = subtasks.filter(s => s.status === 'cancelled').length;
+      const total = subtasks.length;
+
+      let countsHtml = '';
+      if (done > 0) countsHtml += `<span class="st-count st-done" title="Concluídas">${done} ✓</span>`;
+      if (inProgress > 0) countsHtml += `<span class="st-count st-progress" title="Em andamento">${inProgress} ●</span>`;
+      if (cancelled > 0) countsHtml += `<span class="st-count st-cancelled" title="Canceladas">${cancelled} ✕</span>`;
+
+      subtaskBar.innerHTML = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+        <span>${total} subtarefas</span>
+        ${countsHtml}
+      `;
+
+      // Add count badge to card title
+      let titleBadge = card.querySelector('.card-st-badge');
+      const titleEl = card.querySelector('.card-title');
+      if (titleEl) {
+        if (!titleBadge) {
+          titleBadge = document.createElement('span');
+          titleBadge.className = 'card-st-badge';
+          titleEl.appendChild(titleBadge);
+        }
+        titleBadge.innerHTML = `<span class="stb-done">${done}</span>/${total}`;
+      }
+    }
+
+    // Dates bar (use manual dates if set, otherwise infer from subtasks)
+    let dateBar = card.querySelector('.card-dates');
+    const range = computeCardDateRange(card);
+    if (range.start || range.end) {
+      if (!dateBar) {
+        dateBar = document.createElement('div');
+        dateBar.className = 'card-dates';
+        const insertBefore = subtaskBar || card.querySelector('.card-meta');
+        insertBefore.insertAdjacentElement('beforebegin', dateBar);
+      }
+      const tooltip = range.isManual
+        ? 'Datas manuais (sobrescrevem as subtarefas)'
+        : 'Datas calculadas das subtarefas';
+      dateBar.title = tooltip;
+      dateBar.innerHTML = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"/></svg>
+        <span>${formatDateShort(range.start) || '—'}</span>
+        <span class="date-sep">→</span>
+        <span>${formatDateShort(range.end) || '—'}</span>
+      `;
+    } else if (dateBar) {
+      dateBar.remove();
+    }
+  }
+
+  function saveCard() {
+    if (!currentCard) return;
+
+    const newTitle = modalTitle.value.trim();
+    if (!newTitle) return;
+
+    const newMember = modalAssignee.value;
+    const newPoints = modalPoints.value;
+    const newStatus = modalStatus.value;
+    const newTag = currentTag;
+    const newDesc = modalDesc.value.trim();
+    const newStart = modalStart.value || '';
+    const newEnd = modalEnd.value || '';
+
+    currentCard.querySelector('.card-title').textContent = newTitle;
+    currentCard.querySelector('.card-points').textContent = newPoints;
+    currentCard.dataset.member = newMember;
+    currentCard.dataset.label = newTag;
+    if (newDesc) currentCard.dataset.description = newDesc;
+    if (newStart) currentCard.dataset.start = newStart; else delete currentCard.dataset.start;
+    if (newEnd) currentCard.dataset.end = newEnd; else delete currentCard.dataset.end;
+
+    const tagEl = currentCard.querySelector('.card-tag');
+    tagEl.className = 'card-tag tag-' + newTag;
+    tagEl.textContent = tagNames[newTag];
+
+    const memberInfo = memberNames[newMember];
+    const avatarEl = currentCard.querySelector('.avatar');
+    avatarEl.className = 'avatar ' + memberInfo.class;
+    avatarEl.textContent = memberInfo.avatar;
+    currentCard.querySelector('.card-assignee-name').textContent = memberInfo.name;
+
+    const targetColumn = document.querySelector('[data-column="' + newStatus + '"] .column-body');
+    if (targetColumn && currentCard.parentElement !== targetColumn) {
+      targetColumn.appendChild(currentCard);
+    }
+
+    renderCardSubtasks(currentCard);
+    updateCounts();
+    saveState();
+    closeModal();
+    showNotification('Card atualizado!', 'success');
+  }
+
+  function deleteCard() {
+    if (!currentCard) return;
+    if (confirm('Tem certeza que deseja excluir esta tarefa?')) {
+      currentCard.remove();
+      updateCounts();
+      saveState();
+      closeModal();
+      showNotification('Card excluído', 'info');
+    }
+  }
+
+  modalTags.querySelectorAll('.modal-tag-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      modalTags.querySelectorAll('.modal-tag-btn').forEach(b => b.classList.remove('selected'));
+      this.classList.add('selected');
+      currentTag = this.dataset.tag;
+    });
+  });
+
+  modalCloseBtn.addEventListener('click', closeModal);
+  modalCancelBtn.addEventListener('click', closeModal);
+  modalSaveBtn.addEventListener('click', function() {
+    if (!currentCard) return;
+    if (currentCard.dataset.id && currentCard.dataset.id.startsWith('g-')) {
+      saveCard();
+    } else {
+      createCard();
+    }
+  });
+  modalDeleteBtn.addEventListener('click', deleteCard);
+
+  modal.addEventListener('click', function(e) {
+    if (e.target === modal) closeModal();
+  });
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && modal.classList.contains('active')) {
+      closeModal();
+    }
+  });
+
+  document.querySelectorAll('.card[draggable="true"]').forEach(card => {
+    let isDragging = false;
+    card.addEventListener('dragstart', () => { isDragging = true; });
+    card.addEventListener('dragend', () => { isDragging = false; });
+    card.addEventListener('click', function(e) {
+      if (isDragging) return;
+      openModal(this);
+    });
+    renderCardSubtasks(card);
+  });
+
+  function renderBlockedList() {
+    var list = document.getElementById('blocked-list');
+    if (!list) return;
+    list.innerHTML = '';
+    blockedItems.forEach(function(b) {
+      var div = document.createElement('div');
+      div.className = 'blocked-item';
+      div.setAttribute('data-id', b.id);
+      div.innerHTML =
+        '<svg class="blocked-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/></svg>' +
+        '<div class="blocked-text">' +
+          '<strong>' + b.title + '</strong>' +
+          b.desc +
+          (b.taskId ? '<div class="blocked-task-link">' + b.taskId.toUpperCase() + '</div>' : '') +
+        '</div>' +
+        '<div class="blocked-item-actions">' +
+          '<button class="blocked-action-btn edit" title="Editar"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125"/></svg></button>' +
+          '<button class="blocked-action-btn delete" title="Excluir"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/></svg></button>' +
+        '</div>';
+      div.addEventListener('click', function(e) {
+        if (e.target.closest('.blocked-action-btn')) return;
+        openBlockedModal(b.id);
+      });
+      var editBtn = div.querySelector('.edit');
+      editBtn.addEventListener('click', function(e) { e.stopPropagation(); openBlockedModal(b.id); });
+      var delBtn = div.querySelector('.delete');
+      delBtn.addEventListener('click', function(e) { e.stopPropagation(); deleteBlocked(b.id); });
+      list.appendChild(div);
+    });
+  }
+
+  function openBlockedModal(id) {
+    currentBlockedId = id;
+    var b = id ? blockedItems.find(function(x) { return x.id === id; }) : null;
+    blockedModalTitle.textContent = b ? 'Editar bloqueio' : 'Novo bloqueio';
+    blockedTitleInput.value = b ? b.title : '';
+    blockedDescInput.value = b ? b.desc : '';
+    blockedAssigneeSelect.value = b && b.assignee ? b.assignee : '';
+    blockedDeleteBtn.style.display = b ? '' : 'none';
+    populateBlockedTaskSelect();
+    blockedTaskSelect.value = b && b.taskId ? b.taskId : '';
+    blockedModal.classList.add('active');
+  }
+
+  function populateBlockedTaskSelect() {
+    blockedTaskSelect.innerHTML = '<option value="">— Nenhuma —</option>';
+    var allTasks = document.querySelectorAll('.kanban-column .card, .card[data-id]');
+    var seen = {};
+    allTasks.forEach(function(card) {
+      var id = card.getAttribute('data-id');
+      if (!id || seen[id]) return;
+      seen[id] = true;
+      var title = card.querySelector('.card-title');
+      var opt = document.createElement('option');
+      opt.value = id;
+      opt.textContent = (id.toUpperCase()) + ' — ' + (title ? title.textContent.trim() : '');
+      blockedTaskSelect.appendChild(opt);
+    });
+  }
+
+  function saveBlocked() {
+    var title = blockedTitleInput.value.trim();
+    if (!title) { blockedTitleInput.focus(); return; }
+    var desc = blockedDescInput.value.trim();
+    var taskId = blockedTaskSelect.value;
+    var assignee = blockedAssigneeSelect.value;
+    if (currentBlockedId) {
+      var b = blockedItems.find(function(x) { return x.id === currentBlockedId; });
+      if (b) { b.title = title; b.desc = desc; b.taskId = taskId; b.assignee = assignee; }
+    } else {
+      blockedItems.push({
+        id: 'b' + Date.now(),
+        title: title,
+        desc: desc,
+        taskId: taskId,
+        assignee: assignee
+      });
+    }
+    renderBlockedList();
+    closeBlockedModal();
+  }
+
+  function deleteBlocked(id) {
+    if (!confirm('Excluir este bloqueio?')) return;
+    blockedItems = blockedItems.filter(function(x) { return x.id !== id; });
+    renderBlockedList();
+    closeBlockedModal();
+  }
+
+  function closeBlockedModal() {
+    blockedModal.classList.remove('active');
+    currentBlockedId = null;
+  }
+
+  document.getElementById('add-blocked-btn').addEventListener('click', function() { openBlockedModal(null); });
+  document.getElementById('blocked-modal-close-btn').addEventListener('click', closeBlockedModal);
+  document.getElementById('blocked-modal-cancel-btn').addEventListener('click', closeBlockedModal);
+  document.getElementById('blocked-modal-save-btn').addEventListener('click', saveBlocked);
+  blockedDeleteBtn.addEventListener('click', function() { if (currentBlockedId) deleteBlocked(currentBlockedId); });
+  blockedModal.addEventListener('click', function(e) { if (e.target === blockedModal) closeBlockedModal(); });
+  blockedModal.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeBlockedModal(); });
+
+  function renderAttentionList() {
+    var list = document.getElementById('attention-list');
+    if (!list) return;
+    list.innerHTML = '';
+    attentionItems.forEach(function(a) {
+      var div = document.createElement('div');
+      div.className = 'attention-item';
+      div.setAttribute('data-id', a.id);
+      div.innerHTML =
+        '<svg class="attention-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/></svg>' +
+        '<div class="attention-text">' +
+          '<strong>' + a.title + '</strong>' +
+          a.desc +
+          (a.taskId ? '<div class="attention-task-link">' + a.taskId.toUpperCase() + '</div>' : '') +
+        '</div>' +
+        '<div class="attention-item-actions">' +
+          '<button class="attention-action-btn edit" title="Editar"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125"/></svg></button>' +
+          '<button class="attention-action-btn delete" title="Excluir"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/></svg></button>' +
+        '</div>';
+      div.addEventListener('click', function(e) {
+        if (e.target.closest('.attention-action-btn')) return;
+        openAttentionModal(a.id);
+      });
+      var editBtn = div.querySelector('.edit');
+      editBtn.addEventListener('click', function(e) { e.stopPropagation(); openAttentionModal(a.id); });
+      var delBtn = div.querySelector('.delete');
+      delBtn.addEventListener('click', function(e) { e.stopPropagation(); deleteAttention(a.id); });
+      list.appendChild(div);
+    });
+  }
+
+  function openAttentionModal(id) {
+    currentAttentionId = id;
+    var a = id ? attentionItems.find(function(x) { return x.id === id; }) : null;
+    attentionModalTitle.textContent = a ? 'Editar atenção' : 'Nova atenção';
+    attentionTitleInput.value = a ? a.title : '';
+    attentionDescInput.value = a ? a.desc : '';
+    attentionAssigneeSelect.value = a && a.assignee ? a.assignee : '';
+    attentionDeleteBtn.style.display = a ? '' : 'none';
+    populateAttentionTaskSelect();
+    attentionTaskSelect.value = a && a.taskId ? a.taskId : '';
+    attentionModal.classList.add('active');
+  }
+
+  function populateAttentionTaskSelect() {
+    attentionTaskSelect.innerHTML = '<option value="">— Nenhuma —</option>';
+    var allTasks = document.querySelectorAll('.kanban-column .card, .card[data-id]');
+    var seen = {};
+    allTasks.forEach(function(card) {
+      var id = card.getAttribute('data-id');
+      if (!id || seen[id]) return;
+      seen[id] = true;
+      var title = card.querySelector('.card-title');
+      var opt = document.createElement('option');
+      opt.value = id;
+      opt.textContent = (id.toUpperCase()) + ' — ' + (title ? title.textContent.trim() : '');
+      attentionTaskSelect.appendChild(opt);
+    });
+  }
+
+  function saveAttention() {
+    var title = attentionTitleInput.value.trim();
+    if (!title) { attentionTitleInput.focus(); return; }
+    var desc = attentionDescInput.value.trim();
+    var taskId = attentionTaskSelect.value;
+    var assignee = attentionAssigneeSelect.value;
+    if (currentAttentionId) {
+      var a = attentionItems.find(function(x) { return x.id === currentAttentionId; });
+      if (a) { a.title = title; a.desc = desc; a.taskId = taskId; a.assignee = assignee; }
+    } else {
+      attentionItems.push({
+        id: 'a' + Date.now(),
+        title: title,
+        desc: desc,
+        taskId: taskId,
+        assignee: assignee
+      });
+    }
+    renderAttentionList();
+    closeAttentionModal();
+  }
+
+  function deleteAttention(id) {
+    if (!confirm('Excluir esta atenção?')) return;
+    attentionItems = attentionItems.filter(function(x) { return x.id !== id; });
+    renderAttentionList();
+    closeAttentionModal();
+  }
+
+  function closeAttentionModal() {
+    attentionModal.classList.remove('active');
+    currentAttentionId = null;
+  }
+
+  document.getElementById('add-attention-btn').addEventListener('click', function() { openAttentionModal(null); });
+  document.getElementById('attention-modal-close-btn').addEventListener('click', closeAttentionModal);
+  document.getElementById('attention-modal-cancel-btn').addEventListener('click', closeAttentionModal);
+  document.getElementById('attention-modal-save-btn').addEventListener('click', saveAttention);
+  attentionDeleteBtn.addEventListener('click', function() { if (currentAttentionId) deleteAttention(currentAttentionId); });
+  attentionModal.addEventListener('click', function(e) { if (e.target === attentionModal) closeAttentionModal(); });
+  attentionModal.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeAttentionModal(); });
+
+  renderBlockedList();
+  renderAttentionList();
+
+  // Populate member filter buttons from equipe data
+  (function() {
+    var filterGroup = document.getElementById('member-filter-group');
+    if (!filterGroup) return;
+    Object.keys(memberNames).forEach(function(key) {
+      var m = memberNames[key];
+      var btn = document.createElement('button');
+      btn.className = 'filter-btn';
+      btn.dataset.filter = 'member';
+      btn.dataset.value = key;
+      var cls = m.class || 'avatar-a';
+      if (cls.indexOf('avatar-') !== 0) cls = 'avatar-' + cls;
+      var avatarHtml = '<span class="filter-avatar ' + cls + '">' + (m.name ? m.name.charAt(0) : '?') + '</span>';
+      btn.innerHTML = avatarHtml + '<span class="filter-btn-text">' + m.name + '</span>';
+      filterGroup.appendChild(btn);
+    });
+    // Restore saved filter state now that all buttons exist
+    restoreFilterButtons();
+    applyFilters();
+  })();
+
+  updateCounts();
+
+  // ── Keyboard shortcuts ──
+  document.addEventListener('keydown', function(e) {
+    // Ctrl+K / Cmd+K for global search focus
+    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+      e.preventDefault();
+      var searchInput = document.querySelector('[data-od-id="search-input"]');
+      if (searchInput) { searchInput.focus(); searchInput.select(); }
+    }
+    // Ctrl+Shift+L to clear all filters
+    if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'L') {
+      e.preventDefault();
+      savedFilters = {};
+      localStorage.setItem('kanban-filters', '{}');
+      document.querySelectorAll('.filter-btn').forEach(function(b) { b.classList.remove('active'); });
+      document.querySelectorAll('.filter-btn[data-value="all"]').forEach(function(b) { b.classList.add('active'); });
+      applyFilters();
+    }
+});
+  
+  // ── Init: Load saved state or save initial ──
+  if (!loadBoardState()) {
+    saveState();
+  } else {
+    history.push(JSON.stringify(getBoardState()));
+    historyIndex = 0;
+  }
+
+})();
+</script>
+</body>
+</html>

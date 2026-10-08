@@ -1,0 +1,1269 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Configurações — Growth Squad</title>
+<style>
+  :root {
+    --bg: oklch(98% 0.005 250);
+    --surface: oklch(100% 0 0);
+    --surface-warm: oklch(98% 0.005 250);
+    --fg: oklch(22% 0.02 240);
+    --fg-2: oklch(35% 0.018 240);
+    --muted: oklch(50% 0.018 240);
+    --border: oklch(90% 0.008 240);
+    --border-soft: oklch(94% 0.006 250);
+    --accent: oklch(58% 0.16 145);
+    --accent-hover: oklch(58% 0.16 145 / 0.85);
+    --accent-active: oklch(58% 0.16 145 / 0.75);
+    --accent-on: oklch(38% 0.12 145);
+    --accent-soft: oklch(94% 0.04 145);
+    --success: oklch(65% 0.16 145);
+    --warn: oklch(75% 0.14 80);
+    --warn-soft: oklch(95% 0.04 80);
+    --danger: oklch(60% 0.18 25);
+    --danger-soft: oklch(94% 0.04 25);
+    --info: oklch(62% 0.14 250);
+    --info-soft: oklch(94% 0.04 250);
+    --font-body: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', system-ui, sans-serif;
+    --font-mono: 'JetBrains Mono', 'IBM Plex Mono', ui-monospace, Menlo, monospace;
+    --text-xs: 12px;
+    --text-sm: 13px;
+    --text-base: 15px;
+    --text-lg: 18px;
+    --text-xl: 22px;
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 16px;
+    --space-5: 20px;
+    --space-6: 24px;
+    --space-8: 32px;
+    --radius-sm: 6px;
+    --radius-md: 8px;
+    --radius-lg: 10px;
+    --radius-pill: 9999px;
+    --elev-flat: none;
+    --elev-ring: 0 0 0 1px var(--border);
+    --elev-raised: 0 8px 32px oklch(0% 0 0 / 0.08);
+    --focus-ring: 0 0 0 3px oklch(58% 0.16 145 / 0.15);
+    --motion-fast: 200ms;
+    --motion-base: 320ms;
+    --ease-standard: cubic-bezier(0.32, 0.72, 0, 1);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: var(--font-body); background: var(--bg); color: var(--fg); font-size: var(--text-base); line-height: 1.55; min-height: 100vh; display: flex; flex-direction: column; }
+
+  .topbar { background: var(--surface); border-bottom: 1px solid var(--border); padding: var(--space-3) var(--space-5); display: flex; align-items: center; gap: var(--space-4); flex-shrink: 0; z-index: 10; }
+  .topbar-breadcrumb { display: flex; align-items: center; gap: var(--space-2); font-size: var(--text-sm); color: var(--muted); }
+  .topbar-breadcrumb span { color: var(--fg); font-weight: 600; }
+  .sprint-chip { display: inline-flex; align-items: center; gap: var(--space-2); background: var(--surface-warm); color: var(--accent); font-size: var(--text-xs); font-weight: 600; padding: var(--space-1) var(--space-3); border-radius: var(--radius-pill); letter-spacing: 0.02em; border: 1px solid var(--border); }
+  .sprint-chip::before { content: ''; width: 6px; height: 6px; background: var(--accent); border-radius: 50%; }
+
+  .layout { display: flex; flex: 1; overflow: hidden; }
+
+  .nav-sidebar { width: 220px; background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; flex-shrink: 0; padding: var(--space-4) 0; overflow-y: auto; }
+  .nav-brand { display: flex; align-items: center; gap: var(--space-3); padding: 0 var(--space-4) var(--space-5); border-bottom: 1px solid var(--border); margin-bottom: var(--space-3); }
+  .nav-brand-icon { width: 32px; height: 32px; background: linear-gradient(135deg, var(--accent), oklch(65% 0.16 160)); border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 14px; flex-shrink: 0; }
+  .nav-brand-text { font-size: 14px; font-weight: 700; color: var(--fg); line-height: 1.2; }
+  .nav-brand-sub { font-size: var(--text-xs); color: var(--muted); font-weight: 400; }
+  .nav-section { padding: 0 var(--space-3); margin-bottom: var(--space-2); }
+  .nav-section-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); padding: var(--space-2) var(--space-2) var(--space-1); }
+  .nav-item { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-2) var(--space-3); border-radius: var(--radius-sm); font-size: var(--text-sm); font-weight: 500; color: var(--fg-2); cursor: pointer; transition: all var(--motion-fast) var(--ease-standard); text-decoration: none; position: relative; }
+  .nav-item:hover { background: var(--bg); color: var(--fg); }
+  .nav-item.active { background: var(--surface-warm); color: var(--accent); font-weight: 600; }
+  .nav-item.active::before { content: ''; position: absolute; left: 0; top: 6px; bottom: 6px; width: 3px; background: var(--accent); border-radius: 0 2px 2px 0; }
+  .nav-item svg { width: 18px; height: 18px; flex-shrink: 0; opacity: 0.7; }
+  .nav-item.active svg { opacity: 1; }
+  .nav-badge { margin-left: auto; background: var(--danger); color: white; font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: var(--radius-pill); font-family: var(--font-mono); }
+  .nav-spacer { flex: 1; }
+  .nav-user { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3) var(--space-4); border-top: 1px solid var(--border); margin-top: var(--space-2); }
+  .nav-user-info { flex: 1; min-width: 0; }
+  .nav-user-name { font-size: var(--text-sm); font-weight: 600; color: var(--fg); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .nav-user-role { font-size: var(--text-xs); color: var(--muted); }
+
+  .content { flex: 1; padding: var(--space-6); overflow-y: auto; max-width: 800px; }
+  .content-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: var(--space-6); }
+  .content-title { font-size: var(--text-xl); font-weight: 700; color: var(--fg); letter-spacing: -0.01em; }
+  .content-subtitle { font-size: var(--text-sm); color: var(--muted); margin-top: var(--space-1); }
+
+  .btn-primary { display: inline-flex; align-items: center; gap: var(--space-2); background: linear-gradient(135deg, var(--accent), oklch(65% 0.16 160)); color: var(--accent-on); border: none; border-radius: var(--radius-md); padding: var(--space-3) var(--space-5); font-size: var(--text-sm); font-weight: 600; cursor: pointer; transition: all var(--motion-fast) var(--ease-standard); font-family: var(--font-body); box-shadow: 0 4px 16px oklch(58% 0.16 145 / 0.3); }
+  .btn-primary:hover { box-shadow: 0 8px 24px oklch(58% 0.16 145 / 0.4); transform: translateY(-1px); }
+  .btn-primary:active { transform: translateY(0); }
+  .btn-primary svg { width: 16px; height: 16px; }
+
+  .avatar { width: 22px; height: 22px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: white; background: var(--muted); flex-shrink: 0; }
+  .avatar-a { background: var(--accent); }
+
+  .settings-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: var(--space-6); margin-bottom: var(--space-5); box-shadow: var(--elev-raised); }
+  .settings-card-header { display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-5); padding-bottom: var(--space-4); border-bottom: 1px solid var(--border-soft); }
+  .settings-card-icon { width: 32px; height: 32px; background: var(--surface-warm); border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; color: var(--accent); flex-shrink: 0; }
+  .settings-card-icon svg { width: 18px; height: 18px; }
+  .settings-card-title { font-size: var(--text-base); font-weight: 600; color: var(--fg); }
+
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-5) var(--space-8); }
+  .form-group { display: flex; flex-direction: column; gap: var(--space-2); }
+  .form-label { font-size: var(--text-xs); font-weight: 600; color: var(--fg-2); text-transform: uppercase; letter-spacing: 0.05em; }
+  .form-help { font-size: var(--text-xs); color: var(--muted); }
+
+  .form-input, .form-select {
+    width: 100%;
+    padding: var(--space-3) var(--space-3);
+    font-size: var(--text-sm);
+    font-family: var(--font-body);
+    color: var(--fg);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    outline: none;
+    transition: all var(--motion-fast) var(--ease-standard);
+  }
+  .form-input:hover, .form-select:hover { border-color: var(--fg-2); }
+  .form-input:focus, .form-select:focus { border-color: var(--accent); box-shadow: var(--focus-ring); }
+  .form-select { cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='%236b7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='m19.5 8.25-7.5 7.5-7.5-7.5'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; padding-right: 32px; }
+
+  .toggle-row { display: flex; align-items: center; justify-content: space-between; padding: var(--space-3) 0; }
+  .toggle-row + .toggle-row { border-top: 1px solid var(--border-soft); }
+  .toggle-info { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
+  .toggle-label { font-size: var(--text-sm); font-weight: 500; color: var(--fg); }
+  .toggle-desc { font-size: var(--text-xs); color: var(--muted); line-height: 1.4; }
+
+  .toggle-switch { position: relative; width: 44px; height: 24px; flex-shrink: 0; }
+  .toggle-switch input { opacity: 0; width: 0; height: 0; position: absolute; }
+  .toggle-slider {
+    position: absolute;
+    inset: 0;
+    background: var(--border);
+    border-radius: var(--radius-pill);
+    cursor: pointer;
+    transition: background var(--motion-fast) var(--ease-standard);
+  }
+  .toggle-slider::before {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 20px;
+    height: 20px;
+    background: white;
+    border-radius: 50%;
+    transition: transform var(--motion-fast) var(--ease-standard);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+  }
+  .toggle-switch input:checked + .toggle-slider { background: var(--accent); }
+  .toggle-switch input:checked + .toggle-slider::before { transform: translateX(20px); }
+  .toggle-switch input:focus-visible + .toggle-slider { box-shadow: var(--focus-ring); }
+
+  .save-bar { display: flex; align-items: center; justify-content: space-between; padding: var(--space-4) 0; margin-top: var(--space-4); border-top: 1px solid var(--border-soft); }
+  .save-bar-text { font-size: var(--text-xs); color: var(--muted); }
+
+  @media (max-width: 900px) {
+    .nav-sidebar { width: 56px; }
+    .nav-brand-text, .nav-brand-sub, .nav-section-label, .nav-item span, .nav-badge, .nav-user-info { display: none; }
+    .nav-item { justify-content: center; padding: var(--space-3); }
+    .nav-item.active::before { display: none; }
+    .nav-brand { justify-content: center; padding: 0 0 var(--space-4); }
+    .nav-user { justify-content: center; padding: var(--space-3) var(--space-2); }
+    .form-grid { grid-template-columns: 1fr; }
+    .content { max-width: 100%; }
+  }
+  @media (max-width: 700px) { .nav-sidebar { display: none; } }
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  [contenteditable="true"] {
+    outline: none;
+    border-radius: var(--radius-sm);
+    transition: background var(--motion-fast) var(--ease-standard), box-shadow var(--motion-fast) var(--ease-standard);
+    cursor: text;
+    padding: 2px 4px;
+    margin: -2px -4px;
+  }
+  [contenteditable="true"]:hover { background: var(--surface-warm); }
+  [contenteditable="true"]:focus { background: var(--surface-warm); box-shadow: var(--focus-ring); }
+/* SQ-STYLE — trocador de projeto, chips de projeto, escopo de relatorios e CRUD de projetos */
+.sq-switch { position: relative; padding: 0 12px; margin: -4px 0 14px; }
+.sq-switch-btn { width: 100%; display: flex; align-items: center; gap: 8px; padding: 8px 10px; background: var(--surface, #fff); border: 1px solid var(--border); border-radius: 8px; cursor: pointer; font-family: inherit; font-size: 13px; font-weight: 600; color: var(--fg); transition: border-color .15s, box-shadow .15s; }
+.sq-switch-btn:hover { border-color: var(--muted); }
+.sq-switch.open .sq-switch-btn { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+.sq-switch-dot { width: 10px; height: 10px; border-radius: 50%; flex: 0 0 auto; }
+.sq-switch-name { flex: 1; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sq-switch-btn svg { width: 14px; height: 14px; color: var(--muted); transition: transform .15s; flex-shrink: 0; }
+.sq-switch.open .sq-switch-btn svg { transform: rotate(180deg); }
+.sq-menu { position: fixed; display: none; z-index: 300; background: var(--surface, #fff); border: 1px solid var(--border); border-radius: 10px; box-shadow: 0 12px 34px oklch(22% 0.02 240 / .2); padding: 6px; max-width: 280px; }
+.sq-menu.open { display: block; }
+.sq-menu-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); padding: 4px 8px 6px; }
+.sq-menu-item { display: flex; align-items: center; gap: 8px; width: 100%; padding: 7px 8px; border: none; background: none; border-radius: 6px; cursor: pointer; font-family: inherit; font-size: 13px; color: var(--fg); text-align: left; }
+.sq-menu-item:hover { background: var(--bg, oklch(98% 0.005 250)); }
+.sq-menu-dot { width: 9px; height: 9px; border-radius: 50%; flex: 0 0 auto; }
+.sq-menu-name { flex: 1; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sq-menu-sprint { font-size: 11px; color: var(--muted); flex-shrink: 0; font-weight: 500; }
+.sq-menu-check { width: 14px; height: 14px; color: var(--accent); flex-shrink: 0; visibility: hidden; }
+.sq-menu-item.active .sq-menu-check { visibility: visible; }
+.sq-menu-foot { border-top: 1px solid var(--border); margin-top: 6px; padding-top: 6px; }
+.sq-menu-foot .sq-menu-item { color: var(--muted); font-size: 12px; }
+.sq-switch-btn:focus-visible, .sq-menu-item:focus-visible, .sq-proj-activate:focus-visible, .sq-proj-del:focus-visible, .sq-add-btn:focus-visible, .report-scope select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.sq-proj-row input:focus-visible { outline: 2px solid var(--accent); outline-offset: -1px; }
+.sq-projects-check input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.member-projects:empty { display: none; }
+.sq-proj-row input { min-width: 0; }
+.backlog-empty, .gantt-empty { padding: 48px 20px; text-align: center; color: var(--muted); font-size: 13px; }
+.backlog-empty strong, .gantt-empty strong { display: block; margin-bottom: 6px; color: var(--fg); font-size: 14px; font-weight: 700; }
+.backlog-empty span, .gantt-empty span { font-size: 12px; }
+.member-projects { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 10px; }
+.member-project-chip { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 600; color: var(--muted); background: var(--bg, oklch(98% 0.005 250)); border: 1px solid var(--border); border-radius: 999px; padding: 2px 8px; }
+.member-project-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.sq-projects-check { display: flex; flex-wrap: wrap; gap: 6px; }
+.sq-projects-check label { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: var(--muted); background: var(--bg, oklch(98% 0.005 250)); border: 1px solid var(--border); border-radius: 999px; padding: 5px 10px; cursor: pointer; user-select: none; }
+.sq-projects-check label:has(input:checked) { border-color: var(--accent); color: var(--fg); background: var(--accent-soft); }
+.sq-projects-check input { margin: 0; accent-color: var(--accent); }
+.report-scope { display: flex; align-items: center; gap: 8px; }
+.report-scope label { font-size: 12px; font-weight: 600; color: var(--muted); }
+.report-scope select { border: 1px solid var(--border); border-radius: 8px; padding: 7px 10px; font-family: inherit; font-size: 13px; font-weight: 600; color: var(--fg); background: var(--surface, #fff); cursor: pointer; }
+.report-scope select:focus { outline: none; border-color: var(--accent); }
+.portfolio-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.portfolio-table th { text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); padding: 8px 10px; border-bottom: 1px solid var(--border); }
+.portfolio-table td { padding: 9px 10px; border-bottom: 1px solid var(--border); }
+.portfolio-table tr:last-child td { border-bottom: none; }
+.portfolio-name { display: inline-flex; align-items: center; gap: 7px; font-weight: 600; }
+.portfolio-dot { width: 8px; height: 8px; border-radius: 50%; }
+.portfolio-pct { font-weight: 700; color: var(--accent); }
+.project-list { display: flex; flex-direction: column; gap: 8px; }
+.sq-proj-row { display: flex; align-items: center; gap: 8px; background: var(--bg, oklch(98% 0.005 250)); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; }
+.sq-proj-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.sq-proj-row input { border: 1px solid transparent; background: transparent; border-radius: 6px; padding: 6px 8px; font-family: inherit; font-size: 13px; color: var(--fg); min-width: 0; }
+.sq-proj-row input.sq-proj-name { flex: 2; font-weight: 700; }
+.sq-proj-row input.sq-proj-sprint { flex: 1; color: var(--muted); font-weight: 500; }
+.sq-proj-row input:hover { border-color: var(--border); }
+.sq-proj-row input:focus { outline: none; border-color: var(--accent); background: var(--surface, #fff); }
+.sq-proj-badge { flex-shrink: 0; font-size: 11px; font-weight: 700; color: oklch(38% 0.12 145); background: var(--accent-soft); border-radius: 999px; padding: 4px 10px; }
+.sq-proj-activate { flex-shrink: 0; border: 1px solid var(--border); background: var(--surface, #fff); color: var(--fg); font-family: inherit; font-size: 12px; font-weight: 600; border-radius: 999px; padding: 4px 10px; cursor: pointer; }
+.sq-proj-activate:hover { border-color: var(--accent); color: var(--accent); }
+.sq-proj-del { flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border: none; background: none; border-radius: 6px; color: var(--muted); cursor: pointer; }
+.sq-proj-del:hover { background: oklch(60% 0.18 25 / .1); color: var(--danger); }
+.sq-proj-del:disabled { opacity: .35; cursor: not-allowed; }
+.sq-proj-del svg { width: 15px; height: 15px; }
+.sq-add-btn { display: inline-flex; align-items: center; gap: 7px; margin-top: 12px; border: 1px dashed var(--border); background: none; color: var(--fg); font-family: inherit; font-size: 13px; font-weight: 600; border-radius: 8px; padding: 9px 14px; cursor: pointer; width: 100%; justify-content: center; }
+.sq-add-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+.sq-add-btn:disabled { opacity: .45; cursor: not-allowed; }
+.sq-add-btn svg { width: 15px; height: 15px; }
+.sq-add-hint { display: none; margin-top: 8px; font-size: 12px; font-weight: 500; color: var(--danger); text-align: center; }
+.sq-add-hint.show { display: block; }
+.sq-add-btn.nudge { animation: sq-nudge .25s ease; }
+@keyframes sq-nudge { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-3px); } 75% { transform: translateX(3px); } }
+.sq-limit-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.sq-limit-row label { font-size: 12px; font-weight: 600; color: var(--muted); white-space: nowrap; }
+.sq-limit-row input { width: 72px; border: 1px solid var(--border); border-radius: 6px; padding: 6px 8px; font-family: inherit; font-size: 13px; font-weight: 600; color: var(--fg); background: var(--surface, #fff); }
+.sq-limit-row input:hover { border-color: var(--muted); }
+.sq-limit-row input:focus { outline: none; border-color: var(--accent); }
+.sq-limit-row input:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.sq-limit-note { font-size: 11px; color: var(--muted); }
+.sq-lanes-box { margin-top: var(--space-5); padding-top: var(--space-4); border-top: 1px dashed var(--border); }
+.sq-lanes-head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); }
+.sq-lanes-title { font-size: 13px; font-weight: 700; color: var(--fg); }
+.sq-lanes-desc { font-size: 12px; color: var(--muted); margin-top: var(--space-1); }
+.sq-lanes-scope { display: flex; align-items: center; gap: var(--space-2); margin-top: var(--space-3); }
+.sq-lanes-scope label { font-size: 12px; font-weight: 600; color: var(--muted); }
+.sq-lanes-scope select { border: 1px solid var(--border); border-radius: 8px; padding: 7px 10px; font-family: inherit; font-size: 13px; font-weight: 600; color: var(--fg); background: var(--surface, #fff); cursor: pointer; }
+.sq-lanes-scope select:focus { outline: none; border-color: var(--accent); }
+.sq-lanes-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: var(--space-3); min-height: 30px; align-items: center; }
+.sq-lanes-chip { display: inline-flex; align-items: center; gap: var(--space-1); background: var(--accent-soft); border: 1px solid var(--border); border-radius: 999px; padding: 3px 4px 3px 10px; }
+.sq-lanes-chip:focus-within { border-color: var(--accent); }
+.sq-lanes-chip-input { border: none; background: none; font-family: inherit; font-size: 12px; font-weight: 700; color: var(--fg); width: 96px; padding: 2px 0; }
+.sq-lanes-chip-input:focus { outline: none; }
+.sq-lanes-chip-del { border: none; background: none; width: 20px; height: 20px; border-radius: 50%; color: var(--muted); cursor: pointer; font-size: 14px; line-height: 1; display: inline-flex; align-items: center; justify-content: center; }
+.sq-lanes-chip-del:hover { background: oklch(60% 0.18 25 / .1); color: var(--danger); }
+.sq-lanes-empty { font-size: 12px; color: var(--muted); font-style: italic; padding: var(--space-1) 2px; }
+.sq-lanes-add { display: flex; gap: var(--space-2); margin-top: var(--space-3); }
+.sq-lanes-input { flex: 1; border: 1px solid var(--border); border-radius: 8px; padding: 7px 10px; font-family: inherit; font-size: 13px; color: var(--fg); background: var(--surface, #fff); min-width: 0; }
+.sq-lanes-input:hover { border-color: var(--muted); }
+.sq-lanes-input:focus { outline: none; border-color: var(--accent); }
+.sq-lanes-add-btn { border: 1px dashed var(--border); background: none; color: var(--fg); font-family: inherit; font-size: 12px; font-weight: 700; border-radius: 8px; padding: 7px 12px; cursor: pointer; flex-shrink: 0; }
+.sq-lanes-add-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+.sq-lanes-note { display: none; margin-top: var(--space-2); font-size: 12px; font-weight: 600; }
+.sq-lanes-note.show { display: block; }
+.sq-lanes-note.ok { color: oklch(38% 0.12 145); }
+.sq-lanes-note.err { color: var(--danger); }
+.sq-lanes-chip-del:focus-visible, .sq-lanes-add-btn:focus-visible, .sq-lanes-scope select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.sq-lanes-chip-input:focus-visible, .sq-lanes-input:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+@media (max-width: 900px) {
+  .sq-switch { padding: 0 6px 10px; margin: -2px 0 10px; }
+  .sq-switch-name { display: none; }
+  .sq-switch-btn { justify-content: center; padding: 8px 6px; }
+  .sq-switch-btn svg { display: none; }
+}
+
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-breadcrumb">Projetos <span style="color:var(--muted);margin:0 2px">/</span> <span>Growth Squad</span></div>
+  <div class="sprint-chip">Sprint 14 — Ativo</div>
+</header>
+
+<div class="layout">
+  <nav class="nav-sidebar">
+    <div class="nav-brand">
+      <a href="home.html" style="text-decoration:none;display:flex;align-items:center;gap:var(--space-3)">
+        <div class="nav-brand-icon">G</div>
+        <div><div class="nav-brand-text">Growth Squad</div><div class="nav-brand-sub">Sprint 14</div></div>
+      </a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-section-label">Principal</div>
+      <a href="home.html" class="nav-item"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0-.621.504-1.125 1.125-1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25"/></svg><span>Home</span></a>
+      <a href="quadro-kanban.html" class="nav-item"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 4.5v15m6-15v15m-10.875 0h15.75c.621 0 1.125-.504 1.125-1.125V5.625c0-.621-.504-1.125-1.125-1.125H4.125C3.504 4.5 3 5.004 3 5.625v12.75c0 .621.504 1.125 1.125 1.125Z"/></svg><span>Quadro</span></a>
+      <a href="backlog.html" class="nav-item"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0ZM3.75 12h.007v.008H3.75V12Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm-.375 5.25h.007v.008H3.75v-.008Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"/></svg><span>Backlog</span><span class="nav-badge">5</span></a>
+      <a href="cronograma.html" class="nav-item"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5"/></svg><span>Cronograma</span></a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-section-label">Análise</div>
+      <a href="relatorios.html" class="nav-item"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z"/></svg><span>Relatórios</span></a>
+      <a href="equipe.html" class="nav-item"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z"/></svg><span>Equipe</span></a>
+    </div>
+    <div class="nav-spacer"></div>
+    <div class="nav-section">
+      <div class="nav-section-label">Sistema</div>
+      <a href="configuracoes.html" class="nav-item active" data-nav="settings"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.325.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.431l-1.003.827c-.293.241-.438.613-.43.992a7.723 7.723 0 0 1 0 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.955.26 1.43l-1.298 2.247a1.125 1.125 0 0 1-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.47 6.47 0 0 1-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.94-1.11.94h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 0 1-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 0 1-1.369-.49l-1.297-2.247a1.125 1.125 0 0 1 .26-1.431l1.004-.827c.292-.24.437-.613.43-.991a6.932 6.932 0 0 1 0-.255c.007-.38-.138-.751-.43-.992l-1.004-.827a1.125 1.125 0 0 1-.26-1.43l1.297-2.247a1.125 1.125 0 0 1 1.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.086.22-.128.332-.183.582-.495.644-.869l.214-1.28Z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/></svg><span>Configurações</span></a>
+    </div>
+    <div class="nav-user">
+      <div class="avatar avatar-a" style="width:28px;height:28px;font-size:11px">A</div>
+      <div class="nav-user-info"><div class="nav-user-name">Ana Souza</div><div class="nav-user-role">Product Lead</div></div>
+    </div>
+  </nav>
+
+  <main class="content">
+    <div class="content-header">
+      <div>
+        <h1 class="content-title">Configurações</h1>
+        <p class="content-subtitle">Gerencie as configurações do sprint e preferências do squad</p>
+      </div>
+    </div>
+
+    <form>
+      <div class="settings-card">
+        <div class="settings-card-header">
+          <div class="settings-card-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5"/></svg>
+          </div>
+          <div class="settings-card-title">Configurações do Sprint</div>
+        </div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label" for="sprint-name">Nome do Sprint</label>
+            <input class="form-input" type="text" id="sprint-name" value="Sprint 14">
+            <span class="form-help">Identificador único para este sprint</span>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="sprint-capacity">Capacidade do squad (horas)</label>
+            <input class="form-input" type="number" id="sprint-capacity" value="40">
+            <span class="form-help">Total de horas disponíveis para o squad</span>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="sprint-start">Data de início</label>
+            <input class="form-input" type="date" id="sprint-start" value="2026-08-18">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="sprint-end">Data de término</label>
+            <input class="form-input" type="date" id="sprint-end" value="2026-08-29">
+          </div>
+        </div>
+      </div>
+
+      <div class="settings-card">
+        <div class="settings-card-header">
+          <div class="settings-card-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.75V12A2.25 2.25 0 0 1 4.5 9.75h15A2.25 2.25 0 0 1 21.75 12v.75m-8.69-6.44-2.12-2.12a1.5 1.5 0 0 0-1.061-.44H4.5A2.25 2.25 0 0 0 2.25 6v12a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9a2.25 2.25 0 0 0-2.25-2.25h-5.379a1.5 1.5 0 0 1-1.06-.44Z"/></svg>
+          </div>
+          <div class="settings-card-title">Projetos</div>
+          <div id="projects-count" style="margin-left:auto;font-size:12px;color:var(--muted);font-weight:500"></div>
+        </div>
+        <div class="sq-limit-row">
+          <label for="max-projects-input">Limite de projetos</label>
+          <input type="number" id="max-projects-input" min="1" max="20" step="1" inputmode="numeric">
+          <span class="sq-limit-note">De 1 a 20, vale para todas as páginas</span>
+        </div>
+        <div class="project-list" id="project-list"></div>
+        <button type="button" class="sq-add-btn" id="add-project-btn">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+          Novo projeto
+        </button>
+        <div class="sq-add-hint" id="add-project-hint" role="status" aria-live="polite"></div>
+
+        <div class="sq-lanes-box" id="lanes-box">
+          <div class="sq-lanes-head">
+            <span class="sq-lanes-title">Lanes do quadro</span>
+            <label class="toggle-switch">
+              <input type="checkbox" id="lanes-enabled" checked aria-label="Exibir lanes no quadro">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <p class="sq-lanes-desc">Agrupar os cards de cada coluna do quadro em lanes separadas.</p>
+          <div class="sq-lanes-scope">
+            <label for="lanes-project">Projeto</label>
+            <select id="lanes-project"></select>
+          </div>
+          <div class="sq-lanes-chips" id="lanes-chips"></div>
+          <div class="sq-lanes-add">
+            <input class="sq-lanes-input" id="lanes-add-input" type="text" maxlength="24" placeholder="Nova lane (ex.: Hotfix)" aria-label="Nome da nova lane">
+            <button type="button" class="sq-lanes-add-btn" id="lanes-add-btn">Adicionar</button>
+          </div>
+          <div class="sq-lanes-note" id="lanes-note" role="status" aria-live="polite"></div>
+        </div>
+      </div>
+
+      <div class="settings-card">
+        <div class="settings-card-header">
+          <div class="settings-card-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0"/></svg>
+          </div>
+          <div class="settings-card-title">Notificações</div>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-info">
+            <span class="toggle-label">Email ao atribuir tarefa</span>
+            <span class="toggle-desc">Enviar email quando uma tarefa for atribuída a um membro</span>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" checked>
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-info">
+            <span class="toggle-label">Resumo diário</span>
+            <span class="toggle-desc">Receber um resumo das atividades do dia às 18h</span>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" checked>
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-info">
+            <span class="toggle-label">Alerta de blocked</span>
+            <span class="toggle-desc">Notificar quando uma tarefa ficar bloqueada por mais de 24h</span>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+      </div>
+
+      <div class="settings-card">
+        <div class="settings-card-header">
+          <div class="settings-card-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4.098 19.902a3.75 3.75 0 0 0 5.304 0l6.401-6.402M6.75 21A3.75 3.75 0 0 1 3 17.25V4.125C3 3.504 3.504 3 4.125 3h5.25c.621 0 1.125.504 1.125 1.125v4.072M6.75 21a3.75 3.75 0 0 0 3.75-3.75V8.197M6.75 21h13.125c.621 0 1.125-.504 1.125-1.125v-5.25c0-.621-.504-1.125-1.125-1.125h-4.072M10.5 8.197l2.88-2.88c.438-.439 1.15-.439 1.59 0l3.712 3.713c.44.44.44 1.152 0 1.59l-2.879 2.88M6.75 17.25h.008v.008H6.75v-.008Z"/></svg>
+          </div>
+          <div class="settings-card-title">Aparência</div>
+        </div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label" for="theme-select">Tema</label>
+            <select class="form-select" id="theme-select">
+              <option value="light" selected>Claro</option>
+              <option value="dark">Escuro</option>
+              <option value="system">Sistema</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="default-col">Coluna padrão</label>
+            <select class="form-select" id="default-col">
+              <option value="backlog">Backlog</option>
+              <option value="progress">Em andamento</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="save-bar">
+        <span class="save-bar-text">Última alteração: há 2 minutos</span>
+        <button type="button" class="btn-primary">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+          Salvar alterações
+        </button>
+      </div>
+    </form>
+  </main>
+</div>
+
+<script>
+/* SQ-STORE — armazenamento de projetos, seeds e trocador de projeto (injetado em todas as paginas) */
+window.SQ = (function () {
+  'use strict';
+  var PKEY = 'sq-projects';
+  var AKEY = 'sq-active-project';
+  var MKEY = 'sq-max-projects';
+  var MAX = 8;
+  var MAX_MIN = 1;
+  var MAX_HARD = 20;
+  var COLORS = {
+    green: 'oklch(58% 0.16 145)',
+    blue: 'oklch(58% 0.15 250)',
+    purple: 'oklch(55% 0.15 300)',
+    orange: 'oklch(65% 0.15 75)',
+    cyan: 'oklch(60% 0.12 200)'
+  };
+  var COLOR_ORDER = ['green', 'blue', 'purple', 'orange', 'cyan'];
+  var DEFAULTS = [
+    { id: 'p1', name: 'Growth Squad', sprint: 'Sprint 14', color: 'green' },
+    { id: 'p2', name: 'App Mobile', sprint: 'Sprint 7', color: 'blue' },
+    { id: 'p3', name: 'Portal do Cliente', sprint: 'Sprint 3', color: 'purple' },
+    { id: 'p4', name: 'Automações', sprint: 'Sprint 12', color: 'orange' },
+    { id: 'p5', name: 'Data Platform', sprint: 'Sprint 9', color: 'cyan' }
+  ];
+
+  var SEEDS = {
+    p2: {
+      'M-01': { title: 'Onboarding com biometria', assignee: 'Ana Souza', tag: 'Design', priority: 'high', status: 'progress', lane: 'Feature',
+        messages: [{ author: 'Ana', avatar: 'a', time: '2h atrás', text: 'Fluxo de Face ID aprovado pelo time de segurança.' }],
+        subtasks: [
+          { text: 'Mapear fluxo de autenticação', assignee: 'ana', status: 'done', startDate: '2026-08-18', endDate: '2026-08-19' },
+          { text: 'Implementar Face ID no iOS', assignee: 'ana', status: 'in-progress', startDate: '2026-08-20', endDate: '2026-08-24' },
+          { text: 'Impressão digital no Android', assignee: 'bruno', status: 'in-progress', startDate: '2026-08-24', endDate: '2026-08-27' },
+          { text: 'Testes de usabilidade', assignee: 'carla', status: 'in-progress', startDate: '2026-08-28', endDate: '2026-08-30' }
+        ] },
+      'M-02': { title: 'Push de carrinho abandonado', assignee: 'Elena Ribeiro', tag: 'Growth', priority: 'med', status: 'todo',
+        messages: [{ author: 'Elena', avatar: 'e', time: '40min atrás', text: 'Jornada pronta, falta revisão de compliance.' }],
+        subtasks: [
+          { text: 'Definir gatilhos de abandono', assignee: 'elena', status: 'done', startDate: '2026-08-18', endDate: '2026-08-19' },
+          { text: 'Criar segmento de audiência', assignee: 'elena', status: 'in-progress', startDate: '2026-08-21', endDate: '2026-08-23' },
+          { text: 'Configurar jornada no Braze', assignee: 'ana', status: 'in-progress', startDate: '2026-08-25', endDate: '2026-08-27' }
+        ] },
+      'M-03': { title: 'Deep links de campanha', assignee: 'Bruno Lima', tag: 'Infra', priority: 'low', status: 'backlog',
+        messages: [{ author: 'Bruno', avatar: 'b', time: '1h atrás', text: 'iOS e Android precisam de regras separadas.' }],
+        subtasks: [
+          { text: 'Padronizar scheme universal', assignee: 'bruno', status: 'done', startDate: '2026-08-20', endDate: '2026-08-22' },
+          { text: 'Configurar AASA e applink', assignee: 'bruno', status: 'in-progress', startDate: '2026-08-24', endDate: '2026-08-26' },
+          { text: 'Validar com marketing', assignee: 'elena', status: 'in-progress', startDate: '2026-08-27', endDate: '2026-08-29' }
+        ] },
+      'M-04': { title: 'Crash reporting no iOS', assignee: 'Carla Mendes', tag: 'Bug', priority: 'high', status: 'review', lane: 'Bug',
+        messages: [{ author: 'Carla', avatar: 'c', time: '3h atrás', text: 'Passamos de 30 crashes/dia para 4.' }],
+        subtasks: [
+          { text: 'Integrar SDK do Crashlytics', assignee: 'carla', status: 'done', startDate: '2026-08-18', endDate: '2026-08-20' },
+          { text: 'Mapear crashes do último mês', assignee: 'carla', status: 'done', startDate: '2026-08-21', endDate: '2026-08-23' },
+          { text: 'Painel de alertas por versão', assignee: 'bruno', status: 'in-progress', startDate: '2026-08-25', endDate: '2026-08-28' }
+        ] },
+      'M-05': { title: 'Dashboard de retenção do app', assignee: 'Diego Alves', tag: 'Data', priority: 'med', status: 'done',
+        messages: [{ author: 'Diego', avatar: 'd', time: '5h atrás', text: 'Publicado no Metabase para todo o time.' }],
+        subtasks: [
+          { text: 'Query de coortes por canal', assignee: 'diego', status: 'done', startDate: '2026-08-18', endDate: '2026-08-21' },
+          { text: 'Visões D1/D7/D30', assignee: 'diego', status: 'done', startDate: '2026-08-22', endDate: '2026-08-25' },
+          { text: 'Alerta de queda de retenção', assignee: 'diego', status: 'done', startDate: '2026-08-26', endDate: '2026-08-28' }
+        ] }
+    },
+    p3: {
+      'C-01': { title: 'SSO com Google Workspace', assignee: 'Bruno Lima', tag: 'Infra', priority: 'high', status: 'progress',
+        messages: [{ author: 'Bruno', avatar: 'b', time: '1h atrás', text: 'Consent screen aprovado, seguindo para mapeamento de grupos.' }],
+        subtasks: [
+          { text: 'Configurar app OAuth2', assignee: 'bruno', status: 'done', startDate: '2026-08-18', endDate: '2026-08-20' },
+          { text: 'Mapear grupos e permissões', assignee: 'bruno', status: 'in-progress', startDate: '2026-08-21', endDate: '2026-08-24' },
+          { text: 'Migrar clientes enterprise', assignee: 'ana', status: 'in-progress', startDate: '2026-08-25', endDate: '2026-08-29' }
+        ] },
+      'C-02': { title: 'Histórico de faturas', assignee: 'Carla Mendes', tag: 'Design', priority: 'med', status: 'todo',
+        messages: [{ author: 'Carla', avatar: 'c', time: '2h atrás', text: 'Incluí download em PDF e XML na listagem.' }],
+        subtasks: [
+          { text: 'Wireframes da listagem', assignee: 'carla', status: 'done', startDate: '2026-08-19', endDate: '2026-08-21' },
+          { text: 'Detalhe de pagamento e nota', assignee: 'carla', status: 'in-progress', startDate: '2026-08-23', endDate: '2026-08-26' },
+          { text: 'Handoff para desenvolvimento', assignee: 'carla', status: 'in-progress', startDate: '2026-08-27', endDate: '2026-08-29' }
+        ] },
+      'C-03': { title: 'Autenticação em dois fatores', assignee: 'Ana Souza', tag: 'Infra', priority: 'high', status: 'progress',
+        messages: [{ author: 'Ana', avatar: 'a', time: '4h atrás', text: 'SMS tem custo por envio — avaliamos TOTP como padrão.' }],
+        subtasks: [
+          { text: 'Envio de código por SMS', assignee: 'ana', status: 'done', startDate: '2026-08-18', endDate: '2026-08-21' },
+          { text: 'Recovery codes', assignee: 'bruno', status: 'in-progress', startDate: '2026-08-23', endDate: '2026-08-26' },
+          { text: 'Forçar 2FA para admins', assignee: 'ana', status: 'in-progress', startDate: '2026-08-27', endDate: '2026-08-30' }
+        ] },
+      'C-04': { title: 'Exportação de relatórios em PDF', assignee: 'Diego Alves', tag: 'Data', priority: 'med', status: 'review',
+        messages: [{ author: 'Diego', avatar: 'd', time: '6h atrás', text: 'Geração média caiu de 12s para 3s.' }],
+        subtasks: [
+          { text: 'Template de relatório', assignee: 'diego', status: 'done', startDate: '2026-08-18', endDate: '2026-08-20' },
+          { text: 'Serviço de renderização', assignee: 'bruno', status: 'done', startDate: '2026-08-21', endDate: '2026-08-24' },
+          { text: 'Limites de geração assíncrona', assignee: 'diego', status: 'in-progress', startDate: '2026-08-26', endDate: '2026-08-28' }
+        ] },
+      'C-05': { title: 'Chat de suporte embarcado', assignee: 'Elena Ribeiro', tag: 'Growth', priority: 'low', status: 'backlog',
+        messages: [{ author: 'Elena', avatar: 'e', time: '1 dia atrás', text: 'Comparando três fornecedores por custo e SLA.' }],
+        subtasks: [
+          { text: 'Avaliar fornecedores', assignee: 'elena', status: 'in-progress', startDate: '2026-08-20', endDate: '2026-08-22' },
+          { text: 'Definir SLA de resposta', assignee: 'elena', status: 'in-progress', startDate: '2026-08-24', endDate: '2026-08-26' },
+          { text: 'Integração com CRM', assignee: 'bruno', status: 'in-progress', startDate: '2026-08-27', endDate: '2026-08-29' }
+        ] }
+    },
+    p4: {
+      'A-01': { title: 'RPA de conciliação bancária', assignee: 'Diego Alves', tag: 'Data', priority: 'high', status: 'progress',
+        messages: [{ author: 'Diego', avatar: 'd', time: '30min atrás', text: '92% das transações já conciliam sozinhas.' }],
+        subtasks: [
+          { text: 'Extratos dos 4 bancos', assignee: 'diego', status: 'done', startDate: '2026-08-18', endDate: '2026-08-20' },
+          { text: 'Regras de conciliação automática', assignee: 'diego', status: 'in-progress', startDate: '2026-08-21', endDate: '2026-08-25' },
+          { text: 'Fila de exceções', assignee: 'bruno', status: 'in-progress', startDate: '2026-08-26', endDate: '2026-08-30' }
+        ] },
+      'A-02': { title: 'Alerta de estoque mínimo', assignee: 'Bruno Lima', tag: 'Infra', priority: 'med', status: 'todo',
+        messages: [{ author: 'Bruno', avatar: 'b', time: '2h atrás', text: 'Webhook do ERP já entrega eventos a cada 15min.' }],
+        subtasks: [
+          { text: 'Webhook do ERP', assignee: 'bruno', status: 'done', startDate: '2026-08-19', endDate: '2026-08-21' },
+          { text: 'Regras por categoria', assignee: 'bruno', status: 'in-progress', startDate: '2026-08-23', endDate: '2026-08-25' },
+          { text: 'Notificação no Slack', assignee: 'ana', status: 'in-progress', startDate: '2026-08-26', endDate: '2026-08-28' }
+        ] },
+      'A-03': { title: 'Onboarding automático de fornecedores', assignee: 'Ana Souza', tag: 'Growth', priority: 'med', status: 'done',
+        messages: [{ author: 'Ana', avatar: 'a', time: '1 dia atrás', text: 'Tempo de cadastro caiu de 5 dias para 4 horas.' }],
+        subtasks: [
+          { text: 'Formulário de cadastro', assignee: 'ana', status: 'done', startDate: '2026-08-18', endDate: '2026-08-20' },
+          { text: 'Validação de CNPJ', assignee: 'bruno', status: 'done', startDate: '2026-08-21', endDate: '2026-08-23' },
+          { text: 'Aprovação em dois níveis', assignee: 'ana', status: 'done', startDate: '2026-08-24', endDate: '2026-08-27' }
+        ] },
+      'A-04': { title: 'Formulário dinâmico de aprovação', assignee: 'Carla Mendes', tag: 'Design', priority: 'low', status: 'backlog',
+        messages: [{ author: 'Carla', avatar: 'c', time: '5h atrás', text: 'Testando regras condicionais com o financeiro.' }],
+        subtasks: [
+          { text: 'Estudo de campos condicionais', assignee: 'carla', status: 'in-progress', startDate: '2026-08-21', endDate: '2026-08-23' },
+          { text: 'Protótipo de fluxo', assignee: 'carla', status: 'in-progress', startDate: '2026-08-25', endDate: '2026-08-27' },
+          { text: 'Testes com o financeiro', assignee: 'ana', status: 'in-progress', startDate: '2026-08-28', endDate: '2026-08-30' }
+        ] },
+      'A-05': { title: 'Webhook de sincronização com CRM', assignee: 'Bruno Lima', tag: 'Infra', priority: 'high', status: 'review',
+        messages: [{ author: 'Bruno', avatar: 'b', time: '4h atrás', text: 'Retries com backoff passaram nos testes de carga.' }],
+        subtasks: [
+          { text: 'Contrato de eventos', assignee: 'bruno', status: 'done', startDate: '2026-08-18', endDate: '2026-08-20' },
+          { text: 'Retries com backoff', assignee: 'bruno', status: 'done', startDate: '2026-08-22', endDate: '2026-08-24' },
+          { text: 'Monitoramento de falhas', assignee: 'diego', status: 'in-progress', startDate: '2026-08-26', endDate: '2026-08-29' }
+        ] }
+    },
+    p5: {
+      'D-01': { title: 'Lakehouse na camada prata', assignee: 'Diego Alves', tag: 'Data', priority: 'high', status: 'progress',
+        messages: [{ author: 'Diego', avatar: 'd', time: '1h atrás', text: 'Modelagem revisada, jobs dbt rodando em staging.' }],
+        subtasks: [
+          { text: 'Modelagem das tabelas', assignee: 'diego', status: 'done', startDate: '2026-08-18', endDate: '2026-08-20' },
+          { text: 'Jobs de transformação dbt', assignee: 'diego', status: 'in-progress', startDate: '2026-08-22', endDate: '2026-08-26' },
+          { text: 'Testes de qualidade', assignee: 'carla', status: 'in-progress', startDate: '2026-08-27', endDate: '2026-08-30' }
+        ] },
+      'D-02': { title: 'Catálogo de dados com linhagem', assignee: 'Carla Mendes', tag: 'Design', priority: 'med', status: 'todo',
+        messages: [{ author: 'Carla', avatar: 'c', time: '3h atrás', text: 'Busca por termos entra na próxima rodada de testes.' }],
+        subtasks: [
+          { text: 'Wireframes do catálogo', assignee: 'carla', status: 'done', startDate: '2026-08-19', endDate: '2026-08-21' },
+          { text: 'Página de detalhe do dataset', assignee: 'carla', status: 'in-progress', startDate: '2026-08-23', endDate: '2026-08-26' },
+          { text: 'Busca por termos', assignee: 'elena', status: 'in-progress', startDate: '2026-08-27', endDate: '2026-08-29' }
+        ] },
+      'D-03': { title: 'Pipeline de streaming com Kafka', assignee: 'Bruno Lima', tag: 'Infra', priority: 'high', status: 'review',
+        messages: [{ author: 'Bruno', avatar: 'b', time: '2h atrás', text: 'Throughput validado com 12k eventos/s.' }],
+        subtasks: [
+          { text: 'Cluster em staging', assignee: 'bruno', status: 'done', startDate: '2026-08-18', endDate: '2026-08-21' },
+          { text: 'Consumidores de eventos', assignee: 'bruno', status: 'done', startDate: '2026-08-22', endDate: '2026-08-25' },
+          { text: 'Replay e DLQ', assignee: 'ana', status: 'in-progress', startDate: '2026-08-26', endDate: '2026-08-29' }
+        ] },
+      'D-04': { title: 'Testes de qualidade de dados', assignee: 'Diego Alves', tag: 'Data', priority: 'med', status: 'done',
+        messages: [{ author: 'Diego', avatar: 'd', time: '1 dia atrás', text: 'Regras rodando a cada ingestão, alertas no Slack.' }],
+        subtasks: [
+          { text: 'Regras de unicidade', assignee: 'diego', status: 'done', startDate: '2026-08-18', endDate: '2026-08-20' },
+          { text: 'Testes de schema', assignee: 'diego', status: 'done', startDate: '2026-08-21', endDate: '2026-08-23' },
+          { text: 'Dashboard de anomalias', assignee: 'diego', status: 'done', startDate: '2026-08-24', endDate: '2026-08-27' }
+        ] },
+      'D-05': { title: 'Dashboard de custos de cloud', assignee: 'Elena Ribeiro', tag: 'Growth', priority: 'low', status: 'backlog',
+        messages: [{ author: 'Elena', avatar: 'e', time: '2 dias atrás', text: 'Rateio por time vai usar a tag de centro de custo.' }],
+        subtasks: [
+          { text: 'Integração com a fatura', assignee: 'elena', status: 'in-progress', startDate: '2026-08-20', endDate: '2026-08-22' },
+          { text: 'Rateio por time', assignee: 'elena', status: 'in-progress', startDate: '2026-08-24', endDate: '2026-08-26' },
+          { text: 'Alerta de estouro', assignee: 'diego', status: 'in-progress', startDate: '2026-08-27', endDate: '2026-08-29' }
+        ] }
+    }
+  };
+
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  function maxProjects() {
+    var v = parseInt(localStorage.getItem(MKEY), 10);
+    if (isNaN(v)) return MAX;
+    if (v < MAX_MIN) v = MAX_MIN;
+    if (v > MAX_HARD) v = MAX_HARD;
+    return v;
+  }
+
+  function setMaxProjects(n) {
+    var v = parseInt(n, 10);
+    if (isNaN(v)) return null;
+    if (v < MAX_MIN) v = MAX_MIN;
+    if (v > MAX_HARD) v = MAX_HARD;
+    try { localStorage.setItem(MKEY, String(v)); } catch (e) {}
+    return v;
+  }
+
+  function list() {
+    try {
+      var v = JSON.parse(localStorage.getItem(PKEY));
+      if (Array.isArray(v) && v.length) return v;
+    } catch (e) {}
+    return DEFAULTS.slice();
+  }
+
+  function saveList(l) {
+    try { localStorage.setItem(PKEY, JSON.stringify(l.slice(0, MAX_HARD))); } catch (e) {}
+  }
+
+  function activeId() {
+    var id = null;
+    try { id = localStorage.getItem(AKEY); } catch (e) {}
+    var l = list();
+    for (var i = 0; i < l.length; i++) if (l[i].id === id) return id;
+    return l[0].id;
+  }
+
+  function active() {
+    var id = activeId(), l = list();
+    for (var i = 0; i < l.length; i++) if (l[i].id === id) return l[i];
+    return l[0];
+  }
+
+  function color(p) {
+    var pr = p || active();
+    return COLORS[pr && pr.color] || COLORS.green;
+  }
+
+  function key(base) { return base + ':' + activeId(); }
+
+  function tasksOf(pid) {
+    try {
+      var raw = localStorage.getItem('backlog-tasks:' + pid);
+      if (raw) {
+        var v = JSON.parse(raw);
+        if (v && typeof v === 'object') return v;
+      }
+    } catch (e) {}
+    if (SEEDS[pid]) {
+      try { return JSON.parse(JSON.stringify(SEEDS[pid])); } catch (e) { return SEEDS[pid]; }
+    }
+    return null;
+  }
+
+  function boardOf(pid) {
+    var t = tasksOf(pid);
+    if (!t) return null;
+    var colMap = { backlog: 'backlog', todo: 'todo', progress: 'in-progress', review: 'in-review', done: 'done' };
+    var pts = { high: 5, med: 3, low: 2 };
+    var cols = { backlog: [], todo: [], 'in-progress': [], 'in-review': [], done: [] };
+    Object.keys(t).forEach(function (id) {
+      var task = t[id];
+      var st = task.subtasks || [];
+      var memberKey = (task.assignee || 'ana').toLowerCase().split(' ')[0];
+      var tagKey = (task.tag || 'Growth').toLowerCase();
+      cols[colMap[task.status] || 'backlog'].push({
+        id: id,
+        member: memberKey,
+        label: tagKey,
+        lane: task.lane || '',
+        description: task.description || '',
+        start: (st[0] && st[0].startDate) || '',
+        end: (st[st.length - 1] && st[st.length - 1].endDate) || '',
+        subtasks: JSON.stringify(st.map(function (s) {
+          return { text: s.text, assignee: s.assignee || memberKey, status: s.status || 'in-progress', startDate: s.startDate || '', endDate: s.endDate || '' };
+        })),
+        title: task.title,
+        points: pts[task.priority] || 3
+      });
+    });
+    return { columns: cols, savedFilters: {} };
+  }
+
+  function ganttOf(pid) {
+    var t = tasksOf(pid);
+    if (!t) return null;
+    return Object.keys(t).map(function (id) {
+      var task = t[id];
+      var st = task.subtasks || [];
+      var memberKey = (task.assignee || 'ana').toLowerCase().split(' ')[0];
+      var min = '', max = '';
+      st.forEach(function (s) {
+        if (s.startDate && (!min || s.startDate < min)) min = s.startDate;
+        if (s.endDate && (!max || s.endDate > max)) max = s.endDate;
+      });
+      if (!min) min = '2026-08-18';
+      if (!max || max < min) max = min;
+      return {
+        id: id,
+        title: task.title,
+        member: memberKey,
+        label: (task.tag || 'Growth').toLowerCase(),
+        startDate: min,
+        endDate: max,
+        subtasks: st.map(function (s) {
+          return { text: s.text, member: s.assignee || memberKey, start: s.startDate || min, end: s.endDate || min, done: s.status === 'done' };
+        })
+      };
+    });
+  }
+
+  function projectsFor(memberKey) {
+    var found = {};
+    list().forEach(function (p) {
+      var hit = false;
+      var t = tasksOf(p.id);
+      if (t) {
+        outer1:
+        for (var k in t) {
+          var task = t[k];
+          if ((task.assignee || '').toLowerCase().split(' ')[0] === memberKey) { hit = true; break; }
+          var subs = task.subtasks || [];
+          for (var i = 0; i < subs.length; i++) {
+            if ((subs[i].assignee || '') === memberKey) { hit = true; break outer1; }
+          }
+        }
+      }
+      if (!hit) {
+        try {
+          var b = JSON.parse(localStorage.getItem('kanban-board-state:' + p.id));
+          if (b && b.columns) {
+            outer2:
+            for (var c in b.columns) {
+              var cards = b.columns[c] || [];
+              for (var j = 0; j < cards.length; j++) {
+                if ((cards[j].member || '') === memberKey) { hit = true; break outer2; }
+              }
+            }
+          }
+        } catch (e) {}
+      }
+      if (hit) found[p.id] = true;
+    });
+    var out = list().filter(function (p) { return found[p.id]; }).map(function (p) { return p.id; });
+    return out.length ? out : ['p1'];
+  }
+
+  function setActive(id) {
+    try { localStorage.setItem(AKEY, id); } catch (e) {}
+    location.reload();
+  }
+
+  function newProject() {
+    var l = list();
+    if (l.length >= maxProjects()) return null;
+    var n = 1;
+    l.forEach(function (p) {
+      var m = /^p(\d+)$/.exec(p.id);
+      if (m && parseInt(m[1], 10) >= n) n = parseInt(m[1], 10) + 1;
+    });
+    var used = {};
+    l.forEach(function (p) { used[p.color] = true; });
+    var col = COLOR_ORDER[l.length % COLOR_ORDER.length];
+    for (var i = 0; i < COLOR_ORDER.length; i++) {
+      if (!used[COLOR_ORDER[i]]) { col = COLOR_ORDER[i]; break; }
+    }
+    var proj = { id: 'p' + n, name: 'Novo Projeto', sprint: 'Sprint 1', color: col };
+    l.push(proj);
+    saveList(l);
+    return proj;
+  }
+
+  function removeProject(pid) {
+    var l = list().filter(function (p) { return p.id !== pid; });
+    if (!l.length) return false;
+    saveList(l);
+    ['backlog-tasks', 'kanban-board-state', 'kanban-filters', 'gantt-tasks'].forEach(function (base) {
+      try { localStorage.removeItem(base + ':' + pid); } catch (e) {}
+    });
+    if (activeId() === pid) { try { localStorage.setItem(AKEY, l[0].id); } catch (e) {} }
+    return true;
+  }
+
+  var LANES_MAX = 12;
+  var LANES_MAX_LEN = 24;
+  var LANES_DEFAULT = { enabled: true, labels: ['Feature', 'Bug'] };
+
+  function normalizeLanes(cfg) {
+    var out = { enabled: true, labels: [] };
+    if (cfg && typeof cfg === 'object' && cfg.enabled === false) out.enabled = false;
+    var src = (cfg && Array.isArray(cfg.labels)) ? cfg.labels : LANES_DEFAULT.labels;
+    var seen = {};
+    for (var i = 0; i < src.length && out.labels.length < LANES_MAX; i++) {
+      var raw = typeof src[i] === 'string' ? src[i].replace(/^\s+|\s+$/g, '') : '';
+      if (!raw || raw.length > LANES_MAX_LEN) continue;
+      var k = raw.toLowerCase();
+      if (seen[k]) continue;
+      seen[k] = true;
+      out.labels.push(raw);
+    }
+    return out;
+  }
+
+  function lanesOf(pid) {
+    var l = list();
+    for (var i = 0; i < l.length; i++) {
+      if (l[i].id === pid) return normalizeLanes(l[i].lanes);
+    }
+    return normalizeLanes(LANES_DEFAULT);
+  }
+
+  function setLanes(pid, cfg) {
+    var l = list();
+    var norm = normalizeLanes(cfg);
+    for (var i = 0; i < l.length; i++) {
+      if (l[i].id === pid) { l[i].lanes = norm; saveList(l); return norm; }
+    }
+    return null;
+  }
+
+  function migrate() {
+    try {
+      if (!localStorage.getItem(PKEY)) localStorage.setItem(PKEY, JSON.stringify(DEFAULTS));
+      if (!localStorage.getItem(AKEY)) localStorage.setItem(AKEY, 'p1');
+      ['kanban-board-state', 'kanban-filters', 'backlog-tasks', 'gantt-tasks'].forEach(function (base) {
+        try {
+          var legacy = localStorage.getItem(base);
+          if (legacy && !localStorage.getItem(base + ':p1')) localStorage.setItem(base + ':p1', legacy);
+        } catch (e) {}
+      });
+      try {
+        var m = JSON.parse(localStorage.getItem('growth-squad-members'));
+        if (Array.isArray(m)) {
+          var changed = false;
+          m.forEach(function (x) {
+            if (!Array.isArray(x.projects)) { x.projects = projectsFor(String(x.name || '').split(' ')[0].toLowerCase()); changed = true; }
+          });
+          if (changed) localStorage.setItem('growth-squad-members', JSON.stringify(m));
+        }
+      } catch (e) {}
+    } catch (e) {}
+  }
+
+  function injectSwitcher() {
+    var brand = document.querySelector('.nav-brand');
+    if (!brand || document.querySelector('.sq-switch')) return;
+    var p = active();
+
+    var bt = document.querySelector('.nav-brand-text');
+    if (bt) bt.textContent = p.name;
+    var bs = document.querySelector('.nav-brand-sub');
+    if (bs) bs.textContent = p.sprint;
+    var bi = document.querySelector('.nav-brand-icon');
+    if (bi) bi.textContent = p.name.charAt(0).toUpperCase();
+    var crumb = document.querySelector('.topbar-breadcrumb span:last-child');
+    if (crumb) crumb.textContent = p.name;
+    var chip = document.querySelector('.sprint-chip');
+    if (chip) chip.textContent = p.sprint + ' - Ativo';
+
+    var wrap = document.createElement('div');
+    wrap.className = 'sq-switch';
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'sq-switch-btn';
+    btn.setAttribute('aria-haspopup', 'true');
+    btn.setAttribute('aria-expanded', 'false');
+    btn.innerHTML = '<span class="sq-switch-dot" style="background:' + color(p) + '"></span>' +
+      '<span class="sq-switch-name">' + esc(p.name) + '</span>' +
+      '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5"/></svg>';
+    wrap.appendChild(btn);
+    brand.insertAdjacentElement('afterend', wrap);
+
+    var menu = document.createElement('div');
+    menu.className = 'sq-menu';
+    menu.innerHTML = '<div class="sq-menu-label">Projetos</div>' +
+      list().map(function (pr) {
+        return '<button type="button" class="sq-menu-item' + (pr.id === p.id ? ' active' : '') + '" data-pid="' + pr.id + '">' +
+          '<span class="sq-menu-dot" style="background:' + color(pr) + '"></span>' +
+          '<span class="sq-menu-name">' + esc(pr.name) + '</span>' +
+          '<span class="sq-menu-sprint">' + esc(pr.sprint) + '</span>' +
+          '<svg class="sq-menu-check" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/></svg>' +
+          '</button>';
+      }).join('') +
+      '<div class="sq-menu-foot"><button type="button" class="sq-menu-item" data-sq-settings="1">' +
+      '<span class="sq-menu-name">Configurações de projetos</span><span class="sq-menu-sprint">›</span></button></div>';
+    document.body.appendChild(menu);
+
+    function place() {
+      var r = btn.getBoundingClientRect();
+      menu.style.top = (r.bottom + 6) + 'px';
+      menu.style.left = Math.max(8, Math.min(r.left, window.innerWidth - 260)) + 'px';
+      menu.style.minWidth = Math.max(r.width, 230) + 'px';
+    }
+    function openMenu() { place(); menu.classList.add('open'); wrap.classList.add('open'); btn.setAttribute('aria-expanded', 'true'); }
+    function closeMenu() { menu.classList.remove('open'); wrap.classList.remove('open'); btn.setAttribute('aria-expanded', 'false'); }
+
+    btn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      if (menu.classList.contains('open')) closeMenu(); else openMenu();
+    });
+    menu.addEventListener('click', function (e) {
+      var item = e.target.closest('.sq-menu-item[data-pid]');
+      if (item) {
+        closeMenu();
+        if (item.getAttribute('data-pid') !== activeId()) setActive(item.getAttribute('data-pid'));
+        return;
+      }
+      if (e.target.closest('[data-sq-settings]')) { closeMenu(); location.href = 'configuracoes.html'; }
+    });
+    document.addEventListener('click', function (e) {
+      if (menu.classList.contains('open') && !menu.contains(e.target) && !wrap.contains(e.target)) closeMenu();
+    });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeMenu(); });
+    window.addEventListener('scroll', function () { if (menu.classList.contains('open')) closeMenu(); }, true);
+    window.addEventListener('resize', closeMenu);
+  }
+
+  migrate();
+  injectSwitcher();
+
+  return {
+    list: list,
+    saveList: saveList,
+    active: active,
+    activeId: activeId,
+    setActive: setActive,
+    color: color,
+    key: key,
+    esc: esc,
+    tasksOf: tasksOf,
+    boardOf: boardOf,
+    ganttOf: ganttOf,
+    projectsFor: projectsFor,
+    newProject: newProject,
+    removeProject: removeProject,
+    lanesOf: lanesOf,
+    setLanes: setLanes,
+    SEEDS: SEEDS,
+    COLORS: COLORS,
+    MAX: MAX,
+    LIMITS: { min: MAX_MIN, max: MAX_HARD, def: MAX },
+    maxProjects: maxProjects,
+    setMaxProjects: setMaxProjects
+  };
+})();
+
+</script>
+<script>
+  document.querySelectorAll('.toggle-label, .toggle-desc, .form-help, .save-bar-text').forEach(el => {
+    el.setAttribute('contenteditable', 'true');
+  });
+
+  (function () {
+    var form = document.querySelector('form');
+    if (form) form.addEventListener('submit', function (e) { e.preventDefault(); });
+
+    function renderProjects() {
+      var listEl = document.getElementById('project-list');
+      if (!listEl) return;
+      var projects = SQ.list();
+      var activeId = SQ.activeId();
+      listEl.innerHTML = projects.map(function (p) {
+        var isActive = p.id === activeId;
+        return '<div class="sq-proj-row" data-pid="' + p.id + '">' +
+          '<span class="sq-proj-dot" style="background:' + SQ.color(p) + '"></span>' +
+          '<input class="sq-proj-name" type="text" value="' + SQ.esc(p.name) + '" data-field="name" aria-label="Nome do projeto">' +
+          '<input class="sq-proj-sprint" type="text" value="' + SQ.esc(p.sprint) + '" data-field="sprint" aria-label="Sprint do projeto">' +
+          (isActive
+            ? '<span class="sq-proj-badge">Ativo</span>'
+            : '<button type="button" class="sq-proj-activate">Ativar</button>') +
+          '<button type="button" class="sq-proj-del" title="Excluir projeto"' + (projects.length <= 1 ? ' disabled' : '') + '>' +
+          '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"/></svg>' +
+          '</button>' +
+          '</div>';
+      }).join('');
+      var maxN = SQ.maxProjects();
+      var count = document.getElementById('projects-count');
+      if (count) count.textContent = projects.length + ' de ' + maxN + ' projetos' + (projects.length > maxN ? ' (limite excedido)' : '');
+      var addBtn = document.getElementById('add-project-btn');
+      var atCap = projects.length >= maxN;
+      if (addBtn) addBtn.title = atCap ? 'Limite de ' + maxN + ' projetos atingido' : 'Criar novo projeto';
+      var hint = document.getElementById('add-project-hint');
+      if (hint && !atCap) { hint.textContent = ''; hint.classList.remove('show'); }
+      var limitInput = document.getElementById('max-projects-input');
+      if (limitInput && document.activeElement !== limitInput) limitInput.value = maxN;
+      var sprintName = document.getElementById('sprint-name');
+      var ap = SQ.active();
+      if (sprintName && document.activeElement !== sprintName) sprintName.value = ap.sprint;
+    }
+
+    var listEl = document.getElementById('project-list');
+    if (listEl) {
+      listEl.addEventListener('input', function (e) {
+        var row = e.target.closest ? e.target.closest('.sq-proj-row') : null;
+        if (!row || !e.target.matches || !e.target.matches('input')) return;
+        var projects = SQ.list();
+        var p = projects.filter(function (x) { return x.id === row.getAttribute('data-pid'); })[0];
+        if (!p) return;
+        p[e.target.getAttribute('data-field')] = e.target.value;
+        SQ.saveList(projects);
+        if (p.id === SQ.activeId()) {
+          var field = e.target.getAttribute('data-field');
+          if (field === 'name') {
+            var bt = document.querySelector('.nav-brand-text');
+            if (bt) bt.textContent = e.target.value;
+            var sw = document.querySelector('.sq-switch-name');
+            if (sw) sw.textContent = e.target.value;
+            var crumb = document.querySelector('.topbar-breadcrumb span:last-child');
+            if (crumb) crumb.textContent = e.target.value;
+          } else if (field === 'sprint') {
+            var bs = document.querySelector('.nav-brand-sub');
+            if (bs) bs.textContent = e.target.value;
+            var chip = document.querySelector('.sprint-chip');
+            if (chip) chip.textContent = e.target.value + ' - Ativo';
+          }
+        }
+      });
+      listEl.addEventListener('click', function (e) {
+        var row = e.target.closest ? e.target.closest('.sq-proj-row') : null;
+        if (!row) return;
+        var pid = row.getAttribute('data-pid');
+        if (e.target.closest('.sq-proj-activate')) { SQ.setActive(pid); return; }
+        if (e.target.closest('.sq-proj-del')) {
+          if (!confirm('Excluir este projeto e todos os dados dele?')) return;
+          if (SQ.removeProject(pid)) { renderProjects(); if (window.__sqLanesRefresh) window.__sqLanesRefresh(); }
+        }
+      });
+    }
+    var addBtn = document.getElementById('add-project-btn');
+    if (addBtn) addBtn.addEventListener('click', function () {
+      var hint = document.getElementById('add-project-hint');
+      var maxN = SQ.maxProjects();
+      if (SQ.list().length >= maxN) {
+        if (hint) {
+          hint.textContent = 'Limite de ' + maxN + ' projetos atingido - exclua um projeto para criar outro';
+          hint.classList.add('show');
+        }
+        addBtn.classList.remove('nudge');
+        void addBtn.offsetWidth;
+        addBtn.classList.add('nudge');
+        return;
+      }
+      if (SQ.newProject()) { renderProjects(); if (window.__sqLanesRefresh) window.__sqLanesRefresh(); }
+    });
+
+    var limitInput = document.getElementById('max-projects-input');
+    if (limitInput) {
+      var limits = SQ.LIMITS || { min: 1, max: 20 };
+      limitInput.min = limits.min;
+      limitInput.max = limits.max;
+      limitInput.value = SQ.maxProjects();
+      limitInput.addEventListener('change', function () {
+        var v = SQ.setMaxProjects(this.value);
+        this.value = (v === null) ? SQ.maxProjects() : v;
+        renderProjects();
+      });
+    }
+
+    renderProjects();
+  })();
+</script>
+
+<script>
+  (function () {
+    'use strict';
+    var LANES_MAX = 12;
+    var projectSel = document.getElementById('lanes-project');
+    var enabledInput = document.getElementById('lanes-enabled');
+    var chipsEl = document.getElementById('lanes-chips');
+    var addBtn = document.getElementById('lanes-add-btn');
+    var addInput = document.getElementById('lanes-add-input');
+    var noteEl = document.getElementById('lanes-note');
+    if (!projectSel || !enabledInput || !chipsEl || !addBtn || !addInput || !noteEl) return;
+
+    var noteTimer = null;
+    function note(msg, kind) {
+      if (noteTimer) { clearTimeout(noteTimer); noteTimer = null; }
+      noteEl.textContent = msg;
+      noteEl.className = 'sq-lanes-note show ' + (kind === 'err' ? 'err' : 'ok');
+      if (kind !== 'err') {
+        noteTimer = setTimeout(function () { noteEl.className = 'sq-lanes-note'; }, 3200);
+      }
+    }
+
+    function currentPid() { return projectSel.value; }
+    function projectName(pid) {
+      var p = SQ.list().filter(function (x) { return x.id === pid; })[0];
+      return p ? p.name : pid;
+    }
+
+    function renderSelect() {
+      var focused = document.activeElement === projectSel;
+      var prev = projectSel.value;
+      var activeId = SQ.activeId();
+      projectSel.innerHTML = SQ.list().map(function (p) {
+        return '<option value="' + p.id + '">' + SQ.esc(p.name) + (p.id === activeId ? ' (ativo)' : '') + '</option>';
+      }).join('');
+      var hasPrev = prev && projectSel.querySelector('option[value="' + prev + '"]');
+      if (!focused && hasPrev) { projectSel.value = prev; }
+      else { projectSel.value = activeId; }
+    }
+
+    function save(cfg, okMsg) {
+      var saved = SQ.setLanes(currentPid(), cfg);
+      if (!saved) { note('Não foi possível salvar as lanes', 'err'); return; }
+      renderChips();
+      note(okMsg || ('Lanes de ' + projectName(currentPid()) + ' salvas'));
+    }
+
+    function renderChips() {
+      var cfg = SQ.lanesOf(currentPid());
+      enabledInput.checked = cfg.enabled;
+      if (!cfg.labels.length) {
+        chipsEl.innerHTML = '<div class="sq-lanes-empty">Nenhuma lane - adicione a primeira abaixo</div>';
+        return;
+      }
+      chipsEl.innerHTML = cfg.labels.map(function (label, i) {
+        return '<span class="sq-lanes-chip" data-idx="' + i + '">' +
+          '<input class="sq-lanes-chip-input" type="text" maxlength="24" value="' + SQ.esc(label) + '" aria-label="Nome da lane ' + (i + 1) + '">' +
+          '<button type="button" class="sq-lanes-chip-del" title="Remover lane" aria-label="Remover lane ' + SQ.esc(label) + '">&times;</button>' +
+          '</span>';
+      }).join('');
+    }
+
+    projectSel.addEventListener('change', renderChips);
+
+    enabledInput.addEventListener('change', function () {
+      var cfg = SQ.lanesOf(currentPid());
+      save({ enabled: this.checked, labels: cfg.labels }, this.checked ? 'Lanes ativadas' : 'Lanes desativadas');
+    });
+
+    chipsEl.addEventListener('change', function (e) {
+      if (!e.target.classList || !e.target.classList.contains('sq-lanes-chip-input')) return;
+      var chip = e.target.closest('.sq-lanes-chip');
+      var idx = parseInt(chip.getAttribute('data-idx'), 10);
+      var cfg = SQ.lanesOf(currentPid());
+      var raw = e.target.value.replace(/^\s+|\s+$/g, '');
+      if (!raw) { e.target.value = cfg.labels[idx]; note('O nome da lane não pode ficar vazio', 'err'); return; }
+      var dup = cfg.labels.some(function (l, i) { return i !== idx && l.toLowerCase() === raw.toLowerCase(); });
+      if (dup) { e.target.value = cfg.labels[idx]; note('Já existe uma lane com esse nome', 'err'); return; }
+      cfg.labels[idx] = raw.slice(0, 24);
+      save(cfg, 'Lane renomeada');
+    });
+
+    chipsEl.addEventListener('click', function (e) {
+      if (!e.target.closest) return;
+      var del = e.target.closest('.sq-lanes-chip-del');
+      if (!del) return;
+      var chip = del.closest('.sq-lanes-chip');
+      var idx = parseInt(chip.getAttribute('data-idx'), 10);
+      var cfg = SQ.lanesOf(currentPid());
+      var removed = cfg.labels.splice(idx, 1)[0];
+      save(cfg, 'Lane "' + removed + '" removida');
+      addInput.focus();
+    });
+
+    function addLane() {
+      var cfg = SQ.lanesOf(currentPid());
+      var raw = addInput.value.replace(/^\s+|\s+$/g, '');
+      if (!raw) { note('Digite o nome da lane', 'err'); addInput.focus(); return; }
+      if (cfg.labels.length >= LANES_MAX) { note('Máximo de ' + LANES_MAX + ' lanes por projeto', 'err'); return; }
+      var dup = cfg.labels.some(function (l) { return l.toLowerCase() === raw.toLowerCase(); });
+      if (dup) { note('Já existe uma lane com esse nome', 'err'); addInput.select(); return; }
+      var label = raw.slice(0, 24);
+      cfg.labels.push(label);
+      save(cfg, 'Lane "' + label + '" adicionada');
+      addInput.value = '';
+      addInput.focus();
+    }
+
+    addBtn.addEventListener('click', addLane);
+    addInput.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') { e.preventDefault(); addLane(); }
+    });
+
+    window.__sqLanesRefresh = function () { renderSelect(); renderChips(); };
+
+    renderSelect();
+    renderChips();
+  })();
+</script>
+
+</body>
+</html>

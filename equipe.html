@@ -1,0 +1,1438 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Equipe — Growth Squad</title>
+<style>
+  :root {
+    --bg: oklch(98% 0.005 250);
+    --surface: oklch(100% 0 0);
+    --fg: oklch(22% 0.02 240);
+    --fg-2: oklch(35% 0.018 240);
+    --muted: oklch(50% 0.018 240);
+    --border: oklch(90% 0.008 240);
+    --border-soft: oklch(94% 0.006 250);
+    --accent: oklch(58% 0.16 145);
+    --accent-soft: oklch(94% 0.04 145);
+    --accent-hover: oklch(58% 0.16 145 / 0.85);
+    --danger: oklch(60% 0.18 25);
+    --danger-soft: oklch(94% 0.04 25);
+    --warn: oklch(75% 0.14 80);
+    --warn-soft: oklch(95% 0.04 80);
+    --info: oklch(62% 0.14 250);
+    --info-soft: oklch(94% 0.04 250);
+    --font-body: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', system-ui, sans-serif;
+    --font-mono: 'JetBrains Mono', 'IBM Plex Mono', ui-monospace, Menlo, monospace;
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 16px;
+    --space-5: 20px;
+    --space-6: 24px;
+    --space-8: 32px;
+    --text-xs: 12px;
+    --text-sm: 13px;
+    --text-base: 15px;
+    --text-lg: 18px;
+    --text-xl: 22px;
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --radius-pill: 9999px;
+    --elev-raised: 0 8px 32px rgba(0,0,0,0.08);
+    --focus-ring: 0 0 0 3px oklch(58% 0.16 145 / 0.15);
+    --motion-fast: 200ms;
+    --motion-base: 320ms;
+    --ease-standard: cubic-bezier(0.32, 0.72, 0, 1);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: var(--font-body); background: var(--bg); color: var(--fg); font-size: 13px; line-height: 1.5; min-height: 100vh; display: flex; flex-direction: column; }
+
+  .topbar { background: var(--surface); border-bottom: 1px solid var(--border); padding: 10px 20px; display: flex; align-items: center; gap: 16px; flex-shrink: 0; z-index: 10; }
+  .topbar-breadcrumb { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--muted); }
+  .topbar-breadcrumb span { color: var(--fg); font-weight: 600; }
+  .sprint-chip { display: inline-flex; align-items: center; gap: 5px; background: var(--accent-soft); color: oklch(38% 0.12 145); font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 999px; letter-spacing: 0.02em; }
+  .sprint-chip::before { content: ''; width: 6px; height: 6px; background: var(--accent); border-radius: 50%; }
+
+  .layout { display: flex; flex: 1; overflow: hidden; }
+
+  .nav-sidebar { width: 220px; background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; flex-shrink: 0; padding: var(--space-4) 0; overflow-y: auto; }
+  .nav-brand { display: flex; align-items: center; gap: var(--space-3); padding: 0 var(--space-4) var(--space-5); border-bottom: 1px solid var(--border); margin-bottom: var(--space-3); }
+  .nav-brand-icon { width: 32px; height: 32px; background: linear-gradient(135deg, var(--accent), oklch(65% 0.16 160)); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 14px; flex-shrink: 0; }
+  .nav-brand-text { font-size: 14px; font-weight: 700; color: var(--fg); line-height: 1.2; }
+  .nav-brand-sub { font-size: 11px; color: var(--muted); font-weight: 400; }
+  .nav-section { padding: 0 var(--space-3); margin-bottom: var(--space-2); }
+  .nav-section-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); padding: var(--space-2) var(--space-2) var(--space-1); }
+  .nav-item { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-2) var(--space-3); border-radius: 8px; font-size: 13px; font-weight: 500; color: var(--fg-2); cursor: pointer; transition: all 0.15s; text-decoration: none; position: relative; }
+  .nav-item:hover { background: var(--bg); color: var(--fg); }
+  .nav-item.active { background: var(--accent-soft); color: oklch(38% 0.12 145); font-weight: 600; }
+  .nav-item.active::before { content: ''; position: absolute; left: 0; top: 6px; bottom: 6px; width: 3px; background: var(--accent); border-radius: 0 2px 2px 0; }
+  .nav-item svg { width: 18px; height: 18px; flex-shrink: 0; opacity: 0.7; }
+  .nav-item.active svg { opacity: 1; }
+  .nav-badge { margin-left: auto; background: var(--danger); color: white; font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 999px; font-family: var(--font-mono); }
+  .nav-spacer { flex: 1; }
+  .nav-user { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3) var(--space-4); border-top: 1px solid var(--border); margin-top: var(--space-2); }
+  .nav-user-info { flex: 1; min-width: 0; }
+  .nav-user-name { font-size: 13px; font-weight: 600; color: var(--fg); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .nav-user-role { font-size: 11px; color: var(--muted); }
+
+  .content { flex: 1; padding: 24px; overflow-y: auto; }
+  .content-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+  .content-title { font-size: 20px; font-weight: 700; color: var(--fg); }
+  .content-subtitle { font-size: 13px; color: var(--muted); margin-top: 2px; }
+
+  .btn-primary { display: inline-flex; align-items: center; gap: 6px; background: var(--accent); color: white; border: none; border-radius: 8px; padding: 8px 16px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.15s; font-family: var(--font-body); }
+  .btn-primary:hover { filter: brightness(1.1); }
+  .btn-primary svg { width: 16px; height: 16px; }
+
+  .btn-secondary { display: inline-flex; align-items: center; gap: 6px; background: var(--bg); color: var(--fg-2); border: 1px solid var(--border); border-radius: 8px; padding: 8px 16px; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.15s; font-family: var(--font-body); }
+  .btn-secondary:hover { background: var(--border); color: var(--fg); }
+  .btn-secondary svg { width: 16px; height: 16px; }
+
+  .btn-danger { display: inline-flex; align-items: center; gap: 6px; background: var(--danger-soft); color: var(--danger); border: 1px solid oklch(88% 0.04 25); border-radius: 8px; padding: 8px 16px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.15s; font-family: var(--font-body); }
+  .btn-danger:hover { background: var(--danger); color: white; }
+  .btn-danger svg { width: 16px; height: 16px; }
+
+  .avatar { width: 22px; height: 22px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: white; background: var(--muted); flex-shrink: 0; }
+  .avatar-a { background: oklch(55% 0.14 250); }
+  .avatar-b { background: oklch(55% 0.16 145); }
+  .avatar-c { background: oklch(55% 0.15 30); }
+  .avatar-d { background: oklch(55% 0.12 300); }
+  .avatar-e { background: oklch(55% 0.14 80); }
+  .avatar-f { background: oklch(55% 0.18 200); }
+  .avatar-g { background: oklch(55% 0.14 330); }
+
+  .avatar-lg { width: 48px; height: 48px; font-size: 18px; }
+
+  .team-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+  .team-grid.view-list { grid-template-columns: 1fr; gap: 8px; }
+  .team-grid.view-list .member-card { flex-direction: row; align-items: center; gap: 20px; padding: 14px 20px; }
+  .team-grid.view-list .member-header { flex: 0 0 auto; }
+  .team-grid.view-list .member-stats { flex: 1; justify-content: flex-end; }
+  .team-grid.view-list .member-actions { flex: 0 0 auto; }
+  .team-grid.view-list .member-stat-bar { display: none; }
+
+  .view-toggle {
+    display: inline-flex;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    margin-right: 8px;
+  }
+  .view-toggle-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border: none;
+    background: var(--bg);
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .view-toggle-btn:not(:last-child) { border-right: 1px solid var(--border); }
+  .view-toggle-btn:hover { background: var(--surface); color: var(--fg); }
+  .view-toggle-btn.active { background: var(--accent-soft); color: var(--accent); }
+  .view-toggle-btn svg { width: 16px; height: 16px; }
+
+  .content-header-actions { display: flex; align-items: center; gap: 8px; }
+
+  .member-card { background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--border); border-radius: 10px; padding: 20px; display: flex; flex-direction: column; gap: 16px; transition: box-shadow 0.2s ease, transform 0.2s ease, border-color 0.2s ease; position: relative; }
+  .member-card:hover { box-shadow: 0 6px 20px oklch(0% 0 0 / 0.08), 0 2px 6px oklch(0% 0 0 / 0.04); transform: translateY(-2px); }
+
+  .member-header { display: flex; align-items: center; gap: 14px; }
+  .member-info { flex: 1; min-width: 0; }
+  .member-name { font-size: 15px; font-weight: 700; color: var(--fg); }
+  .member-role { font-size: 12px; color: var(--muted); margin-top: 1px; }
+
+  .member-stats { display: flex; gap: 8px; }
+  .stat-box { flex: 1; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; text-align: center; transition: background 0.2s ease; }
+  .stat-box:hover { background: var(--surface); }
+  .stat-value { font-size: 16px; font-weight: 700; font-family: var(--font-mono); color: var(--fg); }
+  .stat-label { font-size: 10px; color: var(--muted); margin-top: 2px; text-transform: uppercase; letter-spacing: 0.04em; font-weight: 600; }
+
+  .progress-bar { display: flex; flex-direction: column; gap: 4px; }
+  .progress-bar-header { display: flex; justify-content: space-between; align-items: center; }
+  .progress-bar-label { font-size: 11px; color: var(--muted); font-weight: 500; }
+  .progress-bar-value { font-size: 11px; font-weight: 700; font-family: var(--font-mono); color: var(--accent); }
+  .progress-track { height: 6px; background: var(--bg); border: 1px solid var(--border); border-radius: 999px; overflow: hidden; }
+  .progress-fill { height: 100%; background: var(--accent); border-radius: 999px; transition: width 0.3s; }
+
+  .member-actions { display: flex; gap: 8px; }
+  .member-actions .btn-secondary { flex: 1; justify-content: center; padding: 7px 10px; font-size: 12px; }
+
+  .card-actions { position: absolute; top: 12px; right: 12px; display: flex; gap: 4px; opacity: 0; transition: opacity 0.15s; }
+  .member-card:hover .card-actions { opacity: 1; }
+  .card-action-btn { width: 28px; height: 28px; border-radius: 6px; border: 1px solid var(--border); background: var(--surface); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s; color: var(--muted); }
+  .card-action-btn:hover { background: var(--bg); color: var(--fg); border-color: oklch(82% 0.01 240); }
+  .card-action-btn.danger:hover { background: var(--danger-soft); color: var(--danger); border-color: oklch(88% 0.04 25); }
+  .card-action-btn svg { width: 14px; height: 14px; }
+
+  /* Empty state */
+  .empty-state { text-align: center; padding: 80px 40px; }
+
+  .role-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 20px;
+    padding: 12px 0 4px;
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .role-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .role-legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 3px;
+    flex-shrink: 0;
+    border-left: 3px solid;
+  }
+  .empty-state-icon { width: 64px; height: 64px; margin: 0 auto 20px; background: var(--accent-soft); border-radius: 16px; display: flex; align-items: center; justify-content: center; color: var(--accent); }
+  .empty-state-icon svg { width: 32px; height: 32px; }
+  .empty-state-title { font-size: 18px; font-weight: 700; color: var(--fg); margin-bottom: 6px; }
+  .empty-state-text { font-size: 13px; color: var(--muted); margin-bottom: 20px; max-width: 360px; margin-left: auto; margin-right: auto; }
+
+  /* Workload chart */
+  .workload-chart { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px 24px; margin-bottom: 20px; }
+  .workload-chart-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  .workload-chart-title { font-size: 14px; font-weight: 700; color: var(--fg); display: flex; align-items: center; gap: 8px; }
+  .workload-chart-title svg { width: 18px; height: 18px; color: var(--accent); }
+  .workload-chart-legend { display: flex; gap: 16px; font-size: 11px; color: var(--muted); }
+  .workload-chart-legend span { display: flex; align-items: center; gap: 5px; }
+  .workload-chart-legend .dot { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
+  .workload-bars { display: flex; flex-direction: column; gap: 10px; }
+  .workload-row { display: flex; align-items: center; gap: 12px; }
+  .workload-label { width: 100px; display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+  .workload-label .avatar { width: 22px; height: 22px; font-size: 9px; }
+  .workload-label-name { font-size: 12px; font-weight: 600; color: var(--fg); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .workload-track { flex: 1; height: 28px; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; position: relative; overflow: hidden; display: flex; }
+  .workload-segment { height: 100%; transition: width 0.4s var(--ease-standard); position: relative; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: white; min-width: 0; overflow: hidden; }
+  .workload-segment span { white-space: nowrap; text-shadow: 0 1px 2px rgba(0,0,0,0.2); }
+  .workload-segment:not(:last-child) { border-right: 1px solid var(--surface); }
+  .workload-count { width: 36px; text-align: right; font-size: 13px; font-weight: 700; font-family: var(--font-mono); color: var(--fg); flex-shrink: 0; }
+  .workload-empty { text-align: center; padding: 24px; color: var(--muted); font-size: 12px; }
+  .workload-empty svg { width: 24px; height: 24px; margin-bottom: 6px; opacity: 0.4; }
+  .workload-summary { display: flex; gap: 24px; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border); }
+  .workload-summary-item { display: flex; flex-direction: column; gap: 2px; }
+  .workload-summary-value { font-size: 18px; font-weight: 700; font-family: var(--font-mono); color: var(--fg); }
+  .workload-summary-label { font-size: 11px; color: var(--muted); font-weight: 500; }
+
+  /* Modal */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(100, 100, 110, 0.15); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; z-index: 1000; opacity: 0; pointer-events: none; transition: opacity 0.2s var(--ease-standard); }
+  .modal-overlay.open { opacity: 1; pointer-events: auto; }
+  .modal-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); width: 520px; max-width: 95vw; max-height: 90vh; overflow-y: auto; box-shadow: var(--elev-raised); transform: scale(0.95) translateY(8px); transition: transform 0.25s var(--ease-standard); }
+  .modal-overlay.open .modal-card { transform: scale(1) translateY(0); }
+  .modal-header { display: flex; align-items: center; justify-content: space-between; padding: 20px 24px 0; }
+  .modal-title { font-size: 17px; font-weight: 700; color: var(--fg); }
+  .modal-close { width: 28px; height: 28px; border-radius: 6px; border: none; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--muted); transition: all 0.15s; }
+  .modal-close:hover { background: var(--bg); color: var(--fg); }
+  .modal-close svg { width: 16px; height: 16px; }
+  .modal-body { padding: 20px 24px; display: flex; flex-direction: column; gap: 16px; }
+  .modal-field { display: flex; flex-direction: column; gap: 6px; }
+  .modal-field label { font-size: 12px; font-weight: 600; color: var(--fg-2); text-transform: uppercase; letter-spacing: 0.04em; }
+  .modal-field input, .modal-field select { padding: 10px 12px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 13px; font-family: var(--font-body); color: var(--fg); background: var(--surface); transition: border-color 0.15s, box-shadow 0.15s; }
+  .modal-field input:focus, .modal-field select:focus { outline: none; border-color: var(--accent); box-shadow: var(--focus-ring); }
+  .modal-field input::placeholder { color: var(--muted); }
+  .modal-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .modal-footer { display: flex; align-items: center; justify-content: space-between; padding: 0 24px 20px; gap: 8px; }
+  .modal-footer-left { display: flex; }
+  .modal-footer-right { display: flex; gap: 8px; }
+
+  /* Avatar color picker */
+  .color-picker { display: flex; gap: 8px; flex-wrap: wrap; }
+  .color-option { width: 32px; height: 32px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; transition: all 0.15s; display: flex; align-items: center; justify-content: center; color: white; font-size: 12px; font-weight: 700; }
+  .color-option:hover { transform: scale(1.1); }
+  .color-option.selected { border-color: var(--fg); box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--fg); }
+
+  @media (max-width: 1100px) { .team-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 900px) { .team-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 900px) {
+    .nav-sidebar { width: 56px; }
+    .nav-brand-text, .nav-brand-sub, .nav-section-label, .nav-item span, .nav-badge, .nav-user-info { display: none; }
+    .nav-item { justify-content: center; padding: var(--space-3); }
+    .nav-item.active::before { display: none; }
+    .nav-brand { justify-content: center; padding: 0 0 var(--space-4); }
+    .nav-user { justify-content: center; padding: var(--space-3) var(--space-2); }
+  }
+  @media (max-width: 700px) { .nav-sidebar { display: none; } }
+  @media (max-width: 600px) { .team-grid { grid-template-columns: 1fr; } }
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+/* SQ-STYLE — trocador de projeto, chips de projeto, escopo de relatorios e CRUD de projetos */
+.sq-switch { position: relative; padding: 0 12px; margin: -4px 0 14px; }
+.sq-switch-btn { width: 100%; display: flex; align-items: center; gap: 8px; padding: 8px 10px; background: var(--surface, #fff); border: 1px solid var(--border); border-radius: 8px; cursor: pointer; font-family: inherit; font-size: 13px; font-weight: 600; color: var(--fg); transition: border-color .15s, box-shadow .15s; }
+.sq-switch-btn:hover { border-color: var(--muted); }
+.sq-switch.open .sq-switch-btn { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+.sq-switch-dot { width: 10px; height: 10px; border-radius: 50%; flex: 0 0 auto; }
+.sq-switch-name { flex: 1; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sq-switch-btn svg { width: 14px; height: 14px; color: var(--muted); transition: transform .15s; flex-shrink: 0; }
+.sq-switch.open .sq-switch-btn svg { transform: rotate(180deg); }
+.sq-menu { position: fixed; display: none; z-index: 300; background: var(--surface, #fff); border: 1px solid var(--border); border-radius: 10px; box-shadow: 0 12px 34px oklch(22% 0.02 240 / .2); padding: 6px; max-width: 280px; }
+.sq-menu.open { display: block; }
+.sq-menu-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); padding: 4px 8px 6px; }
+.sq-menu-item { display: flex; align-items: center; gap: 8px; width: 100%; padding: 7px 8px; border: none; background: none; border-radius: 6px; cursor: pointer; font-family: inherit; font-size: 13px; color: var(--fg); text-align: left; }
+.sq-menu-item:hover { background: var(--bg, oklch(98% 0.005 250)); }
+.sq-menu-dot { width: 9px; height: 9px; border-radius: 50%; flex: 0 0 auto; }
+.sq-menu-name { flex: 1; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sq-menu-sprint { font-size: 11px; color: var(--muted); flex-shrink: 0; font-weight: 500; }
+.sq-menu-check { width: 14px; height: 14px; color: var(--accent); flex-shrink: 0; visibility: hidden; }
+.sq-menu-item.active .sq-menu-check { visibility: visible; }
+.sq-menu-foot { border-top: 1px solid var(--border); margin-top: 6px; padding-top: 6px; }
+.sq-menu-foot .sq-menu-item { color: var(--muted); font-size: 12px; }
+.sq-switch-btn:focus-visible, .sq-menu-item:focus-visible, .sq-proj-activate:focus-visible, .sq-proj-del:focus-visible, .sq-add-btn:focus-visible, .report-scope select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.sq-proj-row input:focus-visible { outline: 2px solid var(--accent); outline-offset: -1px; }
+.sq-projects-check input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.member-projects:empty { display: none; }
+.sq-proj-row input { min-width: 0; }
+.backlog-empty, .gantt-empty { padding: 48px 20px; text-align: center; color: var(--muted); font-size: 13px; }
+.backlog-empty strong, .gantt-empty strong { display: block; margin-bottom: 6px; color: var(--fg); font-size: 14px; font-weight: 700; }
+.backlog-empty span, .gantt-empty span { font-size: 12px; }
+.member-projects { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 10px; }
+.member-project-chip { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 600; color: var(--muted); background: var(--bg, oklch(98% 0.005 250)); border: 1px solid var(--border); border-radius: 999px; padding: 2px 8px; }
+.member-project-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.sq-projects-check { display: flex; flex-wrap: wrap; gap: 6px; }
+.sq-projects-check label { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: var(--muted); background: var(--bg, oklch(98% 0.005 250)); border: 1px solid var(--border); border-radius: 999px; padding: 5px 10px; cursor: pointer; user-select: none; }
+.sq-projects-check label:has(input:checked) { border-color: var(--accent); color: var(--fg); background: var(--accent-soft); }
+.sq-projects-check input { margin: 0; accent-color: var(--accent); }
+.report-scope { display: flex; align-items: center; gap: 8px; }
+.report-scope label { font-size: 12px; font-weight: 600; color: var(--muted); }
+.report-scope select { border: 1px solid var(--border); border-radius: 8px; padding: 7px 10px; font-family: inherit; font-size: 13px; font-weight: 600; color: var(--fg); background: var(--surface, #fff); cursor: pointer; }
+.report-scope select:focus { outline: none; border-color: var(--accent); }
+.portfolio-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.portfolio-table th { text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); padding: 8px 10px; border-bottom: 1px solid var(--border); }
+.portfolio-table td { padding: 9px 10px; border-bottom: 1px solid var(--border); }
+.portfolio-table tr:last-child td { border-bottom: none; }
+.portfolio-name { display: inline-flex; align-items: center; gap: 7px; font-weight: 600; }
+.portfolio-dot { width: 8px; height: 8px; border-radius: 50%; }
+.portfolio-pct { font-weight: 700; color: var(--accent); }
+.project-list { display: flex; flex-direction: column; gap: 8px; }
+.sq-proj-row { display: flex; align-items: center; gap: 8px; background: var(--bg, oklch(98% 0.005 250)); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; }
+.sq-proj-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.sq-proj-row input { border: 1px solid transparent; background: transparent; border-radius: 6px; padding: 6px 8px; font-family: inherit; font-size: 13px; color: var(--fg); min-width: 0; }
+.sq-proj-row input.sq-proj-name { flex: 2; font-weight: 700; }
+.sq-proj-row input.sq-proj-sprint { flex: 1; color: var(--muted); font-weight: 500; }
+.sq-proj-row input:hover { border-color: var(--border); }
+.sq-proj-row input:focus { outline: none; border-color: var(--accent); background: var(--surface, #fff); }
+.sq-proj-badge { flex-shrink: 0; font-size: 11px; font-weight: 700; color: oklch(38% 0.12 145); background: var(--accent-soft); border-radius: 999px; padding: 4px 10px; }
+.sq-proj-activate { flex-shrink: 0; border: 1px solid var(--border); background: var(--surface, #fff); color: var(--fg); font-family: inherit; font-size: 12px; font-weight: 600; border-radius: 999px; padding: 4px 10px; cursor: pointer; }
+.sq-proj-activate:hover { border-color: var(--accent); color: var(--accent); }
+.sq-proj-del { flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border: none; background: none; border-radius: 6px; color: var(--muted); cursor: pointer; }
+.sq-proj-del:hover { background: oklch(60% 0.18 25 / .1); color: var(--danger); }
+.sq-proj-del:disabled { opacity: .35; cursor: not-allowed; }
+.sq-proj-del svg { width: 15px; height: 15px; }
+.sq-add-btn { display: inline-flex; align-items: center; gap: 7px; margin-top: 12px; border: 1px dashed var(--border); background: none; color: var(--fg); font-family: inherit; font-size: 13px; font-weight: 600; border-radius: 8px; padding: 9px 14px; cursor: pointer; width: 100%; justify-content: center; }
+.sq-add-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+.sq-add-btn:disabled { opacity: .45; cursor: not-allowed; }
+.sq-add-btn svg { width: 15px; height: 15px; }
+@media (max-width: 900px) {
+  .sq-switch { padding: 0 6px 10px; margin: -2px 0 10px; }
+  .sq-switch-name { display: none; }
+  .sq-switch-btn { justify-content: center; padding: 8px 6px; }
+  .sq-switch-btn svg { display: none; }
+}
+
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-breadcrumb">Projetos <span style="color:var(--muted);margin:0 2px">/</span> <span>Growth Squad</span></div>
+  <div class="sprint-chip">Sprint 14 — Ativo</div>
+</header>
+
+<div class="layout">
+  <nav class="nav-sidebar">
+    <div class="nav-brand">
+      <a href="home.html" style="text-decoration:none;display:flex;align-items:center;gap:10px">
+        <div class="nav-brand-icon">G</div>
+        <div><div class="nav-brand-text">Growth Squad</div><div class="nav-brand-sub">Sprint 14</div></div>
+      </a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-section-label">Principal</div>
+      <a href="home.html" class="nav-item"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0-.621.504-1.125 1.125-1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25"/></svg><span>Home</span></a>
+      <a href="quadro-kanban.html" class="nav-item"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 4.5v15m6-15v15m-10.875 0h15.75c.621 0 1.125-.504 1.125-1.125V5.625c0-.621-.504-1.125-1.125-1.125H4.125C3.504 4.5 3 5.004 3 5.625v12.75c0 .621.504 1.125 1.125 1.125Z"/></svg><span>Quadro</span></a>
+      <a href="backlog.html" class="nav-item"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0ZM3.75 12h.007v.008H3.75V12Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm-.375 5.25h.007v.008H3.75v-.008Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"/></svg><span>Backlog</span><span class="nav-badge">5</span></a>
+      <a href="cronograma.html" class="nav-item"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5"/></svg><span>Cronograma</span></a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-section-label">Análise</div>
+      <a href="relatorios.html" class="nav-item"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z"/></svg><span>Relatórios</span></a>
+      <a href="equipe.html" class="nav-item active" data-nav="members"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z"/></svg><span>Equipe</span></a>
+    </div>
+    <div class="nav-spacer"></div>
+    <div class="nav-section">
+      <div class="nav-section-label">Sistema</div>
+      <a href="configuracoes.html" class="nav-item"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.325.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.431l-1.003.827c-.293.241-.438.613-.43.992a7.723 7.723 0 0 1 0 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.955.26 1.43l-1.298 2.247a1.125 1.125 0 0 1-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.47 6.47 0 0 1-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.94-1.11.94h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 0 1-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 0 1-1.369-.49l-1.297-2.247a1.125 1.125 0 0 1 .26-1.431l1.004-.827c.292-.24.437-.613.43-.991a6.932 6.932 0 0 1 0-.255c.007-.38-.138-.751-.43-.992l-1.004-.827a1.125 1.125 0 0 1-.26-1.43l1.297-2.247a1.125 1.125 0 0 1 1.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.086.22-.128.332-.183.582-.495.644-.869l.214-1.28Z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/></svg><span>Configurações</span></a>
+    </div>
+    <div class="nav-user">
+      <div class="avatar avatar-a" style="width:28px;height:28px;font-size:11px">A</div>
+      <div class="nav-user-info"><div class="nav-user-name">Ana Souza</div><div class="nav-user-role">Product Lead</div></div>
+    </div>
+  </nav>
+
+  <main class="content">
+    <div class="content-header">
+      <div>
+        <h1 class="content-title" id="page-title">Equipe</h1>
+        <p class="content-subtitle" id="page-subtitle"></p>
+      </div>
+      <div class="content-header-actions">
+        <div class="view-toggle" id="view-toggle">
+          <button class="view-toggle-btn active" data-view="grid" title="Visão em grade">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z"/></svg>
+          </button>
+          <button class="view-toggle-btn" data-view="list" title="Visão em lista">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 12h16.5m-16.5 3.75h16.5M3.75 19.5h16.5M5.625 4.5h12.75a1.875 1.875 0 010 3.75H5.625a1.875 1.875 0 010-3.75z"/></svg>
+          </button>
+        </div>
+        <button class="btn-primary" id="add-member-btn">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+          Adicionar membro
+        </button>
+      </div>
+    </div>
+
+    <div id="workload-chart" class="workload-chart"></div>
+
+    <div id="team-grid" class="team-grid"></div>
+    <div id="role-legend" class="role-legend"></div>
+    <div id="empty-state" class="empty-state" style="display:none">
+      <div class="empty-state-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z"/></svg>
+      </div>
+      <div class="empty-state-title">Nenhum membro cadastrado</div>
+      <div class="empty-state-text">Adicione membros à equipe para começar a atribuir tarefas e acompanhar o progresso.</div>
+      <button class="btn-primary" onclick="openMemberModal()">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+        Adicionar primeiro membro
+      </button>
+    </div>
+  </main>
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="member-modal">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h2 class="modal-title" id="modal-title">Novo membro</h2>
+      <button class="modal-close" id="modal-close-btn">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-field">
+        <label>Nome</label>
+        <input type="text" id="member-name-input" placeholder="Nome completo">
+      </div>
+      <div class="modal-field">
+        <label>Cargo</label>
+        <input type="text" id="member-role-input" placeholder="Ex: Frontend Engineer">
+      </div>
+      <div class="modal-row">
+        <div class="modal-field">
+          <label>E-mail</label>
+          <input type="email" id="member-email-input" placeholder="email@exemplo.com">
+        </div>
+        <div class="modal-field">
+          <label>Cor do avatar</label>
+          <div class="color-picker" id="color-picker">
+            <div class="color-option selected" data-color="a" style="background:oklch(55% 0.14 250)">A</div>
+            <div class="color-option" data-color="b" style="background:oklch(55% 0.16 145)">B</div>
+            <div class="color-option" data-color="c" style="background:oklch(55% 0.15 30)">C</div>
+            <div class="color-option" data-color="d" style="background:oklch(55% 0.12 300)">D</div>
+            <div class="color-option" data-color="e" style="background:oklch(55% 0.14 80)">E</div>
+            <div class="color-option" data-color="f" style="background:oklch(55% 0.18 200)">F</div>
+            <div class="color-option" data-color="g" style="background:oklch(55% 0.14 330)">G</div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-field" style="margin-top:8px">
+        <label>Projetos</label>
+        <div class="sq-projects-check" id="projects-check"></div>
+      </div>
+      <div class="modal-hint" style="display:flex;align-items:center;gap:6px;padding:8px 12px;border-radius:6px;background:var(--bg-tertiary);color:var(--text-tertiary);font-size:12px;margin-top:8px">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width:16px;height:16px;flex-shrink:0"><path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z"/></svg>
+        Tarefas, pontos e conclusão são calculados automaticamente a partir do quadro Kanban.
+      </div>
+    </div>
+    <div class="modal-footer">
+      <div class="modal-footer-left">
+        <button class="btn-danger" id="modal-delete-btn" style="display:none">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"/></svg>
+          Excluir
+        </button>
+      </div>
+      <div class="modal-footer-right">
+        <button class="btn-secondary" id="modal-cancel-btn">Cancelar</button>
+        <button class="btn-primary" id="modal-save-btn">Salvar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* SQ-STORE — armazenamento de projetos, seeds e trocador de projeto (injetado em todas as paginas) */
+window.SQ = (function () {
+  'use strict';
+  var PKEY = 'sq-projects';
+  var AKEY = 'sq-active-project';
+  var MKEY = 'sq-max-projects';
+  var MAX = 8;
+  var MAX_MIN = 1;
+  var MAX_HARD = 20;
+  var COLORS = {
+    green: 'oklch(58% 0.16 145)',
+    blue: 'oklch(58% 0.15 250)',
+    purple: 'oklch(55% 0.15 300)',
+    orange: 'oklch(65% 0.15 75)',
+    cyan: 'oklch(60% 0.12 200)'
+  };
+  var COLOR_ORDER = ['green', 'blue', 'purple', 'orange', 'cyan'];
+  var DEFAULTS = [
+    { id: 'p1', name: 'Growth Squad', sprint: 'Sprint 14', color: 'green' },
+    { id: 'p2', name: 'App Mobile', sprint: 'Sprint 7', color: 'blue' },
+    { id: 'p3', name: 'Portal do Cliente', sprint: 'Sprint 3', color: 'purple' },
+    { id: 'p4', name: 'Automações', sprint: 'Sprint 12', color: 'orange' },
+    { id: 'p5', name: 'Data Platform', sprint: 'Sprint 9', color: 'cyan' }
+  ];
+
+  var SEEDS = {
+    p2: {
+      'M-01': { title: 'Onboarding com biometria', assignee: 'Ana Souza', tag: 'Design', priority: 'high', status: 'progress', lane: 'Feature',
+        messages: [{ author: 'Ana', avatar: 'a', time: '2h atrás', text: 'Fluxo de Face ID aprovado pelo time de segurança.' }],
+        subtasks: [
+          { text: 'Mapear fluxo de autenticação', assignee: 'ana', status: 'done', startDate: '2026-08-18', endDate: '2026-08-19' },
+          { text: 'Implementar Face ID no iOS', assignee: 'ana', status: 'in-progress', startDate: '2026-08-20', endDate: '2026-08-24' },
+          { text: 'Impressão digital no Android', assignee: 'bruno', status: 'in-progress', startDate: '2026-08-24', endDate: '2026-08-27' },
+          { text: 'Testes de usabilidade', assignee: 'carla', status: 'in-progress', startDate: '2026-08-28', endDate: '2026-08-30' }
+        ] },
+      'M-02': { title: 'Push de carrinho abandonado', assignee: 'Elena Ribeiro', tag: 'Growth', priority: 'med', status: 'todo',
+        messages: [{ author: 'Elena', avatar: 'e', time: '40min atrás', text: 'Jornada pronta, falta revisão de compliance.' }],
+        subtasks: [
+          { text: 'Definir gatilhos de abandono', assignee: 'elena', status: 'done', startDate: '2026-08-18', endDate: '2026-08-19' },
+          { text: 'Criar segmento de audiência', assignee: 'elena', status: 'in-progress', startDate: '2026-08-21', endDate: '2026-08-23' },
+          { text: 'Configurar jornada no Braze', assignee: 'ana', status: 'in-progress', startDate: '2026-08-25', endDate: '2026-08-27' }
+        ] },
+      'M-03': { title: 'Deep links de campanha', assignee: 'Bruno Lima', tag: 'Infra', priority: 'low', status: 'backlog',
+        messages: [{ author: 'Bruno', avatar: 'b', time: '1h atrás', text: 'iOS e Android precisam de regras separadas.' }],
+        subtasks: [
+          { text: 'Padronizar scheme universal', assignee: 'bruno', status: 'done', startDate: '2026-08-20', endDate: '2026-08-22' },
+          { text: 'Configurar AASA e applink', assignee: 'bruno', status: 'in-progress', startDate: '2026-08-24', endDate: '2026-08-26' },
+          { text: 'Validar com marketing', assignee: 'elena', status: 'in-progress', startDate: '2026-08-27', endDate: '2026-08-29' }
+        ] },
+      'M-04': { title: 'Crash reporting no iOS', assignee: 'Carla Mendes', tag: 'Bug', priority: 'high', status: 'review', lane: 'Bug',
+        messages: [{ author: 'Carla', avatar: 'c', time: '3h atrás', text: 'Passamos de 30 crashes/dia para 4.' }],
+        subtasks: [
+          { text: 'Integrar SDK do Crashlytics', assignee: 'carla', status: 'done', startDate: '2026-08-18', endDate: '2026-08-20' },
+          { text: 'Mapear crashes do último mês', assignee: 'carla', status: 'done', startDate: '2026-08-21', endDate: '2026-08-23' },
+          { text: 'Painel de alertas por versão', assignee: 'bruno', status: 'in-progress', startDate: '2026-08-25', endDate: '2026-08-28' }
+        ] },
+      'M-05': { title: 'Dashboard de retenção do app', assignee: 'Diego Alves', tag: 'Data', priority: 'med', status: 'done',
+        messages: [{ author: 'Diego', avatar: 'd', time: '5h atrás', text: 'Publicado no Metabase para todo o time.' }],
+        subtasks: [
+          { text: 'Query de coortes por canal', assignee: 'diego', status: 'done', startDate: '2026-08-18', endDate: '2026-08-21' },
+          { text: 'Visões D1/D7/D30', assignee: 'diego', status: 'done', startDate: '2026-08-22', endDate: '2026-08-25' },
+          { text: 'Alerta de queda de retenção', assignee: 'diego', status: 'done', startDate: '2026-08-26', endDate: '2026-08-28' }
+        ] }
+    },
+    p3: {
+      'C-01': { title: 'SSO com Google Workspace', assignee: 'Bruno Lima', tag: 'Infra', priority: 'high', status: 'progress',
+        messages: [{ author: 'Bruno', avatar: 'b', time: '1h atrás', text: 'Consent screen aprovado, seguindo para mapeamento de grupos.' }],
+        subtasks: [
+          { text: 'Configurar app OAuth2', assignee: 'bruno', status: 'done', startDate: '2026-08-18', endDate: '2026-08-20' },
+          { text: 'Mapear grupos e permissões', assignee: 'bruno', status: 'in-progress', startDate: '2026-08-21', endDate: '2026-08-24' },
+          { text: 'Migrar clientes enterprise', assignee: 'ana', status: 'in-progress', startDate: '2026-08-25', endDate: '2026-08-29' }
+        ] },
+      'C-02': { title: 'Histórico de faturas', assignee: 'Carla Mendes', tag: 'Design', priority: 'med', status: 'todo',
+        messages: [{ author: 'Carla', avatar: 'c', time: '2h atrás', text: 'Incluí download em PDF e XML na listagem.' }],
+        subtasks: [
+          { text: 'Wireframes da listagem', assignee: 'carla', status: 'done', startDate: '2026-08-19', endDate: '2026-08-21' },
+          { text: 'Detalhe de pagamento e nota', assignee: 'carla', status: 'in-progress', startDate: '2026-08-23', endDate: '2026-08-26' },
+          { text: 'Handoff para desenvolvimento', assignee: 'carla', status: 'in-progress', startDate: '2026-08-27', endDate: '2026-08-29' }
+        ] },
+      'C-03': { title: 'Autenticação em dois fatores', assignee: 'Ana Souza', tag: 'Infra', priority: 'high', status: 'progress',
+        messages: [{ author: 'Ana', avatar: 'a', time: '4h atrás', text: 'SMS tem custo por envio — avaliamos TOTP como padrão.' }],
+        subtasks: [
+          { text: 'Envio de código por SMS', assignee: 'ana', status: 'done', startDate: '2026-08-18', endDate: '2026-08-21' },
+          { text: 'Recovery codes', assignee: 'bruno', status: 'in-progress', startDate: '2026-08-23', endDate: '2026-08-26' },
+          { text: 'Forçar 2FA para admins', assignee: 'ana', status: 'in-progress', startDate: '2026-08-27', endDate: '2026-08-30' }
+        ] },
+      'C-04': { title: 'Exportação de relatórios em PDF', assignee: 'Diego Alves', tag: 'Data', priority: 'med', status: 'review',
+        messages: [{ author: 'Diego', avatar: 'd', time: '6h atrás', text: 'Geração média caiu de 12s para 3s.' }],
+        subtasks: [
+          { text: 'Template de relatório', assignee: 'diego', status: 'done', startDate: '2026-08-18', endDate: '2026-08-20' },
+          { text: 'Serviço de renderização', assignee: 'bruno', status: 'done', startDate: '2026-08-21', endDate: '2026-08-24' },
+          { text: 'Limites de geração assíncrona', assignee: 'diego', status: 'in-progress', startDate: '2026-08-26', endDate: '2026-08-28' }
+        ] },
+      'C-05': { title: 'Chat de suporte embarcado', assignee: 'Elena Ribeiro', tag: 'Growth', priority: 'low', status: 'backlog',
+        messages: [{ author: 'Elena', avatar: 'e', time: '1 dia atrás', text: 'Comparando três fornecedores por custo e SLA.' }],
+        subtasks: [
+          { text: 'Avaliar fornecedores', assignee: 'elena', status: 'in-progress', startDate: '2026-08-20', endDate: '2026-08-22' },
+          { text: 'Definir SLA de resposta', assignee: 'elena', status: 'in-progress', startDate: '2026-08-24', endDate: '2026-08-26' },
+          { text: 'Integração com CRM', assignee: 'bruno', status: 'in-progress', startDate: '2026-08-27', endDate: '2026-08-29' }
+        ] }
+    },
+    p4: {
+      'A-01': { title: 'RPA de conciliação bancária', assignee: 'Diego Alves', tag: 'Data', priority: 'high', status: 'progress',
+        messages: [{ author: 'Diego', avatar: 'd', time: '30min atrás', text: '92% das transações já conciliam sozinhas.' }],
+        subtasks: [
+          { text: 'Extratos dos 4 bancos', assignee: 'diego', status: 'done', startDate: '2026-08-18', endDate: '2026-08-20' },
+          { text: 'Regras de conciliação automática', assignee: 'diego', status: 'in-progress', startDate: '2026-08-21', endDate: '2026-08-25' },
+          { text: 'Fila de exceções', assignee: 'bruno', status: 'in-progress', startDate: '2026-08-26', endDate: '2026-08-30' }
+        ] },
+      'A-02': { title: 'Alerta de estoque mínimo', assignee: 'Bruno Lima', tag: 'Infra', priority: 'med', status: 'todo',
+        messages: [{ author: 'Bruno', avatar: 'b', time: '2h atrás', text: 'Webhook do ERP já entrega eventos a cada 15min.' }],
+        subtasks: [
+          { text: 'Webhook do ERP', assignee: 'bruno', status: 'done', startDate: '2026-08-19', endDate: '2026-08-21' },
+          { text: 'Regras por categoria', assignee: 'bruno', status: 'in-progress', startDate: '2026-08-23', endDate: '2026-08-25' },
+          { text: 'Notificação no Slack', assignee: 'ana', status: 'in-progress', startDate: '2026-08-26', endDate: '2026-08-28' }
+        ] },
+      'A-03': { title: 'Onboarding automático de fornecedores', assignee: 'Ana Souza', tag: 'Growth', priority: 'med', status: 'done',
+        messages: [{ author: 'Ana', avatar: 'a', time: '1 dia atrás', text: 'Tempo de cadastro caiu de 5 dias para 4 horas.' }],
+        subtasks: [
+          { text: 'Formulário de cadastro', assignee: 'ana', status: 'done', startDate: '2026-08-18', endDate: '2026-08-20' },
+          { text: 'Validação de CNPJ', assignee: 'bruno', status: 'done', startDate: '2026-08-21', endDate: '2026-08-23' },
+          { text: 'Aprovação em dois níveis', assignee: 'ana', status: 'done', startDate: '2026-08-24', endDate: '2026-08-27' }
+        ] },
+      'A-04': { title: 'Formulário dinâmico de aprovação', assignee: 'Carla Mendes', tag: 'Design', priority: 'low', status: 'backlog',
+        messages: [{ author: 'Carla', avatar: 'c', time: '5h atrás', text: 'Testando regras condicionais com o financeiro.' }],
+        subtasks: [
+          { text: 'Estudo de campos condicionais', assignee: 'carla', status: 'in-progress', startDate: '2026-08-21', endDate: '2026-08-23' },
+          { text: 'Protótipo de fluxo', assignee: 'carla', status: 'in-progress', startDate: '2026-08-25', endDate: '2026-08-27' },
+          { text: 'Testes com o financeiro', assignee: 'ana', status: 'in-progress', startDate: '2026-08-28', endDate: '2026-08-30' }
+        ] },
+      'A-05': { title: 'Webhook de sincronização com CRM', assignee: 'Bruno Lima', tag: 'Infra', priority: 'high', status: 'review',
+        messages: [{ author: 'Bruno', avatar: 'b', time: '4h atrás', text: 'Retries com backoff passaram nos testes de carga.' }],
+        subtasks: [
+          { text: 'Contrato de eventos', assignee: 'bruno', status: 'done', startDate: '2026-08-18', endDate: '2026-08-20' },
+          { text: 'Retries com backoff', assignee: 'bruno', status: 'done', startDate: '2026-08-22', endDate: '2026-08-24' },
+          { text: 'Monitoramento de falhas', assignee: 'diego', status: 'in-progress', startDate: '2026-08-26', endDate: '2026-08-29' }
+        ] }
+    },
+    p5: {
+      'D-01': { title: 'Lakehouse na camada prata', assignee: 'Diego Alves', tag: 'Data', priority: 'high', status: 'progress',
+        messages: [{ author: 'Diego', avatar: 'd', time: '1h atrás', text: 'Modelagem revisada, jobs dbt rodando em staging.' }],
+        subtasks: [
+          { text: 'Modelagem das tabelas', assignee: 'diego', status: 'done', startDate: '2026-08-18', endDate: '2026-08-20' },
+          { text: 'Jobs de transformação dbt', assignee: 'diego', status: 'in-progress', startDate: '2026-08-22', endDate: '2026-08-26' },
+          { text: 'Testes de qualidade', assignee: 'carla', status: 'in-progress', startDate: '2026-08-27', endDate: '2026-08-30' }
+        ] },
+      'D-02': { title: 'Catálogo de dados com linhagem', assignee: 'Carla Mendes', tag: 'Design', priority: 'med', status: 'todo',
+        messages: [{ author: 'Carla', avatar: 'c', time: '3h atrás', text: 'Busca por termos entra na próxima rodada de testes.' }],
+        subtasks: [
+          { text: 'Wireframes do catálogo', assignee: 'carla', status: 'done', startDate: '2026-08-19', endDate: '2026-08-21' },
+          { text: 'Página de detalhe do dataset', assignee: 'carla', status: 'in-progress', startDate: '2026-08-23', endDate: '2026-08-26' },
+          { text: 'Busca por termos', assignee: 'elena', status: 'in-progress', startDate: '2026-08-27', endDate: '2026-08-29' }
+        ] },
+      'D-03': { title: 'Pipeline de streaming com Kafka', assignee: 'Bruno Lima', tag: 'Infra', priority: 'high', status: 'review',
+        messages: [{ author: 'Bruno', avatar: 'b', time: '2h atrás', text: 'Throughput validado com 12k eventos/s.' }],
+        subtasks: [
+          { text: 'Cluster em staging', assignee: 'bruno', status: 'done', startDate: '2026-08-18', endDate: '2026-08-21' },
+          { text: 'Consumidores de eventos', assignee: 'bruno', status: 'done', startDate: '2026-08-22', endDate: '2026-08-25' },
+          { text: 'Replay e DLQ', assignee: 'ana', status: 'in-progress', startDate: '2026-08-26', endDate: '2026-08-29' }
+        ] },
+      'D-04': { title: 'Testes de qualidade de dados', assignee: 'Diego Alves', tag: 'Data', priority: 'med', status: 'done',
+        messages: [{ author: 'Diego', avatar: 'd', time: '1 dia atrás', text: 'Regras rodando a cada ingestão, alertas no Slack.' }],
+        subtasks: [
+          { text: 'Regras de unicidade', assignee: 'diego', status: 'done', startDate: '2026-08-18', endDate: '2026-08-20' },
+          { text: 'Testes de schema', assignee: 'diego', status: 'done', startDate: '2026-08-21', endDate: '2026-08-23' },
+          { text: 'Dashboard de anomalias', assignee: 'diego', status: 'done', startDate: '2026-08-24', endDate: '2026-08-27' }
+        ] },
+      'D-05': { title: 'Dashboard de custos de cloud', assignee: 'Elena Ribeiro', tag: 'Growth', priority: 'low', status: 'backlog',
+        messages: [{ author: 'Elena', avatar: 'e', time: '2 dias atrás', text: 'Rateio por time vai usar a tag de centro de custo.' }],
+        subtasks: [
+          { text: 'Integração com a fatura', assignee: 'elena', status: 'in-progress', startDate: '2026-08-20', endDate: '2026-08-22' },
+          { text: 'Rateio por time', assignee: 'elena', status: 'in-progress', startDate: '2026-08-24', endDate: '2026-08-26' },
+          { text: 'Alerta de estouro', assignee: 'diego', status: 'in-progress', startDate: '2026-08-27', endDate: '2026-08-29' }
+        ] }
+    }
+  };
+
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  function maxProjects() {
+    var v = parseInt(localStorage.getItem(MKEY), 10);
+    if (isNaN(v)) return MAX;
+    if (v < MAX_MIN) v = MAX_MIN;
+    if (v > MAX_HARD) v = MAX_HARD;
+    return v;
+  }
+
+  function setMaxProjects(n) {
+    var v = parseInt(n, 10);
+    if (isNaN(v)) return null;
+    if (v < MAX_MIN) v = MAX_MIN;
+    if (v > MAX_HARD) v = MAX_HARD;
+    try { localStorage.setItem(MKEY, String(v)); } catch (e) {}
+    return v;
+  }
+
+  function list() {
+    try {
+      var v = JSON.parse(localStorage.getItem(PKEY));
+      if (Array.isArray(v) && v.length) return v;
+    } catch (e) {}
+    return DEFAULTS.slice();
+  }
+
+  function saveList(l) {
+    try { localStorage.setItem(PKEY, JSON.stringify(l.slice(0, MAX_HARD))); } catch (e) {}
+  }
+
+  function activeId() {
+    var id = null;
+    try { id = localStorage.getItem(AKEY); } catch (e) {}
+    var l = list();
+    for (var i = 0; i < l.length; i++) if (l[i].id === id) return id;
+    return l[0].id;
+  }
+
+  function active() {
+    var id = activeId(), l = list();
+    for (var i = 0; i < l.length; i++) if (l[i].id === id) return l[i];
+    return l[0];
+  }
+
+  function color(p) {
+    var pr = p || active();
+    return COLORS[pr && pr.color] || COLORS.green;
+  }
+
+  function key(base) { return base + ':' + activeId(); }
+
+  function tasksOf(pid) {
+    try {
+      var raw = localStorage.getItem('backlog-tasks:' + pid);
+      if (raw) {
+        var v = JSON.parse(raw);
+        if (v && typeof v === 'object') return v;
+      }
+    } catch (e) {}
+    if (SEEDS[pid]) {
+      try { return JSON.parse(JSON.stringify(SEEDS[pid])); } catch (e) { return SEEDS[pid]; }
+    }
+    return null;
+  }
+
+  function boardOf(pid) {
+    var t = tasksOf(pid);
+    if (!t) return null;
+    var colMap = { backlog: 'backlog', todo: 'todo', progress: 'in-progress', review: 'in-review', done: 'done' };
+    var pts = { high: 5, med: 3, low: 2 };
+    var cols = { backlog: [], todo: [], 'in-progress': [], 'in-review': [], done: [] };
+    Object.keys(t).forEach(function (id) {
+      var task = t[id];
+      var st = task.subtasks || [];
+      var memberKey = (task.assignee || 'ana').toLowerCase().split(' ')[0];
+      var tagKey = (task.tag || 'Growth').toLowerCase();
+      cols[colMap[task.status] || 'backlog'].push({
+        id: id,
+        member: memberKey,
+        label: tagKey,
+        lane: task.lane || '',
+        description: task.description || '',
+        start: (st[0] && st[0].startDate) || '',
+        end: (st[st.length - 1] && st[st.length - 1].endDate) || '',
+        subtasks: JSON.stringify(st.map(function (s) {
+          return { text: s.text, assignee: s.assignee || memberKey, status: s.status || 'in-progress', startDate: s.startDate || '', endDate: s.endDate || '' };
+        })),
+        title: task.title,
+        points: pts[task.priority] || 3
+      });
+    });
+    return { columns: cols, savedFilters: {} };
+  }
+
+  function ganttOf(pid) {
+    var t = tasksOf(pid);
+    if (!t) return null;
+    return Object.keys(t).map(function (id) {
+      var task = t[id];
+      var st = task.subtasks || [];
+      var memberKey = (task.assignee || 'ana').toLowerCase().split(' ')[0];
+      var min = '', max = '';
+      st.forEach(function (s) {
+        if (s.startDate && (!min || s.startDate < min)) min = s.startDate;
+        if (s.endDate && (!max || s.endDate > max)) max = s.endDate;
+      });
+      if (!min) min = '2026-08-18';
+      if (!max || max < min) max = min;
+      return {
+        id: id,
+        title: task.title,
+        member: memberKey,
+        label: (task.tag || 'Growth').toLowerCase(),
+        startDate: min,
+        endDate: max,
+        subtasks: st.map(function (s) {
+          return { text: s.text, member: s.assignee || memberKey, start: s.startDate || min, end: s.endDate || min, done: s.status === 'done' };
+        })
+      };
+    });
+  }
+
+  function projectsFor(memberKey) {
+    var found = {};
+    list().forEach(function (p) {
+      var hit = false;
+      var t = tasksOf(p.id);
+      if (t) {
+        outer1:
+        for (var k in t) {
+          var task = t[k];
+          if ((task.assignee || '').toLowerCase().split(' ')[0] === memberKey) { hit = true; break; }
+          var subs = task.subtasks || [];
+          for (var i = 0; i < subs.length; i++) {
+            if ((subs[i].assignee || '') === memberKey) { hit = true; break outer1; }
+          }
+        }
+      }
+      if (!hit) {
+        try {
+          var b = JSON.parse(localStorage.getItem('kanban-board-state:' + p.id));
+          if (b && b.columns) {
+            outer2:
+            for (var c in b.columns) {
+              var cards = b.columns[c] || [];
+              for (var j = 0; j < cards.length; j++) {
+                if ((cards[j].member || '') === memberKey) { hit = true; break outer2; }
+              }
+            }
+          }
+        } catch (e) {}
+      }
+      if (hit) found[p.id] = true;
+    });
+    var out = list().filter(function (p) { return found[p.id]; }).map(function (p) { return p.id; });
+    return out.length ? out : ['p1'];
+  }
+
+  function setActive(id) {
+    try { localStorage.setItem(AKEY, id); } catch (e) {}
+    location.reload();
+  }
+
+  function newProject() {
+    var l = list();
+    if (l.length >= maxProjects()) return null;
+    var n = 1;
+    l.forEach(function (p) {
+      var m = /^p(\d+)$/.exec(p.id);
+      if (m && parseInt(m[1], 10) >= n) n = parseInt(m[1], 10) + 1;
+    });
+    var used = {};
+    l.forEach(function (p) { used[p.color] = true; });
+    var col = COLOR_ORDER[l.length % COLOR_ORDER.length];
+    for (var i = 0; i < COLOR_ORDER.length; i++) {
+      if (!used[COLOR_ORDER[i]]) { col = COLOR_ORDER[i]; break; }
+    }
+    var proj = { id: 'p' + n, name: 'Novo Projeto', sprint: 'Sprint 1', color: col };
+    l.push(proj);
+    saveList(l);
+    return proj;
+  }
+
+  function removeProject(pid) {
+    var l = list().filter(function (p) { return p.id !== pid; });
+    if (!l.length) return false;
+    saveList(l);
+    ['backlog-tasks', 'kanban-board-state', 'kanban-filters', 'gantt-tasks'].forEach(function (base) {
+      try { localStorage.removeItem(base + ':' + pid); } catch (e) {}
+    });
+    if (activeId() === pid) { try { localStorage.setItem(AKEY, l[0].id); } catch (e) {} }
+    return true;
+  }
+
+  var LANES_MAX = 12;
+  var LANES_MAX_LEN = 24;
+  var LANES_DEFAULT = { enabled: true, labels: ['Feature', 'Bug'] };
+
+  function normalizeLanes(cfg) {
+    var out = { enabled: true, labels: [] };
+    if (cfg && typeof cfg === 'object' && cfg.enabled === false) out.enabled = false;
+    var src = (cfg && Array.isArray(cfg.labels)) ? cfg.labels : LANES_DEFAULT.labels;
+    var seen = {};
+    for (var i = 0; i < src.length && out.labels.length < LANES_MAX; i++) {
+      var raw = typeof src[i] === 'string' ? src[i].replace(/^\s+|\s+$/g, '') : '';
+      if (!raw || raw.length > LANES_MAX_LEN) continue;
+      var k = raw.toLowerCase();
+      if (seen[k]) continue;
+      seen[k] = true;
+      out.labels.push(raw);
+    }
+    return out;
+  }
+
+  function lanesOf(pid) {
+    var l = list();
+    for (var i = 0; i < l.length; i++) {
+      if (l[i].id === pid) return normalizeLanes(l[i].lanes);
+    }
+    return normalizeLanes(LANES_DEFAULT);
+  }
+
+  function setLanes(pid, cfg) {
+    var l = list();
+    var norm = normalizeLanes(cfg);
+    for (var i = 0; i < l.length; i++) {
+      if (l[i].id === pid) { l[i].lanes = norm; saveList(l); return norm; }
+    }
+    return null;
+  }
+
+  function migrate() {
+    try {
+      if (!localStorage.getItem(PKEY)) localStorage.setItem(PKEY, JSON.stringify(DEFAULTS));
+      if (!localStorage.getItem(AKEY)) localStorage.setItem(AKEY, 'p1');
+      ['kanban-board-state', 'kanban-filters', 'backlog-tasks', 'gantt-tasks'].forEach(function (base) {
+        try {
+          var legacy = localStorage.getItem(base);
+          if (legacy && !localStorage.getItem(base + ':p1')) localStorage.setItem(base + ':p1', legacy);
+        } catch (e) {}
+      });
+      try {
+        var m = JSON.parse(localStorage.getItem('growth-squad-members'));
+        if (Array.isArray(m)) {
+          var changed = false;
+          m.forEach(function (x) {
+            if (!Array.isArray(x.projects)) { x.projects = projectsFor(String(x.name || '').split(' ')[0].toLowerCase()); changed = true; }
+          });
+          if (changed) localStorage.setItem('growth-squad-members', JSON.stringify(m));
+        }
+      } catch (e) {}
+    } catch (e) {}
+  }
+
+  function injectSwitcher() {
+    var brand = document.querySelector('.nav-brand');
+    if (!brand || document.querySelector('.sq-switch')) return;
+    var p = active();
+
+    var bt = document.querySelector('.nav-brand-text');
+    if (bt) bt.textContent = p.name;
+    var bs = document.querySelector('.nav-brand-sub');
+    if (bs) bs.textContent = p.sprint;
+    var bi = document.querySelector('.nav-brand-icon');
+    if (bi) bi.textContent = p.name.charAt(0).toUpperCase();
+    var crumb = document.querySelector('.topbar-breadcrumb span:last-child');
+    if (crumb) crumb.textContent = p.name;
+    var chip = document.querySelector('.sprint-chip');
+    if (chip) chip.textContent = p.sprint + ' - Ativo';
+
+    var wrap = document.createElement('div');
+    wrap.className = 'sq-switch';
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'sq-switch-btn';
+    btn.setAttribute('aria-haspopup', 'true');
+    btn.setAttribute('aria-expanded', 'false');
+    btn.innerHTML = '<span class="sq-switch-dot" style="background:' + color(p) + '"></span>' +
+      '<span class="sq-switch-name">' + esc(p.name) + '</span>' +
+      '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5"/></svg>';
+    wrap.appendChild(btn);
+    brand.insertAdjacentElement('afterend', wrap);
+
+    var menu = document.createElement('div');
+    menu.className = 'sq-menu';
+    menu.innerHTML = '<div class="sq-menu-label">Projetos</div>' +
+      list().map(function (pr) {
+        return '<button type="button" class="sq-menu-item' + (pr.id === p.id ? ' active' : '') + '" data-pid="' + pr.id + '">' +
+          '<span class="sq-menu-dot" style="background:' + color(pr) + '"></span>' +
+          '<span class="sq-menu-name">' + esc(pr.name) + '</span>' +
+          '<span class="sq-menu-sprint">' + esc(pr.sprint) + '</span>' +
+          '<svg class="sq-menu-check" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/></svg>' +
+          '</button>';
+      }).join('') +
+      '<div class="sq-menu-foot"><button type="button" class="sq-menu-item" data-sq-settings="1">' +
+      '<span class="sq-menu-name">Configurações de projetos</span><span class="sq-menu-sprint">›</span></button></div>';
+    document.body.appendChild(menu);
+
+    function place() {
+      var r = btn.getBoundingClientRect();
+      menu.style.top = (r.bottom + 6) + 'px';
+      menu.style.left = Math.max(8, Math.min(r.left, window.innerWidth - 260)) + 'px';
+      menu.style.minWidth = Math.max(r.width, 230) + 'px';
+    }
+    function openMenu() { place(); menu.classList.add('open'); wrap.classList.add('open'); btn.setAttribute('aria-expanded', 'true'); }
+    function closeMenu() { menu.classList.remove('open'); wrap.classList.remove('open'); btn.setAttribute('aria-expanded', 'false'); }
+
+    btn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      if (menu.classList.contains('open')) closeMenu(); else openMenu();
+    });
+    menu.addEventListener('click', function (e) {
+      var item = e.target.closest('.sq-menu-item[data-pid]');
+      if (item) {
+        closeMenu();
+        if (item.getAttribute('data-pid') !== activeId()) setActive(item.getAttribute('data-pid'));
+        return;
+      }
+      if (e.target.closest('[data-sq-settings]')) { closeMenu(); location.href = 'configuracoes.html'; }
+    });
+    document.addEventListener('click', function (e) {
+      if (menu.classList.contains('open') && !menu.contains(e.target) && !wrap.contains(e.target)) closeMenu();
+    });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeMenu(); });
+    window.addEventListener('scroll', function () { if (menu.classList.contains('open')) closeMenu(); }, true);
+    window.addEventListener('resize', closeMenu);
+  }
+
+  migrate();
+  injectSwitcher();
+
+  return {
+    list: list,
+    saveList: saveList,
+    active: active,
+    activeId: activeId,
+    setActive: setActive,
+    color: color,
+    key: key,
+    esc: esc,
+    tasksOf: tasksOf,
+    boardOf: boardOf,
+    ganttOf: ganttOf,
+    projectsFor: projectsFor,
+    newProject: newProject,
+    removeProject: removeProject,
+    lanesOf: lanesOf,
+    setLanes: setLanes,
+    SEEDS: SEEDS,
+    COLORS: COLORS,
+    MAX: MAX,
+    LIMITS: { min: MAX_MIN, max: MAX_HARD, def: MAX },
+    maxProjects: maxProjects,
+    setMaxProjects: setMaxProjects
+  };
+})();
+
+</script>
+<script>
+(function() {
+  var STORAGE_KEY = 'growth-squad-members';
+  var defaultMembers = [
+    { id: 'm1', name: 'Ana Souza', role: 'Product Lead', email: 'ana@growth.com', color: 'a' },
+    { id: 'm2', name: 'Bruno Costa', role: 'Backend Engineer', email: 'bruno@growth.com', color: 'b' },
+    { id: 'm3', name: 'Carla Mendes', role: 'Designer', email: 'carla@growth.com', color: 'c' },
+    { id: 'm4', name: 'Diego Lima', role: 'Data Engineer', email: 'diego@growth.com', color: 'd' },
+    { id: 'm5', name: 'Elena Ramos', role: 'Growth Marketer', email: 'elena@growth.com', color: 'e' }
+  ];
+
+  function loadMembers() {
+    try {
+      var saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+      if (Array.isArray(saved) && saved.length > 0) return saved;
+    } catch(e) {}
+    return defaultMembers;
+  }
+
+  function saveMembers() {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(members)); } catch(e) {}
+  }
+
+  var members = loadMembers();
+  (function ensureMemberProjects() {
+    var changed = false;
+    members.forEach(function (m) {
+      if (!Array.isArray(m.projects)) { m.projects = SQ.projectsFor(String(m.name || '').split(' ')[0].toLowerCase()); changed = true; }
+    });
+    if (changed) saveMembers();
+  })();
+
+  var modal = document.getElementById('member-modal');
+  var modalTitle = document.getElementById('modal-title');
+  var nameInput = document.getElementById('member-name-input');
+  var roleInput = document.getElementById('member-role-input');
+  var emailInput = document.getElementById('member-email-input');
+  var deleteBtn = document.getElementById('modal-delete-btn');
+  var colorPicker = document.getElementById('color-picker');
+  var grid = document.getElementById('team-grid');
+  var emptyState = document.getElementById('empty-state');
+  var pageSubtitle = document.getElementById('page-subtitle');
+
+  var currentId = null;
+  var selectedColor = 'a';
+
+  function getInitial(name) {
+    return name ? name.charAt(0).toUpperCase() : '?';
+  }
+
+  function getMemberKey(name) {
+    return name ? name.split(' ')[0].toLowerCase() : '';
+  }
+
+  function loadActiveBoard() {
+    try {
+      var raw = localStorage.getItem(SQ.key('kanban-board-state'));
+      if (raw) {
+        var v = JSON.parse(raw);
+        if (v && v.columns) return v;
+      }
+    } catch (e) {}
+    try { return SQ.boardOf(SQ.activeId()); } catch (e) { return null; }
+  }
+
+  function computeStatsFromKanban() {
+    var stats = {};
+    try {
+      var saved = loadActiveBoard();
+      if (!saved || !saved.columns) return stats;
+      Object.keys(saved.columns).forEach(function(colKey) {
+        saved.columns[colKey].forEach(function(card) {
+          var key = card.member || '';
+          if (!key) return;
+          if (!stats[key]) stats[key] = { tasks: 0, points: 0, inProgress: 0, done: 0 };
+          stats[key].tasks++;
+          stats[key].points += card.points || 0;
+          if (colKey === 'in-progress') stats[key].inProgress++;
+          if (colKey === 'done') stats[key].done++;
+        });
+      });
+    } catch(e) {}
+    return stats;
+  }
+
+  function updateSubtitle() {
+    var totalTasks = 0;
+    var totalDone = 0;
+    var kanbanStats = computeStatsFromKanban();
+    Object.keys(kanbanStats).forEach(function(k) {
+      totalTasks += kanbanStats[k].tasks;
+      totalDone += kanbanStats[k].done;
+    });
+    pageSubtitle.textContent = members.length + ' membro' + (members.length !== 1 ? 's' : '') + ' — ' + totalTasks + ' tarefas no quadro de ' + SQ.active().name + ', ' + totalDone + ' concluídas';
+  }
+
+  var avatarColors = {
+    a: 'oklch(55% 0.14 250)', b: 'oklch(55% 0.16 145)', c: 'oklch(55% 0.15 30)',
+    d: 'oklch(55% 0.12 300)', e: 'oklch(55% 0.14 80)', f: 'oklch(55% 0.18 200)', g: 'oklch(55% 0.14 330)'
+  };
+
+  function renderWorkloadChart() {
+    var container = document.getElementById('workload-chart');
+    var kanbanStats = computeStatsFromKanban();
+    var hasData = members.some(function(m) {
+      var key = getMemberKey(m.name);
+      return kanbanStats[key] && kanbanStats[key].tasks > 0;
+    });
+
+    if (!hasData) {
+      container.innerHTML =
+        '<div class="workload-chart-header"><div class="workload-chart-title"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z"/></svg>Distribuição de workload</div></div>' +
+        '<div class="workload-empty"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z"/></svg>Nenhuma tarefa atribuída no quadro ainda</div>';
+      return;
+    }
+
+    var maxTasks = 1;
+    var totalAll = 0;
+    var memberData = members.map(function(m) {
+      var key = getMemberKey(m.name);
+      var s = kanbanStats[key] || { tasks: 0, points: 0, inProgress: 0, done: 0 };
+      if (s.tasks > maxTasks) maxTasks = s.tasks;
+      totalAll += s.tasks;
+      return { name: m.name.split(' ')[0], color: m.color, stats: s };
+    }).filter(function(m) { return m.stats.tasks > 0; })
+      .sort(function(a, b) { return b.stats.tasks - a.stats.tasks; });
+
+    var segColors = {
+      done: 'oklch(58% 0.16 145)',
+      'in-progress': 'oklch(62% 0.14 250)',
+      'in-review': 'oklch(75% 0.14 80)',
+      todo: 'oklch(78% 0.06 240)',
+      backlog: 'oklch(85% 0.03 240)'
+    };
+    var segLabels = { done: 'Concluído', 'in-progress': 'Em andamento', 'in-review': 'Em revisão', todo: 'A fazer', backlog: 'Backlog' };
+
+    var html = '<div class="workload-chart-header">';
+    html += '<div class="workload-chart-title"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z"/></svg>Distribuição de workload</div>';
+    html += '<div class="workload-chart-legend">';
+    ['done', 'in-progress', 'in-review', 'todo', 'backlog'].forEach(function(k) {
+      html += '<span><span class="dot" style="background:' + segColors[k] + '"></span>' + segLabels[k] + '</span>';
+    });
+    html += '</div></div>';
+
+    html += '<div class="workload-bars">';
+    memberData.forEach(function(m) {
+      var total = m.stats.tasks;
+      var pct = (total / maxTasks) * 100;
+      html += '<div class="workload-row">';
+      html += '<div class="workload-label"><div class="avatar avatar-' + m.color + '">' + getInitial(m.name) + '</div><div class="workload-label-name">' + m.name + '</div></div>';
+      html += '<div class="workload-track">';
+      var segOrder = ['done', 'in-progress', 'in-review', 'todo', 'backlog'];
+      var colCounts = {};
+      try {
+        var saved = loadActiveBoard();
+        if (saved && saved.columns) {
+          Object.keys(saved.columns).forEach(function(colKey) {
+            saved.columns[colKey].forEach(function(card) {
+              if ((card.member || '') === getMemberKey(m.name)) {
+                colCounts[colKey] = (colCounts[colKey] || 0) + 1;
+              }
+            });
+          });
+        }
+      } catch(e) {}
+      segOrder.forEach(function(seg) {
+        var count = colCounts[seg] || 0;
+        if (count > 0) {
+          var w = (count / total) * 100;
+          html += '<div class="workload-segment" style="width:' + w + '%;background:' + segColors[seg] + '" title="' + segLabels[seg] + ': ' + count + '"><span>' + count + '</span></div>';
+        }
+      });
+      html += '</div>';
+      html += '<div class="workload-count">' + total + '</div>';
+      html += '</div>';
+    });
+    html += '</div>';
+
+    var totalMembers = memberData.length;
+    var avgTasks = totalMembers > 0 ? (totalAll / totalMembers).toFixed(1) : 0;
+    var maxMember = memberData.length > 0 ? memberData[0] : null;
+    html += '<div class="workload-summary">';
+    html += '<div class="workload-summary-item"><div class="workload-summary-value">' + totalAll + '</div><div class="workload-summary-label">Total de tarefas</div></div>';
+    html += '<div class="workload-summary-item"><div class="workload-summary-value">' + avgTasks + '</div><div class="workload-summary-label">Média por membro</div></div>';
+    html += '<div class="workload-summary-item"><div class="workload-summary-value">' + (maxMember ? maxMember.name : '—') + '</div><div class="workload-summary-label">Maior carga (' + (maxMember ? maxMember.stats.tasks : 0) + ')</div></div>';
+    html += '</div>';
+
+    container.innerHTML = html;
+  }
+
+  function projectChips(m) {
+    return (m.projects || []).map(function (pid) {
+      var pr = SQ.list().filter(function (x) { return x.id === pid; })[0];
+      if (!pr) return '';
+      return '<span class="member-project-chip"><span class="member-project-dot" style="background:' + SQ.color(pr) + '"></span>' + SQ.esc(pr.name) + '</span>';
+    }).join('');
+  }
+
+  function renderMembers() {
+    grid.innerHTML = '';
+    if (members.length === 0) {
+      grid.style.display = 'none';
+      emptyState.style.display = '';
+    } else {
+      grid.style.display = '';
+      emptyState.style.display = 'none';
+    }
+    var kanbanStats = computeStatsFromKanban();
+    var roleColors = {
+      'product lead': 'oklch(58% 0.16 145)',
+      'backend engineer': 'oklch(58% 0.14 250)',
+      'frontend engineer': 'oklch(58% 0.14 280)',
+      'designer': 'oklch(62% 0.17 330)',
+      'data engineer': 'oklch(60% 0.14 80)',
+      'growth marketer': 'oklch(58% 0.16 30)',
+      'qa engineer': 'oklch(55% 0.12 200)'
+    };
+    var defaultColor = 'oklch(70% 0.02 240)';
+    members.forEach(function(m) {
+      var key = getMemberKey(m.name);
+      var s = kanbanStats[key] || { tasks: 0, points: 0, inProgress: 0, done: 0 };
+      var completion = s.tasks > 0 ? Math.round((s.done / s.tasks) * 100) : 0;
+      var card = document.createElement('div');
+      card.className = 'member-card';
+      var rc = roleColors[m.role.toLowerCase()] || defaultColor;
+      card.style.borderLeftColor = rc;
+      card.innerHTML =
+        '<div class="card-actions">' +
+          '<button class="card-action-btn edit-btn" data-id="' + m.id + '" title="Editar">' +
+            '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10"/></svg>' +
+          '</button>' +
+          '<button class="card-action-btn danger delete-btn" data-id="' + m.id + '" title="Excluir">' +
+            '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"/></svg>' +
+          '</button>' +
+        '</div>' +
+        '<div class="member-header">' +
+          '<div class="avatar avatar-lg avatar-' + m.color + '">' + getInitial(m.name) + '</div>' +
+          '<div class="member-info">' +
+            '<div class="member-name">' + m.name + '</div>' +
+            '<div class="member-role">' + m.role + '</div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="member-projects">' + projectChips(m) + '</div>' +
+        '<div class="member-stats">' +
+          '<div class="stat-box"><div class="stat-value">' + s.tasks + '</div><div class="stat-label">Tarefas</div></div>' +
+          '<div class="stat-box"><div class="stat-value">' + s.points + '</div><div class="stat-label">Pontos</div></div>' +
+          '<div class="stat-box"><div class="stat-value">' + s.inProgress + '</div><div class="stat-label">Em andamento</div></div>' +
+        '</div>' +
+        '<div class="progress-bar">' +
+          '<div class="progress-bar-header"><span class="progress-bar-label">Conclusão</span><span class="progress-bar-value">' + completion + '%</span></div>' +
+          '<div class="progress-track"><div class="progress-fill" style="width:' + completion + '%"></div></div>' +
+        '</div>' +
+        '<div class="member-actions">' +
+          '<button class="btn-secondary edit-card-btn" data-id="' + m.id + '">' +
+            '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10"/></svg> Editar' +
+          '</button>' +
+          '<button class="btn-secondary email-btn">' +
+            '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75"/></svg> E-mail' +
+          '</button>' +
+        '</div>';
+      grid.appendChild(card);
+    });
+    renderWorkloadChart();
+    updateSubtitle();
+  }
+
+  function openMemberModal(id) {
+    currentId = id || null;
+    if (currentId) {
+      var m = members.find(function(x) { return x.id === currentId; });
+      if (!m) return;
+      modalTitle.textContent = 'Editar membro';
+      nameInput.value = m.name;
+      roleInput.value = m.role;
+      emailInput.value = m.email;
+      selectedColor = m.color;
+      deleteBtn.style.display = '';
+    } else {
+      modalTitle.textContent = 'Novo membro';
+      nameInput.value = '';
+      roleInput.value = '';
+      emailInput.value = '';
+      selectedColor = 'a';
+      deleteBtn.style.display = 'none';
+    }
+    colorPicker.querySelectorAll('.color-option').forEach(function(el) {
+      el.classList.toggle('selected', el.dataset.color === selectedColor);
+    });
+    var checksEl = document.getElementById('projects-check');
+    if (checksEl) {
+      var editing = currentId ? members.find(function(x) { return x.id === currentId; }) : null;
+      var selProjects = editing && Array.isArray(editing.projects) ? editing.projects : [SQ.activeId()];
+      checksEl.innerHTML = SQ.list().map(function(pr) {
+        return '<label><input type="checkbox" data-pid="' + pr.id + '"' + (selProjects.indexOf(pr.id) >= 0 ? ' checked' : '') + '><span class="member-project-dot" style="background:' + SQ.color(pr) + '"></span>' + SQ.esc(pr.name) + '</label>';
+      }).join('');
+    }
+    modal.classList.add('open');
+    setTimeout(function() { nameInput.focus(); }, 100);
+  }
+
+  function closeModal() {
+    modal.classList.remove('open');
+    currentId = null;
+  }
+
+  function saveMember() {
+    var name = nameInput.value.trim();
+    var role = roleInput.value.trim();
+    var email = emailInput.value.trim();
+    if (!name) { nameInput.focus(); return; }
+
+    if (currentId) {
+      var m = members.find(function(x) { return x.id === currentId; });
+      if (m) {
+        m.name = name;
+        m.role = role || 'Sem cargo';
+        m.email = email;
+        m.color = selectedColor;
+      }
+    } else {
+      members.push({
+        id: 'm' + Date.now(),
+        name: name,
+        role: role || 'Sem cargo',
+        email: email,
+        color: selectedColor
+      });
+    }
+    var checkedProjects = [];
+    var checksEl = document.getElementById('projects-check');
+    if (checksEl) {
+      checksEl.querySelectorAll('input:checked').forEach(function(cb) { checkedProjects.push(cb.getAttribute('data-pid')); });
+    }
+    if (!checkedProjects.length) checkedProjects = [SQ.activeId()];
+    var targetMember = currentId ? members.find(function(x) { return x.id === currentId; }) : members[members.length - 1];
+    if (targetMember) targetMember.projects = checkedProjects;
+    renderMembers();
+    renderLegend();
+    saveMembers();
+    closeModal();
+  }
+
+  function deleteMember(id) {
+    if (!confirm('Excluir este membro da equipe?')) return;
+    members = members.filter(function(x) { return x.id !== id; });
+    renderMembers();
+    renderLegend();
+    saveMembers();
+    closeModal();
+  }
+
+  // Event listeners
+  document.getElementById('add-member-btn').addEventListener('click', function() { openMemberModal(); });
+  document.getElementById('modal-close-btn').addEventListener('click', closeModal);
+  document.getElementById('modal-cancel-btn').addEventListener('click', closeModal);
+  document.getElementById('modal-save-btn').addEventListener('click', saveMember);
+  document.getElementById('modal-delete-btn').addEventListener('click', function() { if (currentId) deleteMember(currentId); });
+
+  modal.addEventListener('click', function(e) { if (e.target === modal) closeModal(); });
+  document.addEventListener('keydown', function(e) { if (e.key === 'Escape' && modal.classList.contains('open')) closeModal(); });
+
+  colorPicker.addEventListener('click', function(e) {
+    var opt = e.target.closest('.color-option');
+    if (!opt) return;
+    selectedColor = opt.dataset.color;
+    colorPicker.querySelectorAll('.color-option').forEach(function(el) {
+      el.classList.toggle('selected', el.dataset.color === selectedColor);
+    });
+  });
+
+  grid.addEventListener('click', function(e) {
+    var editBtn = e.target.closest('.edit-btn, .edit-card-btn');
+    if (editBtn) { openMemberModal(editBtn.dataset.id); return; }
+    var delBtn = e.target.closest('.delete-btn');
+    if (delBtn) { deleteMember(delBtn.dataset.id); return; }
+  });
+
+  document.getElementById('view-toggle').addEventListener('click', function(e) {
+    var btn = e.target.closest('.view-toggle-btn');
+    if (!btn) return;
+    var view = btn.dataset.view;
+    this.querySelectorAll('.view-toggle-btn').forEach(function(b) { b.classList.remove('active'); });
+    btn.classList.add('active');
+    grid.classList.toggle('view-list', view === 'list');
+  });
+
+  var roleColors = {
+    'product lead': 'oklch(58% 0.16 145)',
+    'backend engineer': 'oklch(58% 0.14 250)',
+    'frontend engineer': 'oklch(58% 0.14 280)',
+    'designer': 'oklch(62% 0.17 330)',
+    'data engineer': 'oklch(60% 0.14 80)',
+    'growth marketer': 'oklch(58% 0.16 30)',
+    'qa engineer': 'oklch(55% 0.12 200)'
+  };
+  var defaultRoleColor = 'oklch(70% 0.02 240)';
+
+  function renderLegend() {
+    var legendEl = document.getElementById('role-legend');
+    var usedRoles = {};
+    members.forEach(function(m) {
+      var r = m.role || 'Sem cargo';
+      if (!usedRoles[r]) usedRoles[r] = true;
+    });
+    var html = '';
+    Object.keys(usedRoles).forEach(function(r) {
+      var c = roleColors[r.toLowerCase()] || defaultRoleColor;
+      html += '<div class="role-legend-item"><div class="role-legend-dot" style="background:' + c + ';border-left-color:' + c + '"></div>' + r + '</div>';
+    });
+    legendEl.innerHTML = html;
+  }
+
+  renderMembers();
+  renderLegend();
+})();
+</script>
+
+</body>
+</html>

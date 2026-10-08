@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "kind": "html",
+  "title": "quadro-kanban.html",
+  "entry": "quadro-kanban.html",
+  "renderer": "html",
+  "status": "complete",
+  "exports": [
+    "html",
+    "pdf",
+    "zip"
+  ],
+  "createdAt": "2026-08-25T17:51:40.169Z",
+  "updatedAt": "2026-08-25T17:51:40.169Z",
+  "metadata": {
+    "inferred": true,
+    "reconciled": true
+  }
+}

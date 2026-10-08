@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "kind": "html",
+  "title": "_rendercheck.html",
+  "entry": "_rendercheck.html",
+  "renderer": "html",
+  "status": "complete",
+  "exports": [
+    "html",
+    "pdf",
+    "zip"
+  ],
+  "createdAt": "2026-09-29T00:54:29.704Z",
+  "updatedAt": "2026-09-29T00:54:29.704Z",
+  "metadata": {
+    "inferred": true,
+    "reconciled": true
+  }
+}

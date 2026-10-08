@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "kind": "html",
+  "title": "backlog.html",
+  "entry": "backlog.html",
+  "renderer": "html",
+  "status": "complete",
+  "exports": [
+    "html",
+    "pdf",
+    "zip"
+  ],
+  "createdAt": "2026-08-25T18:08:42.260Z",
+  "updatedAt": "2026-08-25T18:08:42.260Z",
+  "metadata": {
+    "inferred": true,
+    "reconciled": true
+  }
+}
